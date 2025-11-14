@@ -11,9 +11,20 @@ import * as echarts from 'echarts'
 
 const el = ref(null)
 let chart = null
+let resizeObserver = null
 
-onMounted(()=>{ render(); window.addEventListener('resize', onResize) })
-onBeforeUnmount(()=>{ window.removeEventListener('resize', onResize); if(chart){ chart.dispose(); chart=null } })
+onMounted(()=>{
+  render()
+  resizeObserver = new ResizeObserver(onResize)
+  resizeObserver.observe(el.value)
+})
+
+onBeforeUnmount(()=>{
+  if (resizeObserver) {
+    resizeObserver.disconnect()
+  }
+  if(chart){ chart.dispose(); chart=null }
+})
 function onResize(){ if(chart) chart.resize() }
 
 function render(){
@@ -47,13 +58,13 @@ function render(){
     if(i > 0 && actualRate < actualRates[i-1] * 0.85){ actualRate = actualRates[i-1] * 0.92 }
     actualRates.push(Math.max(0.01, actualRate))
   }
-  const axisLine = '#d7dceb'
+  const axisLine = '#d1d5db'
   const axisLabel = '#6b7280'
-  const gridLine = '#f9fafb'
-  const actualLine = '#16a34a'
-  const areaStart = 'rgba(22,163,74,0.32)'
-  const areaEnd = 'rgba(22,163,74,0.06)'
-  const planLine = '#94a3b8'
+  const gridLine = '#f3f4f6'
+  const actualLine = '#15803d'
+  const areaStart = 'rgba(21,128,61,0.45)'
+  const areaEnd = 'rgba(187,247,208,0.05)'
+  const planLine = '#64748b'
   const lineWidthActual = 2
   const lineWidthPlan = 2
   chart.setOption({

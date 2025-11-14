@@ -22,7 +22,7 @@ function render(){
     grid: { left: -8, right: 6, top: 4, bottom: 6 },
     xAxis: { type: 'category', boundaryGap: false, axisLine: { show: false }, axisTick: { show: false }, axisLabel: { show: false }, splitLine: { show: false }, data: a.map((_,i)=>i) },
     yAxis: { type: 'value', min: 50, max: 100, axisLine: { show: false }, axisTick: { show: false }, axisLabel: { show: false }, splitLine: { show: false } },
-    series: [{ type: 'line', data: a, smooth: true, showSymbol: true, symbol: 'circle', symbolSize: 3, lineStyle: { width: 2, color: isUp ? '#16a34a' : '#dc2626' }, itemStyle: { color: isUp ? '#16a34a' : '#dc2626' }, areaStyle: { color: new echarts.graphic.LinearGradient(0,0,0,1,[ { offset: 0, color: isUp ? 'rgba(22,163,58,0.25)' : 'rgba(220,38,38,0.25)' }, { offset: 1, color: 'rgba(255,255,255,0)' } ]) }, markLine: { data: [{ yAxis: 80, lineStyle: { type: 'dashed', color: '#d1d5db', width: 1 } }], symbol: 'none', label: { show: false } } }]
+    series: [{ type: 'line', data: a, smooth: true, showSymbol: true, symbol: 'circle', symbolSize: 3, lineStyle: { width: 2, color: isUp ? '#15803d' : '#dc2626' }, itemStyle: { color: isUp ? '#15803d' : '#dc2626' }, areaStyle: { color: new echarts.graphic.LinearGradient(0,0,0,1,[ { offset: 0, color: isUp ? 'rgba(21,128,61,0.45)' : 'rgba(220,38,38,0.25)' }, { offset: 1, color: 'rgba(255,255,255,0)' } ]) }, markLine: { data: [{ yAxis: 80, lineStyle: { type: 'dashed', color: '#d1d5db', width: 1 } }], symbol: 'none', label: { show: false } } }]
   })
 }
 
