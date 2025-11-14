@@ -49,15 +49,15 @@ function render(){
   }
   const axisLine = '#d7dceb'
   const axisLabel = '#6b7280'
-  const gridLine = '#eef1f7'
-  const actualLine = '#34d399'
-  const areaStart = 'rgba(52,211,153,0.32)'
-  const areaEnd = 'rgba(52,211,153,0.06)'
+  const gridLine = '#f9fafb'
+  const actualLine = '#16a34a'
+  const areaStart = 'rgba(22,163,74,0.32)'
+  const areaEnd = 'rgba(22,163,74,0.06)'
   const planLine = '#94a3b8'
   const lineWidthActual = 2
   const lineWidthPlan = 2
   chart.setOption({
-    legend: { top: 0, right: 16, itemGap: 10 },
+    legend: { top: 0, right: 16, itemGap: 10, icon: 'rect', itemWidth: 14, itemHeight: 2 },
     grid: { left: 50, right: 24, top: 40, bottom: 28 },
     xAxis: { type: 'category', data: dates, boundaryGap: false, axisLine: { lineStyle: { color: axisLine } }, axisTick: { show: false }, axisLabel: { color: axisLabel } },
     yAxis: { type: 'value', min: 0, max: 1, axisLine: { show: false }, splitLine: { show: true, lineStyle: { color: gridLine } }, axisLabel: { color: axisLabel, formatter: v => Math.round(v*100)+'%' } },
