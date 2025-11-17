@@ -90,23 +90,43 @@ function generateSeriesData() {
 
 const regulars = ref([
 
-  { name: '前海综合保税区车道', sector: '交通', series: generateSeriesData() },
 
-  { name: '乌鲁木齐', sector: '基建', series: generateSeriesData() },
 
-  { name: 'SSJS前海', sector: '安防', series: generateSeriesData() },
+  { name: '前海综合保税区车道', sector: '潘勇', series: generateSeriesData() },
 
-  { name: '国铁建-卡口', sector: '交通', series: generateSeriesData() },
 
-  { name: '2前海-车道', sector: '交通', series: generateSeriesData() },
 
-  { name: '临沂-机场', sector: '航空', series: generateSeriesData() },
+  { name: '乌鲁木齐', sector: '潘勇', series: generateSeriesData() },
 
-  { name: '前海-综合', sector: '基建', series: generateSeriesData() },
 
-  { name: '前海-维修', sector: '基建', series: generateSeriesData() },
 
-  { name: 'SSKJ前海', sector: '安防', series: generateSeriesData() }
+  { name: 'SSJS前海', sector: '潘勇', series: generateSeriesData() },
+
+
+
+  { name: '国铁建-卡口', sector: '潘勇', series: generateSeriesData() },
+
+
+
+  { name: '2前海-车道', sector: '潘勇', series: generateSeriesData() },
+
+
+
+  { name: '临沂-机场', sector: '潘勇', series: generateSeriesData() },
+
+
+
+  { name: '前海-综合', sector: '潘勇', series: generateSeriesData() },
+
+
+
+  { name: '前海-维修', sector: '潘勇', series: generateSeriesData() },
+
+
+
+  { name: 'SSKJ前海', sector: '潘勇', series: generateSeriesData() }
+
+
 
 ])
 
