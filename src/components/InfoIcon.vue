@@ -11,5 +11,5 @@ function hide(){ if(bubble && bubble.parentNode){ bubble.parentNode.removeChild(
 </script>
 
 <style scoped>
-.info-icon { display: inline-flex; align-items: center; justify-content: center; width: 14px; height: 14px; line-height: 14px; border-radius: 50%; border: 1px solid var(--accent); color: var(--accent); font-size: 10px; font-weight: 700; margin-left: 6px; background: #ffffff; cursor: help; position: relative; }
+.info-icon { display: inline-flex; align-items: center; justify-content: center; width: 14px; height: 14px; line-height: 14px; border-radius: 50%; border: 1px solid var(--accent); color: var(--accent); font-size: 10px; font-weight: 700; background: #ffffff; cursor: help; position: relative; }
 </style>

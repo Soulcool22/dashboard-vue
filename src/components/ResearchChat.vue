@@ -44,5 +44,14 @@ onMounted(()=>{ pushMsg('你好，可点击下方假设问题或直接提问。'
 </script>
 
 <style scoped>
+.col-right {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.research-section {
+  flex-grow: 1;
+  overflow-y: auto;
+}
 .research-content { font-size: 14px; line-height: 1.4; color: var(--text); margin-bottom: 12px; padding: 0 16px; }
 </style>

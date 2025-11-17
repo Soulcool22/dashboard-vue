@@ -1,17 +1,19 @@
 <template>
   <div class="card rl-card">
     <div class="wl-header">
-      <h3>常规列表</h3>
+      <div>
+        <h3>常规列表</h3>
+        <div class="sub">可添加至关注列表</div>
+      </div>
       <div class="wl-actions">
         <el-button class="expand-btn" type="text" @click="toggle">
-          <svg width="24" height="24" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <svg width="20" height="20" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path v-if="!collapsed" d="M13 30L25 18L37 30" stroke="#7f8081" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
             <path v-else d="M36 18L24 30L12 18" stroke="#7f8081" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
         </el-button>
       </div>
     </div>
-    <div class="sub">可添加至关注列表</div>
     <div class="wl-list" v-show="!collapsed">
       <div class="wl-item" v-for="(p, idx) in regulars" :key="'rl-'+idx">
         <div class="wl-info">

@@ -1,33 +1,40 @@
 <template>
-  <header>
-    <div class="brand">
-      <span>项目管理系统</span>
-      <span class="badge">数据看板</span>
-    </div>
-  </header>
-  <main :class="['layout', { 'left-expanded': expandedLeft }]">
-    <section class="col col-left">
-      <WatchList :projects="projects" @toggle-left="toggleLeftExpand" />
-      <RegularList v-model="regularCollapsed" :regulars="regulars" />
-    </section>
-    <section class="col col-middle">
-      <div class="project-info">
-        <div class="project-main-title">项目1</div>
-        <div class="project-index-row">
-          <div class="project-index-value">80.2</div>
-          <div class="project-index-label">进度兑现指数</div>
-          <div class="project-index-change">↑ +2.3%</div>
-        </div>
+  <div id="app-wrapper">
+    <header>
+      <div class="brand">
+        <span>项目管理系统</span>
+        <span class="badge">数据看板</span>
       </div>
-      <KpiGrid :kpis="kpis" />
-      <CompletionLine />
-    </section>
-    <ResearchChat />
-  </main>
+    </header>
+    <main :class="['layout', { 'left-expanded': expandedLeft }]">
+      <section class="col col-left">
+        <WatchList
+          :projects="projects"
+          :search-query="searchQuery"
+          @toggle-left="toggleLeftExpand"
+          @update:searchQuery="searchQuery = $event"
+        />
+        <RegularList v-model="regularCollapsed" :regulars="filteredRegulars" />
+      </section>
+      <section class="col col-middle">
+        <div class="project-info">
+          <div class="project-main-title">项目1</div>
+          <div class="project-index-row">
+            <div class="project-index-value">80.2</div>
+            <div class="project-index-label">进度兑现指数</div>
+            <div class="project-index-change">↑ +2.3%</div>
+          </div>
+        </div>
+        <KpiGrid :kpis="kpis" />
+        <CompletionLine />
+      </section>
+      <ResearchChat />
+    </main>
+  </div>
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import WatchList from './components/WatchList.vue'
 import RegularList from './components/RegularList.vue'
 import KpiGrid from './components/KpiGrid.vue'
@@ -44,12 +51,6 @@ const projects = ref([
 ])
 
 const regulars = ref([
-  { name: '项目1', sector: '通信', series: [72,75,78,81,84,87,85,88,86,89,87,90,88,85,87,90] },
-  { name: '项目2', sector: '财务', series: [65,68,71,74,77,80,83,86,84,87,85,88,86,89,87,90] },
-  { name: '项目3', sector: '主食', series: [82,79,76,73,70,74,77,80,78,81,84,82,85,88,86,89] },
-  { name: '项目4', sector: '工业', series: [62,65,68,71,74,77,80,83,81,84,87,85,88,86,89,90] },
-  { name: '项目5', sector: '云计算', series: [75,78,81,84,87,85,88,86,89,87,90,88,85,87,89,90] },
-  { name: '项目6', sector: '智能制造', series: [68,71,74,77,80,83,86,84,87,85,88,86,89,87,90,88] },
   { name: '项目7', sector: '新能源', series: [70,73,76,79,82,85,88,86,89,87,90,88,85,87,89,86] },
   { name: '项目8', sector: '医疗', series: [72,75,78,81,84,87,85,88,86,89,87,90,88,85,87,90] },
   { name: '项目9', sector: '数字科技', series: [78,81,84,87,85,88,86,89,87,90,88,85,87,89,86,88] },
@@ -63,13 +64,33 @@ const kpis = ref([
   { title: '关键里程碑达成率', value: '72%', delta: '-3%', up: false },
   { title: '逾期任务率', value: '22%', delta: '-1%', up: true }
 ])
+
+const searchQuery = ref('')
+const filteredRegulars = computed(() => {
+  if (!searchQuery.value) {
+    return regulars.value
+  }
+  return regulars.value.filter(item =>
+    item.name.toLowerCase().includes(searchQuery.value.toLowerCase())
+  )
+})
 </script>
 
 <style scoped>
+#app-wrapper {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+}
+.layout {
+  flex-grow: 1;
+  overflow: hidden;
+}
 .project-info { display: flex; flex-direction: column; gap: 2px; padding: 0; }
-.project-main-title { font-size: 24px; font-weight: 700; color: var(--text); }
-.project-index-row { display: flex; align-items: baseline; gap: 6px; margin-bottom: 6px; }
-.project-index-value { font-size: 28px; font-weight: 700; color: #15803d; }
-.project-index-label { font-size: 14px; color: var(--muted); }
-.project-index-change { font-size: 16px; color: #15803d; }
+.project-main-title { font-size: 20px; font-weight: 700; }
+.project-index-row { display: flex; align-items: baseline; gap: 6px; }
+.project-index-value { font-size: 22px; font-weight: 700; }
+.project-index-label { font-size: 12px; color: var(--muted); }
+.project-index-change { font-size: 12px; color: var(--up); }
 </style>
