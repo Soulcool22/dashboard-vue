@@ -52,5 +52,17 @@ function deltaText(p){ const a=p.series; const prev=a[a.length-2]; const last=a[
 </script>
 
 <style scoped>
-.wl-item { cursor: pointer; }
+.wl-item {
+  display: grid;
+  grid-template-columns: 1fr 80px auto; /* Match the grid in WatchList.vue */
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  position: relative;
+  cursor: pointer;
+}
+
+.wl-right {
+  text-align: right;
+}
 </style>
