@@ -15,7 +15,12 @@
       </div>
     </div>
     <div class="wl-list" v-show="!collapsed">
-      <div class="wl-item" v-for="(p, idx) in regulars" :key="'rl-'+idx">
+      <div 
+        v-for="(p, idx) in regulars" 
+        :key="'rl-'+idx"
+        :class="['wl-item', { 'active': activeProject && activeProject.name === p.name }]"
+        @click="$emit('select-project', p)"
+      >
         <div class="wl-info">
           <div class="wl-name">{{ p.name }}</div>
           <div class="wl-sub">{{ p.sector }}</div>
@@ -33,8 +38,12 @@
 <script setup>
 import { computed } from 'vue'
 import SparkLine from './SparkLine.vue'
-const props = defineProps({ regulars: { type: Array, default: () => [] }, modelValue: { type: Boolean, default: false } })
-const emits = defineEmits(['update:modelValue'])
+const props = defineProps({ 
+  regulars: { type: Array, default: () => [] }, 
+  modelValue: { type: Boolean, default: false },
+  activeProject: { type: Object, default: null }
+})
+const emits = defineEmits(['update:modelValue', 'select-project'])
 function toggle(){ emits('update:modelValue', !props.modelValue) }
 const collapsed = computed(()=> props.modelValue)
 function lastValue(p){ const a=p.series; return a[a.length-1] }
@@ -43,4 +52,5 @@ function deltaText(p){ const a=p.series; const prev=a[a.length-2]; const last=a[
 </script>
 
 <style scoped>
+.wl-item { cursor: pointer; }
 </style>

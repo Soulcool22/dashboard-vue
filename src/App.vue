@@ -11,18 +11,29 @@
         <WatchList
           :projects="projects"
           :search-query="searchQuery"
+          :all-projects="filteredAllProjects"
+          :active-project="selectedProject"
           @toggle-left="toggleLeftExpand"
           @update:searchQuery="searchQuery = $event"
+          @toggle-watch-status="toggleWatchStatus"
+          @search-active-change="isSearchActive = $event"
+          @select-project="handleSelectProject"
         />
-        <RegularList v-model="regularCollapsed" :regulars="filteredRegulars" />
+        <RegularList 
+          v-if="!isSearchActive" 
+          v-model="regularCollapsed" 
+          :regulars="regulars" 
+          :active-project="selectedProject"
+          @select-project="handleSelectProject"
+        />
       </section>
       <section class="col col-middle">
-        <div class="project-info">
-          <div class="project-main-title">项目1</div>
+        <div v-if="selectedProject" class="project-info">
+          <div class="project-main-title">{{ selectedProject.name }}</div>
           <div class="project-index-row">
-            <div class="project-index-value">80.2</div>
+            <div class="project-index-value">{{ lastValue(selectedProject).toFixed(2) }}</div>
             <div class="project-index-label">进度兑现指数</div>
-            <div class="project-index-change">↑ +2.3%</div>
+            <div class="project-index-change" :class="deltaSign(selectedProject) >= 0 ? 'up' : 'down'">{{ deltaText(selectedProject) }}</div>
           </div>
         </div>
         <KpiGrid :kpis="kpis" />
@@ -34,7 +45,7 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import WatchList from './components/WatchList.vue'
 import RegularList from './components/RegularList.vue'
 import KpiGrid from './components/KpiGrid.vue'
@@ -45,6 +56,7 @@ const expandedLeft = ref(false)
 const regularCollapsed = ref(false)
 function toggleLeftExpand(){ expandedLeft.value = !expandedLeft.value }
 
+// --- Data State ---
 const projects = ref([
   { name: '项目A', sector: '工程', series: [65,72,68,75,71,82,79,87,74,81,78,85,73,88,82,90] },
   { name: '项目B', sector: '制造', series: [72,68,65,62,58,61,67,64,69,66,63,59,65,62,68,65] }
@@ -65,15 +77,56 @@ const kpis = ref([
   { title: '逾期任务率', value: '22%', delta: '-1%', up: true }
 ])
 
+// --- Search and Filter Logic ---
 const searchQuery = ref('')
-const filteredRegulars = computed(() => {
+const isSearchActive = ref(false)
+
+const allProjects = computed(() => {
+  const watched = projects.value.map(p => ({ ...p, isWatched: true }))
+  const unWatched = regulars.value.map(p => ({ ...p, isWatched: false }))
+  return [...watched, ...unWatched]
+})
+
+const filteredAllProjects = computed(() => {
   if (!searchQuery.value) {
-    return regulars.value
+    return allProjects.value
   }
-  return regulars.value.filter(item =>
+  return allProjects.value.filter(item =>
     item.name.toLowerCase().includes(searchQuery.value.toLowerCase())
   )
 })
+
+function toggleWatchStatus(projectToToggle) {
+  const indexInProjects = projects.value.findIndex(p => p.name === projectToToggle.name)
+  if (indexInProjects !== -1) {
+    const [removed] = projects.value.splice(indexInProjects, 1)
+    regulars.value.unshift(removed)
+  } else {
+    const indexInRegulars = regulars.value.findIndex(p => p.name === projectToToggle.name)
+    if (indexInRegulars !== -1) {
+      const [added] = regulars.value.splice(indexInRegulars, 1)
+      projects.value.push(added)
+    }
+  }
+}
+
+// --- Selection Logic ---
+const selectedProject = ref(null)
+onMounted(() => {
+  if (projects.value.length > 0) {
+    selectedProject.value = projects.value[0]
+  } else if (regulars.value.length > 0) {
+    selectedProject.value = regulars.value[0]
+  }
+})
+function handleSelectProject(project) {
+  selectedProject.value = project
+}
+
+// Helper functions
+function lastValue(p){ if(!p || !p.series) return 0; const a=p.series; return a[a.length-1] }
+function deltaSign(p){ if(!p || !p.series || p.series.length < 2) return 0; const a=p.series; return a[a.length-1]-a[a.length-2] }
+function deltaText(p){ if(!p || !p.series || p.series.length < 2) return ''; const a=p.series; const prev=a[a.length-2]; const last=a[a.length-1]; const pct=prev?(((last-prev)/prev)*100).toFixed(2):'0.00'; const s=(last-prev)>=0?'↑ ':'↓ '; return s+Math.abs(pct)+'%' }
 </script>
 
 <style scoped>
@@ -92,5 +145,7 @@ const filteredRegulars = computed(() => {
 .project-index-row { display: flex; align-items: baseline; gap: 6px; }
 .project-index-value { font-size: 22px; font-weight: 700; }
 .project-index-label { font-size: 12px; color: var(--muted); }
-.project-index-change { font-size: 12px; color: var(--up); }
+.project-index-change { font-size: 12px; }
+.project-index-change.up { color: var(--up); }
+.project-index-change.down { color: var(--down); }
 </style>

@@ -801,3 +801,109 @@ Props参数：accept(文件类型)、maxSize(文件大小限制)
 - 你的所有回答使用中文
 
 **遵循规范，高效开发！**
+
+## 🔖 Icon 使用规范（IconPark）
+
+### 选择与来源
+
+- 图标库：IconPark（字节跳动官方）
+- 官方站点：`https://iconpark.oceanengine.com/official`
+- 优先使用 IconPark，保证风格统一、主题一致、可扩展性强。
+
+### 安装与引入（Vue3）
+
+```bash
+# 安装 IconPark for Vue3
+npm install @icon-park/vue-next --save
+
+# 推荐：全局引入样式一次
+# 在 src/main.js 中添加：
+import '@icon-park/vue-next/styles/index.css'
+```
+
+### 使用方式
+
+- 按需组件导入（推荐，体积更小）
+
+```vue
+<template>
+  <home theme="outline" size="18" />
+</template>
+
+<script setup>
+import { Home } from '@icon-park/vue-next'
+</script>
+```
+
+- 全局注册（用于远程菜单等需要动态名称的场景）
+
+```javascript
+// src/main.js
+import { createApp } from 'vue'
+import { install } from '@icon-park/vue-next/es/all'
+import App from './App.vue'
+import '@icon-park/vue-next/styles/index.css'
+
+const app = createApp(App)
+install(app)       // 默认前缀 'icon'，例如 People => <icon-people />
+// install(app, 'i') // 自定义前缀 'i'，例如 People => <i-people />
+app.mount('#app')
+```
+
+- 动态组件（通过类型名渲染）
+
+```vue
+<template>
+  <icon-park type="add-text" theme="filled" />
+</template>
+
+<script setup>
+import { IconPark } from '@icon-park/vue-next/es/all'
+</script>
+```
+
+### 主题与属性规范
+
+- `theme`：统一默认使用 `outline`；对于强调/填充场景可使用 `filled`；双色/多色谨慎使用，确保与主题一致。
+- `size`：使用数字或字符串，常用 `16`、`18`、`20`。在文本内跟随字体大小时使用 `1em`。
+- `fill`：默认 `currentColor`，跟随父元素颜色；在需要特殊强调时设置具体色值。
+- `strokeWidth`：默认 `4`，保持线条一致性；若需要细线条可适度下调。
+- 其他属性：`spin`（旋转）、`strokeLinecap`、`strokeLinejoin` 按需设置。
+
+### 命名与导入约定
+
+- 在模板中使用小写加中划线：`<icon-folder-open />`
+- 在脚本中导入使用帕斯卡命名：`FolderOpen`
+- 对于带中划线的图标名（如 `dislike-two`），导入名为 `DislikeTwo`。
+- 为避免与自定义组件冲突，建议给导入添加统一别名前缀（可选）：
+
+```javascript
+import { FolderOpen as IconFolderOpen } from '@icon-park/vue-next'
+```
+
+### 与 Element Plus 的协作
+
+- 在按钮、输入框等组件内使用 IconPark，保持 `size` 与组件字号一致，`fill` 继承文字颜色：
+
+```vue
+<el-button type="primary">
+  <search theme="outline" size="16" style="margin-right:6px" />
+  搜索
+</el-button>
+```
+
+### 性能与体积
+
+- 优先“按需导入”，避免全量注册导致包体过大。
+- 仅在需要“动态类型渲染”或大量图标时使用全局注册/动态组件。
+
+### 示例清单（常用图标）
+
+- `search`（搜索）、`home`（首页）、`setting`（设置）、`config`（配置）
+- `bookmark`（书签）、`camera`（相机）、`equalizer`（均衡器）、`radar`（雷达）
+- `zoom-in` / `zoom-out`（缩放）、`refresh`（刷新）、`save`（保存）
+
+### 目录与提交约束
+
+- 不将图标 SVG 手动复制到仓库，统一从 `@icon-park/vue-next` 引入。
+- 若需要自定义图标，统一放置在 `src/assets/icons` 并注明来源与许可。
