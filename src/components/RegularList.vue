@@ -64,5 +64,8 @@ function deltaText(p){ const a=p.series; const prev=a[a.length-2]; const last=a[
 
 .wl-right {
   text-align: right;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
 }
 </style>
