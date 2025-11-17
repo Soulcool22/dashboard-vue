@@ -158,11 +158,14 @@ function deltaText(p){ const a=p.series; const prev=a[a.length-2]; const last=a[
 
 /* --- Watched List (Regular Style) --- */
 .wl-list:not(.search-list) .wl-item {
-  grid-template-columns: 1fr 80px auto;
+  grid-template-columns: 1fr 80px 60px; /* info | sparkline | data (fixed width) */
 }
 
 .wl-list:not(.search-list) .wl-right {
   text-align: right;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
 }
 
 /* --- Search List (New, Corrected Style) --- */
