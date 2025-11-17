@@ -4,8 +4,8 @@
   --text: #2f3b52;
   --muted: #8a94a6;
   --border: #e6e9f0;
-  --accent: #3a7afe;
-  --accent-soft: #e6f0ff; /* New softer blue for background */
+  --accent: #589ef8; /* Lighter accent blue for border */
+  --accent-soft: #eef5ff; /* Even softer blue for background */
   --up: #16a34a;
   --down: #f87171;
   --layout-left: 320px;
