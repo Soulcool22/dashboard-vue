@@ -14,17 +14,9 @@
         </el-button>
       </div>
     </div>
-    <div v-if="isSearchVisible" class="search-box">
-      <el-input
-        :model-value="searchQuery"
-        @update:modelValue="$emit('update:searchQuery', $event)"
-        placeholder="搜索全部项目..."
-        clearable
-      />
-    </div>
-    <div class="wl-list">
+    <div class="wl-list" v-if="!isSearchVisible">
       <div 
-        v-for="(p, idx) in displayedProjects" 
+        v-for="(p, idx) in projects" 
         :key="'wl-'+idx"
         :class="['wl-item', { 'active': activeProject && activeProject.name === p.name }]"
         @click="$emit('select-project', p)"
@@ -38,18 +30,47 @@
           <div class="wl-price">{{ lastValue(p).toFixed(2) }}</div>
           <div class="wl-delta" :class="deltaSign(p) >= 0 ? 'up' : 'down'">{{ deltaText(p) }}</div>
         </div>
-        <el-button v-if="isSearchVisible" @click.stop="$emit('toggle-watch-status', p)" class="watch-toggle">
-          {{ p.isWatched ? '取消' : '关注' }}
-        </el-button>
+      </div>
+    </div>
+    <div v-if="isSearchVisible" class="search-card">
+      <div class="search-box">
+        <el-input
+          :model-value="searchQuery"
+          @update:modelValue="$emit('update:searchQuery', $event)"
+          placeholder="搜索全部项目..."
+          clearable
+        />
+      </div>
+      <div class="wl-list search-list">
+        <div 
+          v-for="(p, idx) in allProjects" 
+          :key="'wl-search-'+idx"
+          class="wl-item"
+          @click="$emit('select-project', p)"
+        >
+          <div class="wl-status" @click.stop="$emit('toggle-watch-status', p)">
+            <check-small v-if="p.isWatched" theme="two-tone" size="24" :fill="['#7f8081' ,'#ffffff']"/>
+            <plus v-else theme="two-tone" size="24" :fill="['#7f8081' ,'#ffffff']"/>
+          </div>
+          <div class="wl-info">
+            <div class="wl-name">{{ p.name }}</div>
+            <div class="wl-sub">{{ p.sector }}</div>
+          </div>
+          <div class="wl-right">
+            <div class="wl-price">{{ lastValue(p).toFixed(2) }}</div>
+            <div class="wl-delta" :class="deltaSign(p) >= 0 ? 'up' : 'down'">{{ deltaText(p) }}</div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref } from 'vue'
 import SparkLine from './SparkLine.vue'
 import InfoIcon from './InfoIcon.vue'
+import { Plus, CheckSmall } from '@icon-park/vue-next'
 
 const props = defineProps({
   projects: { type: Array, default: () => [] },
@@ -66,26 +87,86 @@ function toggleSearch() {
   emits('search-active-change', isSearchVisible.value)
 }
 
-const displayedProjects = computed(() => {
-  return isSearchVisible.value ? props.allProjects : props.projects
-})
-
 function lastValue(p){ const a=p.series; return a[a.length-1] }
 function deltaSign(p){ const a=p.series; return a[a.length-1]-a[a.length-2] }
-function deltaText(p){ const a=p.series; const prev=a[a.length-2]; const last=a[a.length-1]; const pct=prev?(((last-prev)/prev)*100).toFixed(2):'0.00'; const s=(last-prev)>=0?'↑ ':'↓ '; return s+Math.abs(pct)+'%' }
+function deltaText(p){ const a=p.series; const prev=a[a.length-2]; const last=a[a.length-1]; const pct=prev?(((last-prev)/prev)*100).toFixed(2):'0.00'; const s=(last-prev)>=0?'↑ ':'↓ '; return s.replace(' ','') + Math.abs(pct)+'%' }
 </script>
 
 <style scoped>
 .sub { display: flex; align-items: center; }
 .header-actions { display: flex; align-items: center; cursor: pointer; }
 .search-box { padding: 4px 12px 8px; }
-.wl-item { cursor: pointer; }
-.watch-toggle {
-  position: absolute;
-  right: 12px;
-  top: 50%;
-  transform: translateY(-50%);
-  padding: 4px 8px;
-  height: auto;
+
+.wl-item {
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  position: relative;
+  cursor: pointer;
+}
+
+.search-card {
+  margin: 10px;
+  border: 1px solid var(--accent);
+  border-radius: 12px;
+  background-color: var(--card);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.wl-status {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.wl-price {
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.wl-delta {
+  font-size: 13px;
+}
+
+/* --- Watched List (Regular Style) --- */
+.wl-list:not(.search-list) .wl-item {
+  display: grid;
+  grid-template-columns: 1fr 80px auto; /* info | sparkline | data */
+}
+
+.wl-list:not(.search-list) .wl-right {
+  text-align: right;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+/* --- Search List (New Style) --- */
+.search-list .wl-item {
+  display: grid;
+  grid-template-columns: 24px 1fr auto; /* icon | info | data */
+  gap: 12px;
+}
+
+.search-list .wl-right {
+  display: flex;
+  align-items: baseline;
+  justify-content: flex-end;
+  gap: 8px;
+  width: 110px; /* Fixed width for the container */
+}
+
+.search-list .wl-price,
+.search-list .wl-delta {
+  text-align: right;
+  flex-shrink: 0; /* Prevent shrinking */
+}
+
+.search-list .wl-price {
+  width: 45px;
+}
+
+.search-list .wl-delta {
+  width: 55px;
 }
 </style>
