@@ -24,23 +24,17 @@
       <div class="dialogue-list">
         <div v-for="(m,i) in messages" :key="'msg-'+i" :class="['msg', m.role]">{{ m.text }}</div>
       </div>
-      <div class="question-list">
-        <div class="question-item" @click="quickAsk('假设: 采购延误3天，对总体回报率的影响?')">假设: 采购延误3天，对总体回报率的影响?</div>
-        <div class="question-item" @click="quickAsk('推进至里程碑M3当前一周，风险变化怎样?')">推进至里程碑M3当前一周，风险变化怎样?</div>
-      </div>
     </div>
   </section>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref } from 'vue'
 const searchQuery = ref('')
 const messages = ref([])
 function pushMsg(text, role){ messages.value.push({ text, role }) }
 function onSearch(){ const v=(searchQuery.value||'').trim(); if(!v) return; pushMsg(v,'user'); searchQuery.value=''; setTimeout(()=>reply(v), 400) }
-function quickAsk(text){ pushMsg(text,'user'); setTimeout(()=>reply(text), 300) }
 function reply(text){ const r='占位回复：已记录问题“'+text+'”，将在接入真实数据后提供分析。'; pushMsg(r,'ai') }
-onMounted(()=>{ pushMsg('你好，可点击下方假设问题或直接提问。','ai') })
 </script>
 
 <style scoped>
