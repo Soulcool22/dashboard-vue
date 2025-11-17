@@ -34,12 +34,17 @@
     </div>
     <div v-if="isSearchVisible" class="search-card" ref="searchCardRef">
       <div class="search-box">
-        <el-input
-          :model-value="searchQuery"
-          @update:modelValue="$emit('update:searchQuery', $event)"
-          placeholder="搜索全部项目..."
-          clearable
-        />
+        <div class="search-container">
+          <el-input
+            :model-value="searchQuery"
+            @update:modelValue="$emit('update:searchQuery', $event)"
+            placeholder="搜索全部项目..."
+            clearable
+          />
+          <el-button type="primary" class="search-button">
+            <Search theme="outline" size="16" />
+          </el-button>
+        </div>
       </div>
       <div class="wl-list search-list">
         <div 
@@ -68,7 +73,7 @@
 import { ref, watch, nextTick } from 'vue'
 import SparkLine from './SparkLine.vue'
 import InfoIcon from './InfoIcon.vue'
-import { Plus, CheckSmall } from '@icon-park/vue-next'
+import { Plus, CheckSmall, Search } from '@icon-park/vue-next'
 
 const props = defineProps({
   projects: { type: Array, default: () => [] },
@@ -116,7 +121,7 @@ function deltaText(p){ const a=p.series; const prev=a[a.length-2]; const last=a[
 <style scoped>
 .sub { display: flex; align-items: center; }
 .header-actions { display: flex; align-items: center; cursor: pointer; }
-.search-box { padding: 4px 12px 8px; }
+.search-box { padding: 8px 12px; }
 
 .wl-item {
   display: grid;
@@ -129,14 +134,14 @@ function deltaText(p){ const a=p.series; const prev=a[a.length-2]; const last=a[
 
 .search-card {
   position: absolute;
-  top: 55px; /* Position below the header */
+  top: 55px;
   left: 10px;
   right: 10px;
   z-index: 10;
-  border: 1px solid var(--accent);
   border-radius: 12px;
-  background-color: var(--card);
+  background-color: #f5fbff; /* Lighter blue background */
   box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  border: 1px solid var(--border);
 }
 
 .wl-status {
@@ -156,7 +161,7 @@ function deltaText(p){ const a=p.series; const prev=a[a.length-2]; const last=a[
 
 /* --- Watched List (Regular Style) --- */
 .wl-list:not(.search-list) .wl-item {
-  grid-template-columns: 1fr 80px auto; /* info | sparkline | data */
+  grid-template-columns: 1fr 80px auto;
 }
 
 .wl-list:not(.search-list) .wl-right {
@@ -165,7 +170,7 @@ function deltaText(p){ const a=p.series; const prev=a[a.length-2]; const last=a[
 
 /* --- Search List (New, Corrected Style) --- */
 .search-list .wl-item {
-  grid-template-columns: 24px 1fr auto auto; /* icon | info | price | delta */
+  grid-template-columns: 24px 1fr auto auto;
   gap: 12px;
 }
 
@@ -173,5 +178,37 @@ function deltaText(p){ const a=p.series; const prev=a[a.length-2]; const last=a[
 .search-list .wl-delta {
   text-align: right;
   white-space: nowrap;
+}
+
+/* --- New Search Input Styles --- */
+.search-container {
+  position: relative;
+}
+
+.search-button {
+  position: absolute;
+  right: 5px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 6px rgba(58,122,254,0.24);
+}
+
+.search-container :deep(.el-input__wrapper) {
+  border: 1px solid var(--border);
+  border-radius: 22px;
+  background: var(--card);
+  box-shadow: none;
+  padding: 2px 14px;
+}
+
+.search-container :deep(.el-input__inner) {
+  padding-right: 35px;
 }
 </style>
