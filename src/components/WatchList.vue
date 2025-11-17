@@ -84,7 +84,6 @@ const searchToggleRef = ref(null)
 
 function toggleSearch() {
   isSearchVisible.value = !isSearchVisible.value
-  emits('search-active-change', isSearchVisible.value)
 }
 
 const handleClickOutside = (event) => {
@@ -99,6 +98,7 @@ const handleClickOutside = (event) => {
 }
 
 watch(isSearchVisible, (newValue) => {
+  emits('search-active-change', newValue) // Notify parent of any change
   nextTick(() => {
     if (newValue) {
       document.addEventListener('mousedown', handleClickOutside)

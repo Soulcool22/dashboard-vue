@@ -16,7 +16,7 @@
           @toggle-left="toggleLeftExpand"
           @update:searchQuery="searchQuery = $event"
           @toggle-watch-status="toggleWatchStatus"
-          @search-active-change="isSearchActive = $event"
+          @search-active-change="handleSearchActiveChange"
           @select-project="handleSelectProject"
         />
         <RegularList 
@@ -95,6 +95,13 @@ const filteredAllProjects = computed(() => {
     item.name.toLowerCase().includes(searchQuery.value.toLowerCase())
   )
 })
+
+function handleSearchActiveChange(isActive) {
+  isSearchActive.value = isActive
+  if (!isActive) {
+    searchQuery.value = ''
+  }
+}
 
 function toggleWatchStatus(projectToToggle) {
   const indexInProjects = projects.value.findIndex(p => p.name === projectToToggle.name)
