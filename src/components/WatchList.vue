@@ -136,7 +136,7 @@ function deltaText(p){ const a=p.series; const prev=a[a.length-2]; const last=a[
   margin: 0 10px 10px; /* Position it below the header with margin */
   z-index: 10;
   border-radius: 12px;
-  background-color: #f5fbff; /* Lighter blue background */
+  background-color: #fafdff; /* Even lighter blue background */
   box-shadow: 0 4px 12px rgba(0,0,0,0.1);
   border: 1px solid var(--border);
 }
