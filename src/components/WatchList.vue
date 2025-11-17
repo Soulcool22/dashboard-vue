@@ -6,7 +6,7 @@
         <div class="sub">各项目进度兑现指数趋势<InfoIcon tip="进度兑现指数：衡量项目按照计划的兑现程度，范围 0-100，越高越好，当前基准线为80。" /></div>
       </div>
       <div class="header-actions">
-        <el-button class="expand-btn" type="text" @click="toggleSearch">
+        <el-button class="expand-btn" type="text" @click="toggleSearch" ref="searchToggleRef">
           <svg width="20" height="20" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M21 38C30.3888 38 38 30.3888 38 21C38 11.6112 30.3888 4 21 4C11.6112 4 4 11.6112 4 21C4 30.3888 11.6112 38 21 38Z" stroke="#7f8081" stroke-width="4" stroke-linejoin="round"/><path d="M33.2218 33.2218L41.7071 41.7071" stroke="#7f8081" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </el-button>
         <el-button class="expand-btn" type="text" @click="$emit('toggle-left')">
@@ -32,7 +32,7 @@
         </div>
       </div>
     </div>
-    <div v-if="isSearchVisible" class="search-card">
+    <div v-if="isSearchVisible" class="search-card" ref="searchCardRef">
       <div class="search-box">
         <el-input
           :model-value="searchQuery"
@@ -56,10 +56,8 @@
             <div class="wl-name">{{ p.name }}</div>
             <div class="wl-sub">{{ p.sector }}</div>
           </div>
-          <div class="wl-right">
-            <div class="wl-price">{{ lastValue(p).toFixed(2) }}</div>
-            <div class="wl-delta" :class="deltaSign(p) >= 0 ? 'up' : 'down'">{{ deltaText(p) }}</div>
-          </div>
+          <div class="wl-price">{{ lastValue(p).toFixed(2) }}</div>
+          <div class="wl-delta" :class="deltaSign(p) >= 0 ? 'up' : 'down'">{{ deltaText(p) }}</div>
         </div>
       </div>
     </div>
@@ -67,7 +65,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, watch, nextTick } from 'vue'
 import SparkLine from './SparkLine.vue'
 import InfoIcon from './InfoIcon.vue'
 import { Plus, CheckSmall } from '@icon-park/vue-next'
@@ -81,11 +79,34 @@ const props = defineProps({
 const emits = defineEmits(['toggle-left', 'update:searchQuery', 'toggle-watch-status', 'search-active-change', 'select-project'])
 
 const isSearchVisible = ref(false)
+const searchCardRef = ref(null)
+const searchToggleRef = ref(null)
 
 function toggleSearch() {
   isSearchVisible.value = !isSearchVisible.value
   emits('search-active-change', isSearchVisible.value)
 }
+
+const handleClickOutside = (event) => {
+  if (
+    searchCardRef.value &&
+    !searchCardRef.value.contains(event.target) &&
+    searchToggleRef.value &&
+    !searchToggleRef.value.$el.contains(event.target)
+  ) {
+    isSearchVisible.value = false
+  }
+}
+
+watch(isSearchVisible, (newValue) => {
+  nextTick(() => {
+    if (newValue) {
+      document.addEventListener('mousedown', handleClickOutside)
+    } else {
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+  })
+})
 
 function lastValue(p){ const a=p.series; return a[a.length-1] }
 function deltaSign(p){ const a=p.series; return a[a.length-1]-a[a.length-2] }
@@ -98,6 +119,7 @@ function deltaText(p){ const a=p.series; const prev=a[a.length-2]; const last=a[
 .search-box { padding: 4px 12px 8px; }
 
 .wl-item {
+  display: grid;
   align-items: center;
   gap: 6px;
   padding: 8px 12px;
@@ -106,7 +128,11 @@ function deltaText(p){ const a=p.series; const prev=a[a.length-2]; const last=a[
 }
 
 .search-card {
-  margin: 10px;
+  position: absolute;
+  top: 55px; /* Position below the header */
+  left: 10px;
+  right: 10px;
+  z-index: 10;
   border: 1px solid var(--accent);
   border-radius: 12px;
   background-color: var(--card);
@@ -130,43 +156,22 @@ function deltaText(p){ const a=p.series; const prev=a[a.length-2]; const last=a[
 
 /* --- Watched List (Regular Style) --- */
 .wl-list:not(.search-list) .wl-item {
-  display: grid;
   grid-template-columns: 1fr 80px auto; /* info | sparkline | data */
 }
 
 .wl-list:not(.search-list) .wl-right {
   text-align: right;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
 }
 
-/* --- Search List (New Style) --- */
+/* --- Search List (New, Corrected Style) --- */
 .search-list .wl-item {
-  display: grid;
-  grid-template-columns: 24px 1fr auto; /* icon | info | data */
+  grid-template-columns: 24px 1fr auto auto; /* icon | info | price | delta */
   gap: 12px;
-}
-
-.search-list .wl-right {
-  display: flex;
-  align-items: baseline;
-  justify-content: flex-end;
-  gap: 8px;
-  width: 110px; /* Fixed width for the container */
 }
 
 .search-list .wl-price,
 .search-list .wl-delta {
   text-align: right;
-  flex-shrink: 0; /* Prevent shrinking */
-}
-
-.search-list .wl-price {
-  width: 45px;
-}
-
-.search-list .wl-delta {
-  width: 55px;
+  white-space: nowrap;
 }
 </style>
