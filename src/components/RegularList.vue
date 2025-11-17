@@ -2,7 +2,7 @@
   <div class="card rl-card">
     <div class="wl-header">
       <div>
-        <h3>常规列表</h3>
+        <h3>项目列表</h3>
         <div class="sub">可添加至关注列表</div>
       </div>
       <div class="wl-actions">

@@ -9,7 +9,7 @@
         <el-button class="expand-btn" type="text" @click="toggleSearch" ref="searchToggleRef">
           <svg width="20" height="20" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M21 38C30.3888 38 38 30.3888 38 21C38 11.6112 30.3888 4 21 4C11.6112 4 4 11.6112 4 21C4 30.3888 11.6112 38 21 38Z" stroke="#7f8081" stroke-width="4" stroke-linejoin="round"/><path d="M33.2218 33.2218L41.7071 41.7071" stroke="#7f8081" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </el-button>
-        <el-button class="expand-btn" type="text" @click="$emit('toggle-left')">
+        <el-button class="expand-btn" type="text" @click="$emit('toggle-left')" :class="{ 'is-expanded': isExpanded }">
           <svg width="20" height="20" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M22 42H6V26" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><path d="M26 6H42V22" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </el-button>
       </div>
@@ -79,7 +79,8 @@ const props = defineProps({
   projects: { type: Array, default: () => [] },
   searchQuery: { type: String, default: '' },
   allProjects: { type: Array, default: () => [] },
-  activeProject: { type: Object, default: null }
+  activeProject: { type: Object, default: null },
+  isExpanded: { type: Boolean, default: false }
 })
 const emits = defineEmits(['toggle-left', 'update:searchQuery', 'toggle-watch-status', 'search-active-change', 'select-project'])
 
@@ -210,5 +211,13 @@ function deltaText(p){ const a=p.series; const prev=a[a.length-2]; const last=a[
 
 .search-container :deep(.el-input__inner) {
   padding-right: 35px;
+}
+
+/* --- Animation for Expand Button --- */
+.expand-btn svg {
+  transition: transform 0.3s ease;
+}
+.expand-btn.is-expanded svg {
+  transform: rotate(180deg);
 }
 </style>

@@ -13,6 +13,7 @@
           :search-query="searchQuery"
           :all-projects="filteredAllProjects"
           :active-project="selectedProject"
+          :is-expanded="expandedLeft"
           @toggle-left="toggleLeftExpand"
           @update:searchQuery="searchQuery = $event"
           @toggle-watch-status="toggleWatchStatus"
