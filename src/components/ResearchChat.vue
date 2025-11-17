@@ -1,7 +1,7 @@
 <template>
   <section class="col col-right">
     <div class="research-section">
-      <h3 class="research-title">研究 · 本期项目洞察</h3>
+      <h3 class="research-title">项目洞察</h3>
       <div class="research-content">
         <p><strong>项目整体表现分析：</strong>本期里程碑总体提升 2.3 个百分点，主要得益于采购环节的优化和生产效率的提升。其中，设计阶段完成率达到 85%，超出预期目标。</p>
         <p><strong>关键风险识别：</strong>采购环节平均延迟 3 天，预计影响兑现指数 0.8pp。主要原因为供应商交付周期延长，建议加强供应链缓冲管理，建立多供应商体系以降低单一依赖风险。</p>
@@ -20,9 +20,6 @@
       <div class="search-container">
         <el-input v-model="searchQuery" placeholder="输入问题，例如：下周会有需求新增吗？" clearable></el-input>
         <el-button class="search-button" type="primary" @click="onSearch">↑</el-button>
-      </div>
-      <div class="dialogue-list">
-        <div v-for="(m,i) in messages" :key="'msg-'+i" :class="['msg', m.role]">{{ m.text }}</div>
       </div>
     </div>
   </section>
