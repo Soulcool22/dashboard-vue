@@ -133,10 +133,7 @@ function deltaText(p){ const a=p.series; const prev=a[a.length-2]; const last=a[
 }
 
 .search-card {
-  position: absolute;
-  top: 55px;
-  left: 10px;
-  right: 10px;
+  margin: 0 10px 10px; /* Position it below the header with margin */
   z-index: 10;
   border-radius: 12px;
   background-color: #f5fbff; /* Lighter blue background */
