@@ -1,12 +1,36 @@
 <template>
-  <span class="info-icon" @mouseenter="show" @mouseleave="hide">?</span>
+  <span class="info-icon" ref="elRef" @mouseenter="show" @mouseleave="hide">?</span>
 </template>
 
 <script setup>
 import { ref } from 'vue'
 const props = defineProps({ tip: { type: String, default: '' } })
+const elRef = ref(null)
 let bubble = null
-function show(){ const tip = props.tip; if(!tip) return; hide(); bubble = document.createElement('div'); bubble.className='tooltip-bubble'; bubble.textContent = tip; document.body.appendChild(bubble); const rect = document.querySelector('.info-icon')?.getBoundingClientRect(); const bRect = bubble.getBoundingClientRect(); if(rect){ const top = rect.top + rect.height/2 - bRect.height/2; const left = rect.right + 8; bubble.style.top = top + 'px'; bubble.style.left = left + 'px'; } }
+function show(){
+  const tip = props.tip
+  if(!tip) return
+  hide()
+  bubble = document.createElement('div')
+  bubble.className='tooltip-bubble'
+  bubble.textContent = tip
+  document.body.appendChild(bubble)
+  const el = elRef.value
+  if(!el) return
+  const rect = el.getBoundingClientRect()
+  const bRect = bubble.getBoundingClientRect()
+  let top = rect.top + rect.height/2 - bRect.height/2
+  let left = rect.right + 8
+  const margin = 8
+  const vw = window.innerWidth
+  const vh = window.innerHeight
+  if(top < margin){ top = rect.bottom + margin; left = rect.left }
+  if(top + bRect.height > vh - margin){ top = rect.top - bRect.height - margin }
+  if(left + bRect.width > vw - margin){ left = rect.left - bRect.width - margin }
+  if(left < margin){ left = margin }
+  bubble.style.top = top + 'px'
+  bubble.style.left = left + 'px'
+}
 function hide(){ if(bubble && bubble.parentNode){ bubble.parentNode.removeChild(bubble); bubble = null } }
 </script>
 

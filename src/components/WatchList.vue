@@ -3,7 +3,16 @@
     <div class="wl-header">
       <div>
         <h3>关注项目</h3>
-        <div class="sub">各项目进度兑现指数趋势<InfoIcon tip="进度兑现指数：衡量项目按照计划的兑现程度，范围 0-100，越高越好，当前基准线为80。" /></div>
+        <div class="sub">各项目进度兑现指数趋势<InfoIcon tip="进度兑现指数：衡量项目按照计划的兑现程度，范围 0-100，越高越好，当前基准线为80。
+        *计算规则*：指数 = Σ(管理层指标标准化评分 × 权重占比)，
+        其中各管理层指标以及权重占比：
+        开工准点率：10%
+        完工准点率：20%
+        关键里程碑达成率：35%
+        平均任务工期比：15%
+        逾期恢复时长：5%
+        逾期积压率：7.5%
+        逾期解决率：7.5%" /></div>
       </div>
       <div class="header-actions">
         <el-button class="expand-btn" type="text" @click="toggleSearch" ref="searchToggleRef">
