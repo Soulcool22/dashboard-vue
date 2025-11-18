@@ -1,6 +1,6 @@
 <template>
   <div class="card wl-card" :class="{ 'is-expanded': isExpanded }">
-    <div class="wl-header">
+    <div class="wl-header" :class="{ 'is-expanded': isExpanded && projects.length > 0 }">
       <div>
         <h3>关注项目</h3>
         <div class="sub">各项目进度兑现指数趋势<InfoIcon tip="进度兑现指数：衡量项目按照计划的兑现程度，范围 0-100，越高越好，当前基准线为80。
@@ -22,7 +22,7 @@
           <svg width="20" height="20" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M22 42H6V26" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><path d="M26 6H42V22" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </el-button>
       </div>
-      <div class="wl-columns" v-if="isExpanded && !isSearchVisible && projects && projects.length">
+      <div class="wl-columns" v-if="isExpanded && !isSearchVisible && projects && projects.length > 0">
         <div>项目名称</div>
         <div>进度缩略图</div>
         <div>关键里程碑达成率</div>
@@ -172,7 +172,7 @@ function medianValue(p){ const a=(p.series||[]).slice().sort((x,y)=>x-y); if(!a.
   border-bottom: 1px solid var(--border);
   position: relative;
 }
-.is-expanded .wl-header {
+.wl-header.is-expanded {
   padding-bottom: 34px; /* Make space for columns */
 }
 

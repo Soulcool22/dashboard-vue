@@ -1,6 +1,6 @@
 <template>
   <div class="card rl-card" :class="{ 'is-expanded': isExpanded }">
-    <div class="wl-header">
+    <div class="wl-header" :class="{ 'is-expanded': isExpanded && !collapsed && regulars.length > 0 }">
       <div>
         <h3>项目列表</h3>
         <div class="sub">可添加至关注列表</div>
@@ -13,7 +13,7 @@
           </svg>
         </el-button>
       </div>
-      <div class="wl-columns" v-if="isExpanded && !collapsed && regulars && regulars.length">
+      <div class="wl-columns" v-if="isExpanded && !collapsed && regulars && regulars.length > 0">
         <div>项目名称</div>
         <div>进度缩略图</div>
         <div>关键里程碑达成率</div>
@@ -97,7 +97,7 @@ function medianValue(p){ const a=(p.series||[]).slice().sort((x,y)=>x-y); if(!a.
   border-bottom: 1px solid var(--border);
   position: relative;
 }
-.is-expanded .wl-header {
+.wl-header.is-expanded {
   padding-bottom: 34px; /* Make space for columns */
 }
 .wl-sample { text-align: center; }
