@@ -13,16 +13,16 @@
           </svg>
         </el-button>
       </div>
-    </div>
-    <div class="wl-columns" v-if="isExpanded && !collapsed && regulars && regulars.length">
-      <div>项目名称</div>
-      <div>进度缩略图</div>
-      <div>关键里程碑达成率</div>
-      <div>开工准点率</div>
-      <div>完工准点率</div>
-      <div>列名6</div>
-      <div>列名7</div>
-      <div>进度兑现指数</div>
+      <div class="wl-columns" v-if="isExpanded && !collapsed && regulars && regulars.length">
+        <div>项目名称</div>
+        <div>进度缩略图</div>
+        <div>关键里程碑达成率</div>
+        <div>开工准点率</div>
+        <div>完工准点率</div>
+        <div>列名6</div>
+        <div>列名7</div>
+        <div>进度兑现指数</div>
+      </div>
     </div>
     <div class="wl-list" v-show="!collapsed">
       <div 
@@ -89,27 +89,38 @@ function medianValue(p){ const a=(p.series||[]).slice().sort((x,y)=>x-y); if(!a.
 </script>
 
 <style scoped>
+.wl-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--border);
+  position: relative;
+}
+.is-expanded .wl-header {
+  padding-bottom: 34px; /* Make space for columns */
+}
 .wl-sample { text-align: center; }
 .wl-columns {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
   display: grid;
   grid-template-columns: 120px 80px repeat(5, 1fr) 1fr;
   align-items: center;
   gap: 6px;
-  padding: 0 12px;
-  margin-top: 6px;
+  padding: 4px 12px;
   font-size: 12px;
   color: var(--muted);
-  position: sticky;
-  top: 44px;
-  z-index: 1;
+  border-top: 1px solid var(--border);
   background: var(--card);
-  border-bottom: 1px solid var(--border);
 }
 .wl-columns > div { display: flex; align-items: center; justify-content: center; }
 
 .wl-item {
   display: grid;
-  grid-template-columns: 1fr 80px 60px; /* Match the grid in WatchList.vue */
+  grid-template-columns: 1fr 80px 60px;
   align-items: center;
   gap: 6px;
   padding: 8px 12px;
@@ -125,11 +136,8 @@ function medianValue(p){ const a=(p.series||[]).slice().sort((x,y)=>x-y); if(!a.
 }
 
 /* --- Expanded Layout Logic --- */
-.is-expanded .wl-columns {
-  grid-template-columns: 120px 80px repeat(5, 1fr) 1fr; /* match item columns */
-}
 .is-expanded .wl-item {
-  grid-template-columns: 120px 80px repeat(5, 1fr) 1fr; /* info | sparkline | 5 samples | right */
+  grid-template-columns: 120px 80px repeat(5, 1fr) 1fr;
 }
 .is-expanded .wl-right {
   justify-self: center;

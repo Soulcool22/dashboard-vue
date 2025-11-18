@@ -22,16 +22,16 @@
           <svg width="20" height="20" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M22 42H6V26" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><path d="M26 6H42V22" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </el-button>
       </div>
-    </div>
-    <div class="wl-columns" v-if="isExpanded && !isSearchVisible && projects && projects.length">
-      <div>项目名称</div>
-      <div>进度缩略图</div>
-      <div>关键里程碑达成率</div>
-      <div>开工准点率</div>
-      <div>完工准点率</div>
-      <div>列名6</div>
-      <div>列名7</div>
-      <div>进度兑现指数</div>
+      <div class="wl-columns" v-if="isExpanded && !isSearchVisible && projects && projects.length">
+        <div>项目名称</div>
+        <div>进度缩略图</div>
+        <div>关键里程碑达成率</div>
+        <div>开工准点率</div>
+        <div>完工准点率</div>
+        <div>列名6</div>
+        <div>列名7</div>
+        <div>进度兑现指数</div>
+      </div>
     </div>
     <div class="wl-list" v-if="!isSearchVisible">
       <div 
@@ -164,21 +164,33 @@ function medianValue(p){ const a=(p.series||[]).slice().sort((x,y)=>x-y); if(!a.
 </script>
 
 <style scoped>
+.wl-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--border);
+  position: relative;
+}
+.is-expanded .wl-header {
+  padding-bottom: 34px; /* Make space for columns */
+}
+
 .wl-sample { text-align: center; }
 .wl-columns {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
   display: grid;
   grid-template-columns: 120px 80px repeat(5, 1fr) 1fr;
   align-items: center;
   gap: 6px;
-  padding: 0 12px;
-  margin-top: 6px;
+  padding: 4px 12px;
   font-size: 12px;
   color: var(--muted);
-  position: sticky;
-  top: 44px;
-  z-index: 1;
+  border-top: 1px solid var(--border);
   background: var(--card);
-  border-bottom: 1px solid var(--border);
 }
 .wl-columns > div { display: flex; align-items: center; justify-content: center; }
 
@@ -196,10 +208,10 @@ function medianValue(p){ const a=(p.series||[]).slice().sort((x,y)=>x-y); if(!a.
 }
 
 .search-card {
-  margin: 0 10px 10px; /* Position it below the header with margin */
+  margin: 0 10px 10px;
   z-index: 10;
   border-radius: 12px;
-  background-color: #fafdff; /* Even lighter blue background */
+  background-color: #fafdff;
   box-shadow: 0 4px 12px rgba(0,0,0,0.1);
   border: 1px solid var(--border);
 }
@@ -221,7 +233,7 @@ function medianValue(p){ const a=(p.series||[]).slice().sort((x,y)=>x-y); if(!a.
 
 /* --- Watched List (Regular Style) --- */
 .wl-list:not(.search-list) .wl-item {
-  grid-template-columns: 1fr 80px 60px; /* info | sparkline | data (fixed width) */
+  grid-template-columns: 1fr 80px 60px;
 }
 
 .wl-list:not(.search-list) .wl-right {
@@ -280,9 +292,6 @@ function medianValue(p){ const a=(p.series||[]).slice().sort((x,y)=>x-y); if(!a.
 }
 
 /* --- Expanded Layout Logic --- */
-.is-expanded .wl-columns {
-  grid-template-columns: 120px 80px repeat(5, 1fr) 1fr;
-}
 .is-expanded .wl-list:not(.search-list) .wl-item {
   grid-template-columns: 120px 80px repeat(5, 1fr) 1fr;
 }
