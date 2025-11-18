@@ -47,23 +47,23 @@
         <SparkLine :series="p.series" />
         <div class="wl-sample" v-if="isExpanded">
           <div class="wl-price">{{ avgValue(p).toFixed(2) }}</div>
-          <div class="wl-delta">平均</div>
+          <div class="wl-delta" :class="sampleSign(p) >= 0 ? 'up' : 'down'">{{ sampleText(p) }}</div>
         </div>
         <div class="wl-sample" v-if="isExpanded">
           <div class="wl-price">{{ maxValue(p).toFixed(2) }}</div>
-          <div class="wl-delta">最大</div>
+          <div class="wl-delta" :class="sampleSign(p) >= 0 ? 'up' : 'down'">{{ sampleText(p) }}</div>
         </div>
         <div class="wl-sample" v-if="isExpanded">
           <div class="wl-price">{{ minValue(p).toFixed(2) }}</div>
-          <div class="wl-delta">最小</div>
+          <div class="wl-delta" :class="sampleSign(p) >= 0 ? 'up' : 'down'">{{ sampleText(p) }}</div>
         </div>
         <div class="wl-sample" v-if="isExpanded">
           <div class="wl-price">{{ rangeValue(p).toFixed(2) }}</div>
-          <div class="wl-delta">幅度</div>
+          <div class="wl-delta" :class="sampleSign(p) >= 0 ? 'up' : 'down'">{{ sampleText(p) }}</div>
         </div>
         <div class="wl-sample" v-if="isExpanded">
           <div class="wl-price">{{ medianValue(p).toFixed(2) }}</div>
-          <div class="wl-delta">中位</div>
+          <div class="wl-delta" :class="sampleSign(p) >= 0 ? 'up' : 'down'">{{ sampleText(p) }}</div>
         </div>
         <div class="wl-right">
           <div class="wl-price">{{ lastValue(p).toFixed(2) }}</div>
@@ -156,6 +156,8 @@ watch(isSearchVisible, (newValue) => {
 function lastValue(p){ const a=p.series; return a[a.length-1] }
 function deltaSign(p){ const a=p.series; return a[a.length-1]-a[a.length-2] }
 function deltaText(p){ const a=p.series; const prev=a[a.length-2]; const last=a[a.length-1]; const pct=prev?(((last-prev)/prev)*100).toFixed(2):'0.00'; const s=(last-prev)>=0?'↑ ':'↓ '; return s.replace(' ','') + Math.abs(pct)+'%' }
+function sampleSign(p){ return deltaSign(p) }
+function sampleText(p){ return deltaText(p) }
 function avgValue(p){ const a=p.series||[]; if(!a.length) return 0; return a.reduce((s,v)=>s+v,0)/a.length }
 function maxValue(p){ const a=p.series||[]; if(!a.length) return 0; return Math.max(...a) }
 function minValue(p){ const a=p.series||[]; if(!a.length) return 0; return Math.min(...a) }
@@ -187,7 +189,8 @@ function medianValue(p){ const a=(p.series||[]).slice().sort((x,y)=>x-y); if(!a.
   align-items: center;
   gap: 6px;
   padding: 4px 12px;
-  font-size: 12px;
+  font-size: 11px;
+  font-weight: 600;
   color: var(--muted);
   border-top: 1px solid var(--border);
   background: var(--card);
