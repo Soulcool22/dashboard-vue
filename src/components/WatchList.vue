@@ -1,5 +1,5 @@
 <template>
-  <div class="card wl-card">
+  <div class="card wl-card" :class="{ 'is-expanded': isExpanded }">
     <div class="wl-header">
       <div>
         <h3>关注项目</h3>
@@ -220,5 +220,17 @@ function deltaText(p){ const a=p.series; const prev=a[a.length-2]; const last=a[
 
 .search-container :deep(.el-input__inner) {
   padding-right: 35px;
+}
+
+.expand-btn.active {
+  color: var(--accent);
+}
+
+/* --- Expanded Layout Logic --- */
+.is-expanded .wl-list:not(.search-list) .wl-item {
+  grid-template-columns: 120px 80px 1fr; /* info | sparkline | flexible gap */
+}
+.is-expanded .wl-list:not(.search-list) .wl-right {
+  justify-self: end; /* Push data to the far right */
 }
 </style>

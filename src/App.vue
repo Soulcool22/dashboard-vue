@@ -25,6 +25,7 @@
           v-model="regularCollapsed" 
           :regulars="regulars" 
           :active-project="selectedProject"
+          :is-expanded="expandedLeft"
           @select-project="handleSelectProject"
         />
       </section>

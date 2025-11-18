@@ -1,5 +1,5 @@
 <template>
-  <div class="card rl-card">
+  <div class="card rl-card" :class="{ 'is-expanded': isExpanded }">
     <div class="wl-header">
       <div>
         <h3>项目列表</h3>
@@ -41,14 +41,16 @@ import SparkLine from './SparkLine.vue'
 const props = defineProps({ 
   regulars: { type: Array, default: () => [] }, 
   modelValue: { type: Boolean, default: false },
-  activeProject: { type: Object, default: null }
+  activeProject: { type: Object, default: null },
+  isExpanded: { type: Boolean, default: false }
 })
 const emits = defineEmits(['update:modelValue', 'select-project'])
 function toggle(){ emits('update:modelValue', !props.modelValue) }
 const collapsed = computed(()=> props.modelValue)
 function lastValue(p){ const a=p.series; return a[a.length-1] }
 function deltaSign(p){ const a=p.series; return a[a.length-1]-a[a.length-2] }
-function deltaText(p){ const a=p.series; const prev=a[a.length-2]; const last=a[a.length-1]; const pct=prev?(((last-prev)/prev)*100).toFixed(2):'0.00'; const s=(last-prev)>=0?'↑ ':'↓ '; return s+Math.abs(pct)+'%' }
+function deltaText(p){ const a=p.series; const prev=a[a.length-2]; const last=a[a.length-1]; const pct=prev?(((last-prev)/prev)*100).toFixed(2):'0.00'; const s=(last-prev)>=0?'↑ ':'↓ '; return s+Math.abs(pct)+'%'
+}
 </script>
 
 <style scoped>
@@ -67,5 +69,13 @@ function deltaText(p){ const a=p.series; const prev=a[a.length-2]; const last=a[
   display: flex;
   flex-direction: column;
   align-items: flex-end;
+}
+
+/* --- Expanded Layout Logic --- */
+.is-expanded .wl-item {
+  grid-template-columns: 120px 80px 1fr; /* info | sparkline | flexible gap */
+}
+.is-expanded .wl-right {
+  justify-self: end; /* Push data to the far right */
 }
 </style>
