@@ -23,6 +23,16 @@
         </el-button>
       </div>
     </div>
+    <div class="wl-columns" v-if="isExpanded && !isSearchVisible">
+      <div>列名1</div>
+      <div>列名2</div>
+      <div>列名3</div>
+      <div>列名4</div>
+      <div>列名5</div>
+      <div>列名6</div>
+      <div>列名7</div>
+      <div>列名8</div>
+    </div>
     <div class="wl-list" v-if="!isSearchVisible">
       <div 
         v-for="(p, idx) in projects" 
@@ -129,6 +139,18 @@ function deltaText(p){ const a=p.series; const prev=a[a.length-2]; const last=a[
 </script>
 
 <style scoped>
+.wl-columns {
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  align-items: center;
+  gap: 6px;
+  padding: 0 12px;
+  margin-top: 6px;
+  font-size: 12px;
+  color: var(--muted);
+}
+.wl-columns > div { display: flex; align-items: center; justify-content: center; }
+
 .sub { display: flex; align-items: center; }
 .header-actions { display: flex; align-items: center; cursor: pointer; }
 .search-box { padding: 8px 12px; }
@@ -227,6 +249,9 @@ function deltaText(p){ const a=p.series; const prev=a[a.length-2]; const last=a[
 }
 
 /* --- Expanded Layout Logic --- */
+.is-expanded .wl-columns {
+  grid-template-columns: repeat(8, 1fr);
+}
 .is-expanded .wl-list:not(.search-list) .wl-item {
   grid-template-columns: 120px 80px 1fr; /* info | sparkline | flexible gap */
 }
