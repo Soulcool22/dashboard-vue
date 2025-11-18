@@ -28,16 +28,15 @@ header { padding: 12px 16px; border-bottom: 1px solid var(--border); background:
   gap: 0;
   position: relative;
 }
-.col-middle { padding: 12px; position: relative; display: flex; flex-direction: column; overflow: hidden; }
-
-.kpi-grid, .chart-card-container {
-  flex-shrink: 0;
-}
-
-.updates-container {
-  flex-grow: 1;
-  min-height: 0;
+.col-middle {
+  padding: 12px;
+  position: relative;
   overflow-y: auto;
+  scrollbar-width: none; /* For Firefox */
+  -ms-overflow-style: none; /* For IE and Edge */
+}
+.col-middle::-webkit-scrollbar {
+  display: none; /* For Chrome, Safari, Opera */
 }
 
 .col-right { overflow: hidden; }

@@ -2,11 +2,7 @@
   <div class="updates-card">
     <h3 class="updates-title">今日动态</h3>
     <div class="updates-list">
-      <div v-for="(item, index) in updates" :key="index" class="update-item">
-        <div class="timeline-marker">
-          <div class="timeline-dot"></div>
-          <div v-if="index < updates.length - 1" class="timeline-line"></div>
-        </div>
+      <div v-for="item in updates" :key="item.text" class="update-item">
         <div class="update-content">
           <p class="update-text">{{ item.text }}</p>
           <p class="update-time">{{ item.time }}</p>
@@ -33,9 +29,6 @@ const updates = ref([
 .updates-card {
   background-color: var(--card);
   padding: 0 12px 12px 12px;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden; /* Important for child scrolling */
 }
 
 .updates-title {
@@ -51,48 +44,32 @@ const updates = ref([
 }
 
 .updates-list {
-  overflow-y: auto;
-  flex-grow: 1;
-  scrollbar-width: none; /* for Firefox */
-  -ms-overflow-style: none; /* for IE and Edge */
-}
-
-.updates-list::-webkit-scrollbar {
-  display: none; /* for Chrome, Safari, and Opera */
+  counter-reset: updates-counter; /* Add CSS counter */
 }
 
 
 .update-item {
-  display: flex;
-  gap: 12px;
+  position: relative;
+  padding-left: 28px; /* Space for the number */
+  padding-bottom: 16px;
 }
 
-.timeline-marker {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.timeline-dot {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  background-color: var(--border);
-  flex-shrink: 0;
-}
-
-.update-item:first-child .timeline-dot {
-  background-color: var(--accent);
-}
-
-.timeline-line {
-  width: 1px;
-  height: 100%;
-  background-color: var(--border);
+.update-item::before {
+  counter-increment: updates-counter;
+  content: counter(updates-counter);
+  position: absolute;
+  left: 0;
+  top: 2px;
+  width: 20px;
+  height: 20px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--muted);
+  text-align: right;
 }
 
 .update-content {
-  padding-bottom: 16px;
+  /* No changes needed here */
 }
 
 .update-text {
@@ -108,3 +85,4 @@ const updates = ref([
   margin: 0;
 }
 </style>
+
