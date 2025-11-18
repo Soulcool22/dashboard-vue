@@ -45,6 +45,26 @@
           <div class="wl-sub">{{ p.sector }}</div>
         </div>
         <SparkLine :series="p.series" />
+        <div class="wl-sample" v-if="isExpanded">
+          <div class="wl-price">{{ avgValue(p).toFixed(2) }}</div>
+          <div class="wl-delta">平均</div>
+        </div>
+        <div class="wl-sample" v-if="isExpanded">
+          <div class="wl-price">{{ maxValue(p).toFixed(2) }}</div>
+          <div class="wl-delta">最大</div>
+        </div>
+        <div class="wl-sample" v-if="isExpanded">
+          <div class="wl-price">{{ minValue(p).toFixed(2) }}</div>
+          <div class="wl-delta">最小</div>
+        </div>
+        <div class="wl-sample" v-if="isExpanded">
+          <div class="wl-price">{{ rangeValue(p).toFixed(2) }}</div>
+          <div class="wl-delta">幅度</div>
+        </div>
+        <div class="wl-sample" v-if="isExpanded">
+          <div class="wl-price">{{ medianValue(p).toFixed(2) }}</div>
+          <div class="wl-delta">中位</div>
+        </div>
         <div class="wl-right">
           <div class="wl-price">{{ lastValue(p).toFixed(2) }}</div>
           <div class="wl-delta" :class="deltaSign(p) >= 0 ? 'up' : 'down'">{{ deltaText(p) }}</div>
@@ -136,9 +156,15 @@ watch(isSearchVisible, (newValue) => {
 function lastValue(p){ const a=p.series; return a[a.length-1] }
 function deltaSign(p){ const a=p.series; return a[a.length-1]-a[a.length-2] }
 function deltaText(p){ const a=p.series; const prev=a[a.length-2]; const last=a[a.length-1]; const pct=prev?(((last-prev)/prev)*100).toFixed(2):'0.00'; const s=(last-prev)>=0?'↑ ':'↓ '; return s.replace(' ','') + Math.abs(pct)+'%' }
+function avgValue(p){ const a=p.series||[]; if(!a.length) return 0; return a.reduce((s,v)=>s+v,0)/a.length }
+function maxValue(p){ const a=p.series||[]; if(!a.length) return 0; return Math.max(...a) }
+function minValue(p){ const a=p.series||[]; if(!a.length) return 0; return Math.min(...a) }
+function rangeValue(p){ const a=p.series||[]; if(!a.length) return 0; return maxValue(p)-minValue(p) }
+function medianValue(p){ const a=(p.series||[]).slice().sort((x,y)=>x-y); if(!a.length) return 0; const m=Math.floor(a.length/2); return a.length%2? a[m] : (a[m-1]+a[m])/2 }
 </script>
 
 <style scoped>
+.wl-sample { text-align: center; }
 .wl-columns {
   display: grid;
   grid-template-columns: repeat(8, 1fr);
@@ -253,9 +279,11 @@ function deltaText(p){ const a=p.series; const prev=a[a.length-2]; const last=a[
   grid-template-columns: repeat(8, 1fr);
 }
 .is-expanded .wl-list:not(.search-list) .wl-item {
-  grid-template-columns: 120px 80px 1fr; /* info | sparkline | flexible gap */
+  grid-template-columns: 120px 80px repeat(5, 1fr) 1fr;
 }
 .is-expanded .wl-list:not(.search-list) .wl-right {
-  justify-self: end; /* Push data to the far right */
+  justify-self: center;
+  align-items: center;
+  text-align: center;
 }
 </style>
