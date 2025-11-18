@@ -35,87 +35,14 @@ function reply(text){ const r='占位回复：已记录问题“'+text+'”，�
 </script>
 
 <style scoped>
-
-.col-right {
-
-  display: flex;
-
-  flex-direction: column;
-
-  overflow: hidden;
-
-}
-
-.research-section {
-
-  flex-grow: 1;
-
-  overflow-y: auto;
-
-}
-
-.research-content {
-
-  font-size: 14px;
-
-  line-height: 1.6; /* Increased for readability */
-
-  color: var(--text);
-
-  margin-bottom: 12px;
-
-  padding: 0 16px;
-
-}
-
-.research-content p {
-
-  margin: 0 0 1.2em; /* Consistent paragraph spacing */
-
-}
-
-.research-content strong {
-
-  font-weight: 600;
-
-  color: #1c2538; /* Slightly darker for emphasis */
-
-}
-
-.research-content ul {
-
-  list-style: none;
-
-  padding-left: 0;
-
-  margin: 1.2em 0;
-
-}
-
-.research-content li {
-
-  padding-left: 1.2em;
-
-  position: relative;
-
-  margin-bottom: 0.6em;
-
-}
-
-.research-content li::before {
-
-  content: '■';
-
-  position: absolute;
-
-  left: 0;
-
-  top: 0.1em;
-
-  font-size: 0.7em;
-
-  color: var(--accent);
-
-}
-
+.col-right { display: flex; flex-direction: column; overflow: hidden; font-family: 'Noto Sans SC', 'PingFang SC', 'Microsoft YaHei', 'Segoe UI', 'Helvetica Neue', Arial, sans-serif; }
+.research-section { flex-grow: 1; overflow-y: auto; }
+.research-title { font-family: 'Noto Sans SC', 'PingFang SC', 'Microsoft YaHei', 'Segoe UI', 'Helvetica Neue', Arial, sans-serif; font-size: 16px; font-weight: 600; color: var(--text); margin: 0; padding: 10px 16px; }
+.research-content { font-size: 13px; line-height: 1.7; color: var(--text); margin-bottom: 12px; padding: 0 16px; letter-spacing: 0.1px; }
+.research-content p { margin: 0 0 1.1em; }
+.research-content strong { font-weight: 600; color: #1c2538; }
+.research-content ul { list-style: none; padding-left: 0; margin: 1.1em 0; }
+.research-content li { padding-left: 1.2em; position: relative; margin-bottom: 0.6em; }
+.research-content li::before { content: '■'; position: absolute; left: 0; top: 0.1em; font-size: 0.7em; color: var(--accent); }
+.col-right .search-container :deep(.el-input__inner) { font-size: 12.5px; }
 </style>
