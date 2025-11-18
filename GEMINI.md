@@ -1,175 +1,135 @@
-# Vue3 + Element Plus 企业级前端开发规范
+# 项目开发规则（dashboard-vue 定制版）
 
-## 📋 项目概述
+## 概述
 
-基于 Vue3 + Element Plus + JavaScript 的企业级前端项目开发模板，适用于各种管理后台和企业应用开发。
+- 当前项目为单页数据看板：Vue 3 + Element Plus + ECharts + IconPark
+- 使用 JavaScript（非 TypeScript），未接入路由/Pinia/axios
+- 构建工具为 Vite（rolldown-vite@7.2.2），包管理使用 npm
 
-## 🚀 快速开始
+## 快速启动
 
-### 1. 创建项目
+- 安装依赖：`npm install`
+- 启动开发：`npm run dev`（默认 5173，端口占用时自动顺延）
+- 生产构建：`npm run build`
+- 本地预览：`npm run preview`
 
-```bash
+## 实际依赖
 
-npm createvite@latestyour-project-name----templatevue
+- `vue@^3.5.24`
+- `element-plus@^2.11.7`
+- `echarts@^6.0.0`
+- `@icon-park/vue-next@^1.4.2`
+- 开发：`@vitejs/plugin-vue@^6.0.1`、`rolldown-vite@7.2.2`
 
-cd your-project-name
-
-```
-
-### 2. 安装依赖
-
-```bash
-
-# 安装 pnpm
-
-npm install-gpnpm
-
-
-# 核心依赖
-
-pnpm addvue@^3.3.9vue-router@^4.2.5pinia@^2.1.7
-
-pnpm addelement-plus@^2.4.3@element-plus/icons-vue@^2.3.1
-
-pnpm addaxiospinia-plugin-persistedstate
-
-
-# 开发依赖
-
-pnpm add-D@vitejs/plugin-vuesasseslintprettier
-
-pnpm add-Deslint-plugin-vueeslint-config-prettier
+## 目录结构（当前）
 
 ```
-
-### 3. 创建目录结构
-
-```bash
-
-mkdir -psrc/{api,assets/{images,icons},components,layout,router,store/modules,utils,views/{login,dashboard,system}}
-
-```
-
-## 🛠 技术栈
-
--**框架**: Vue 3.3.9 (Composition API + `<script setup>`)
-
--**UI 库**: Element Plus 2.4.3
-
--**构建**: Vite 5.2.12 | **包管理**: pnpm
-
--**状态**: Pinia + 持久化 | **路由**: Vue Router
-
--**样式**: SCSS | **代码规范**: ESLint + Prettier
-
-## 📁 项目结构
-
-```
-
 src/
-
-├── api/                    # API接口管理
-
-├── assets/                 # 静态资源
-
-├── components/             # 全局组件
-
-├── layout/                 # 布局组件
-
-├── router/                 # 路由配置
-
-├── store/modules/          # 状态管理
-
-├── utils/                  # 工具函数
-
-├── views/                  # 页面组件
-
-│   ├── login/             # 登录
-
-│   ├── dashboard/         # 仪表板
-
-│   └── system/            # 系统管理
-
-├── App.vue                # 根组件
-
-└── main.js                # 入口文件
-
+├── assets/
+│   └── dashboard.css
+├── components/
+│   ├── WatchList.vue
+│   ├── RegularList.vue
+│   ├── KpiGrid.vue
+│   ├── CompletionLine.vue
+│   └── ResearchChat.vue
+├── App.vue
+└── main.js
 ```
 
-## 💻 开发规范
+## 代码规范
 
-### 组件结构
+- 统一使用 `<script setup>`
+- 统一使用 Element Plus 组件
+- 样式集中在 `src/assets/dashboard.css`，通过 CSS 变量控制主题（`--bg`、`--card`、`--text`、`--muted`、`--border`、`--accent`）
+- 组件命名：PascalCase 文件名（如 `WatchList.vue`），函数以 `handle` 前缀命名事件处理
+- 不提交密钥与敏感信息到仓库
 
-```vue
+## UI 规范（关键控件）
 
-<template>
+- 搜索框（右侧 AI 区域）：
+  - 圆角输入：`.search-container .el-input__wrapper { border-radius: 22px; border: 2px solid var(--accent) }`
+  - 右侧圆形按钮：`.search-button { width: 28px; height: 28px; border-radius: 50% }`
+  - 输入右内边距：`.el-input__inner { padding-right: 40px }`
+- KPI 卡片：使用 Element Plus `el-card`，压缩卡片内部 padding：`.kpi .el-card__body { padding: 6px 10px }`
+- 全局隐藏滚动条但保留滚动：
+  - WebKit：`::-webkit-scrollbar { width: 0; height: 0 }`
+  - Firefox：`* { scrollbar-width: none }`
 
-  <div class="container">
+## 图表规范（ECharts）
 
-    <el-button @click="handleClick">按钮</el-button>
+- 折线颜色：
+  - 实际线绿色：`#15803d`，区域渐变上色：`rgba(21,128,61,0.45)` → `rgba(187,247,208,0.05)`
+  - 计划线灰色：`#64748b`
+- SparkLine 缩略图：`symbolSize: 3`、`lineStyle.width: 2`、`smooth: true`
+- 统一坐标轴隐藏（列表缩略图）与网格边距收紧（`grid`）
 
-  </div>
+## 数据与状态
 
-</template>
+- 目前使用本地 mock 数据与生成方法（如 `generateSeriesData()`）
+- 需要接入真实 API 时：
+  - 新增 `axios`（或 `fetch` 封装）到 `dependencies`
+  - 在 `src/api/` 创建模块，统一返回 `{ code, data, message }` 格式
+  - 异步调用需带错误提示与 loading 状态（`ElMessage`、`v-loading`）
 
+## 构建与预览
 
-<script setup>
+- 开发：`npm run dev`，如 5173 占用则自动改为 5174 等
+- 构建：`npm run build` 生成 `dist/`
+- 预览：`npm run preview` 启动本地静态预览
 
-import { ref, onMounted } from 'vue';
+## 命名规范
 
-import { ElMessage } from 'element-plus';
+- 文件：PascalCase（如 `CompletionLine.vue`）
+- 变量：camelCase（如 `isSearchActive`）
+- 常量：UPPER_SNAKE_CASE（如 `API_BASE_URL`）
+- 函数：以 `handle` 前缀（如 `handleSelectProject`）
 
+## 必备配置（当前）
 
-// 响应式数据
+- `src/main.js`：
 
-const loading = ref(false);
+```javascript
+import { createApp } from 'vue'
+import ElementPlus from 'element-plus'
+import 'element-plus/dist/index.css'
+import { install } from '@icon-park/vue-next/es/all'
+import '@icon-park/vue-next/styles/index.css'
+import './assets/dashboard.css'
+import App from './App.vue'
 
-
-// 方法
-
-async function handleClick() {
-
-  try {
-
-    loading.value = true;
-
-    // 业务逻辑
-
-    ElMessage.success('操作成功');
-
-  } catch (error) {
-
-    ElMessage.error('操作失败');
-
-  } finally {
-
-    loading.value = false;
-
-  }
-
-}
-
-
-onMounted(() => {
-
-  // 初始化
-
-});
-
-</script>
-
-
-<style scoped>
-
-.container {
-
-  padding: 16px;
-
-}
-
-</style>
-
+const app = createApp(App)
+app.use(ElementPlus)
+// 图标全局注册：推荐直接调用 install(app)
+install(app)
+app.mount('#app')
 ```
+
+## Icon 使用规范（IconPark）
+
+- 官方站点：`https://iconpark.oceanengine.com/official`
+- 按需导入（首选）：`import { Home } from '@icon-park/vue-next'` → `<home theme="outline" size="16" />`
+- 全局注册（当前项目已启用）：`install(app)` 默认前缀 `icon` → `<icon-search />`
+- 模板命名小写中划线；脚本导入使用帕斯卡命名（`dislike-two` → `DislikeTwo`）
+- 与 Element Plus 搭配时 `size` 跟随字号，`fill` 默认 `currentColor`
+
+## 安全与密钥
+
+- 不在仓库中存储任何密钥或账号信息
+- 如需使用 Gemini CLI：设置环境变量 `GEMINI_API_KEY`（Windows PowerShell）
+  - 临时：`$env:GEMINI_API_KEY = 'YOUR_KEY'`
+  - 用户级持久化：`setx GEMINI_API_KEY "YOUR_KEY"`
+  - 机器级（管理员）：`setx GEMINI_API_KEY "YOUR_KEY" /M`
+- 若后续改用 Google 登录或 Vertex AI，需要清理或覆盖该变量，并设置 `GOOGLE_CLOUD_PROJECT` 与 `GOOGLE_CLOUD_LOCATION`
+
+## 开发流程（当前项目）
+
+1. 页面开发：在 `src/components/` 或 `src/App.vue` 扩展
+2. 样式扩展：统一改动 `src/assets/dashboard.css`
+3. 图表调整：`SparkLine.vue`、`CompletionLine.vue` 按本规范颜色与样式
+4. 交互增强：使用 Element Plus 的反馈控件（`ElMessage`、`ElMessageBox`）
+5. 验证：通过 `npm run dev` 预览并检查样式与交互
+
 
 ### API 调用
 
@@ -683,15 +643,6 @@ exportdefault service;
 
 ---
 
-## 🤖 Cursor AI 使用指南
-
-### 如何使用
-
-1. 将 `CURSOR_DEV_PROMPT.md` 文件内容复制到 Cursor 的对话框中作为上下文
-2. 根据具体开发需求，参考以下场景使用对应的提示词
-
-### 常用开发场景
-
 #### 1. 开发新页面
 
 ```
@@ -899,7 +850,7 @@ import { FolderOpen as IconFolderOpen } from '@icon-park/vue-next'
 
 ### 示例清单（常用图标）
 
-- `search`（搜索）、`home`（首页）、`setting`（设置）、`config`（配置）
+- `search`（搜索）、`home`（首页）、`setting`（设置）、`config`（配置）·
 - `bookmark`（书签）、`camera`（相机）、`equalizer`（均衡器）、`radar`（雷达）
 - `zoom-in` / `zoom-out`（缩放）、`refresh`（刷新）、`save`（保存）
 
