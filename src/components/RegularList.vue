@@ -14,7 +14,7 @@
         </el-button>
       </div>
     </div>
-    <div class="wl-columns" v-if="isExpanded && !collapsed">
+    <div class="wl-columns" v-if="isExpanded && !collapsed && regulars && regulars.length">
       <div>列名1</div>
       <div>列名2</div>
       <div>列名3</div>

@@ -23,7 +23,7 @@
         </el-button>
       </div>
     </div>
-    <div class="wl-columns" v-if="isExpanded && !isSearchVisible">
+    <div class="wl-columns" v-if="isExpanded && !isSearchVisible && projects && projects.length">
       <div>列名1</div>
       <div>列名2</div>
       <div>列名3</div>
