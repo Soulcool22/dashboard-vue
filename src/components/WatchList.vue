@@ -174,6 +174,11 @@ function medianValue(p){ const a=(p.series||[]).slice().sort((x,y)=>x-y); if(!a.
   margin-top: 6px;
   font-size: 12px;
   color: var(--muted);
+  position: sticky;
+  top: 44px;
+  z-index: 1;
+  background: var(--card);
+  border-bottom: 1px solid var(--border);
 }
 .wl-columns > div { display: flex; align-items: center; justify-content: center; }
 
