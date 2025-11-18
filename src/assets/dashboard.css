@@ -17,7 +17,7 @@ body { margin: 0; color: var(--text); background: var(--bg); font-family: -apple
 header { padding: 12px 16px; border-bottom: 1px solid var(--border); background: var(--card); color: var(--accent); }
 .brand { display: flex; align-items: center; gap: 10px; font-weight: 600; }
 .badge { background: #eef3ff; color: var(--accent); border-radius: 999px; padding: 4px 10px; font-size: 12px; }
-.layout { display: grid; grid-template-columns: var(--layout-left) minmax(600px, 1fr) var(--layout-right); gap: 0; background: var(--card); }
+.layout { display: grid; grid-template-columns: var(--layout-left) minmax(600px, 1fr) var(--layout-right); gap: 0; background: var(--card); transition: grid-template-columns 0.3s ease; }
 .layout.left-expanded { grid-template-columns: 1fr var(--layout-right); }
 .layout.left-expanded .col-middle { display: none; }
 .col { display: flex; flex-direction: column; gap: 2px; }

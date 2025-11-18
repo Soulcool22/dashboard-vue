@@ -4,7 +4,7 @@
       <div>
         <h3>关注项目</h3>
         <div class="sub">各项目进度兑现指数趋势<InfoIcon tip="进度兑现指数：衡量项目按照计划的兑现程度，范围 0-100，越高越好，当前基准线为80。
-        *计算规则*：指数 = Σ(管理层指标标准化评分 × 权重占比)，
+        *计算规则*：指数 = Σ(管理层指标标准化评分 × 权重占比)
         其中各管理层指标以及权重占比：
         开工准点率：10%
         完工准点率：20%
@@ -18,7 +18,7 @@
         <el-button class="expand-btn" type="text" @click="toggleSearch" ref="searchToggleRef">
           <svg width="20" height="20" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M21 38C30.3888 38 38 30.3888 38 21C38 11.6112 30.3888 4 21 4C11.6112 4 4 11.6112 4 21C4 30.3888 11.6112 38 21 38Z" stroke="#7f8081" stroke-width="4" stroke-linejoin="round"/><path d="M33.2218 33.2218L41.7071 41.7071" stroke="#7f8081" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </el-button>
-        <el-button class="expand-btn" type="text" @click="$emit('toggle-left')" :class="{ 'is-expanded': isExpanded }">
+        <el-button class="expand-btn" type="text" @click="$emit('toggle-left')" :class="{ 'active': isExpanded }">
           <svg width="20" height="20" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M22 42H6V26" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><path d="M26 6H42V22" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </el-button>
       </div>
@@ -220,13 +220,5 @@ function deltaText(p){ const a=p.series; const prev=a[a.length-2]; const last=a[
 
 .search-container :deep(.el-input__inner) {
   padding-right: 35px;
-}
-
-/* --- Animation for Expand Button --- */
-.expand-btn svg {
-  transition: transform 0.3s ease;
-}
-.expand-btn.is-expanded svg {
-  transform: rotate(180deg);
 }
 </style>
