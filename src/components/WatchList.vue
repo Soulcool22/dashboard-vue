@@ -191,6 +191,7 @@ function medianValue(p){ const a=(p.series||[]).slice().sort((x,y)=>x-y); if(!a.
   padding: 4px 12px;
   font-size: 11px;
   font-weight: 600;
+  font-family: 'Noto Sans SC', 'PingFang SC', 'Microsoft YaHei', 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
   color: var(--muted);
   border-top: 1px solid var(--border);
   background: var(--card);
