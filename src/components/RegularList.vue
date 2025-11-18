@@ -92,7 +92,7 @@ function medianValue(p){ const a=(p.series||[]).slice().sort((x,y)=>x-y); if(!a.
 .wl-sample { text-align: center; }
 .wl-columns {
   display: grid;
-  grid-template-columns: repeat(8, 1fr);
+  grid-template-columns: 120px 80px repeat(5, 1fr) 1fr;
   align-items: center;
   gap: 6px;
   padding: 0 12px;
@@ -121,7 +121,7 @@ function medianValue(p){ const a=(p.series||[]).slice().sort((x,y)=>x-y); if(!a.
 
 /* --- Expanded Layout Logic --- */
 .is-expanded .wl-columns {
-  grid-template-columns: repeat(8, 1fr); /* 8 equal columns when expanded */
+  grid-template-columns: 120px 80px repeat(5, 1fr) 1fr; /* match item columns */
 }
 .is-expanded .wl-item {
   grid-template-columns: 120px 80px repeat(5, 1fr) 1fr; /* info | sparkline | 5 samples | right */
