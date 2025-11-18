@@ -5,7 +5,6 @@
       <div v-for="item in updates" :key="item.text" class="update-item">
         <div class="update-content">
           <p class="update-text">{{ item.text }}</p>
-          <p class="update-time">{{ item.time }}</p>
         </div>
       </div>
     </div>
@@ -44,28 +43,25 @@ const updates = ref([
 }
 
 .updates-list {
-  counter-reset: updates-counter; /* Add CSS counter */
+  /* No special properties needed here anymore */
 }
-
 
 .update-item {
   position: relative;
-  padding-left: 28px; /* Space for the number */
-  padding-bottom: 16px;
+  padding-left: 20px; /* Space for the bullet */
+  padding-bottom: 12px;
 }
 
 .update-item::before {
-  counter-increment: updates-counter;
-  content: counter(updates-counter);
+  content: '•';
   position: absolute;
   left: 0;
-  top: 2px;
+  top: -1px;
   width: 20px;
-  height: 20px;
-  font-size: 13px;
+  font-size: 20px;
   font-weight: 600;
-  color: var(--muted);
-  text-align: right;
+  color: var(--accent);
+  text-align: left;
 }
 
 .update-content {
@@ -75,14 +71,9 @@ const updates = ref([
 .update-text {
   font-size: 13px;
   color: var(--text);
-  margin: 0 0 4px 0;
+  margin: 0;
   line-height: 1.5;
 }
-
-.update-time {
-  font-size: 12px;
-  color: var(--muted);
-  margin: 0;
-}
 </style>
+
 
