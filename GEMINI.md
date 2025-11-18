@@ -1,5 +1,7 @@
 # 项目开发规则（dashboard-vue 定制版）
 
+## 你的所有回答使用中文
+
 ## 概述
 
 - 当前项目为单页数据看板：Vue 3 + Element Plus + ECharts + IconPark
@@ -129,7 +131,6 @@ app.mount('#app')
 3. 图表调整：`SparkLine.vue`、`CompletionLine.vue` 按本规范颜色与样式
 4. 交互增强：使用 Element Plus 的反馈控件（`ElMessage`、`ElMessageBox`）
 5. 验证：通过 `npm run dev` 预览并检查样式与交互
-
 
 ### API 调用
 
