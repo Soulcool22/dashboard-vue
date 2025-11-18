@@ -51,7 +51,10 @@
         <!-- View Content -->
         <template v-if="!isCompanyView">
           <KpiGrid :kpis="kpis" />
-          <CompletionLine />
+          <div class="chart-card-container">
+            <CompletionLine />
+          </div>
+          <ProjectUpdates class="updates-container" />
         </template>
         <div v-else class="company-view-placeholder">
           <!-- Company-level content will go here -->
@@ -69,9 +72,10 @@ import RegularList from './components/RegularList.vue'
 import KpiGrid from './components/KpiGrid.vue'
 import CompletionLine from './components/CompletionLine.vue'
 import ResearchChat from './components/ResearchChat.vue'
+import ProjectUpdates from './components/ProjectUpdates.vue'
 import { Home } from '@icon-park/vue-next'
 
-const expandedLeft = ref(false)
+const expandedLeft = ref(true)
 const regularCollapsed = ref(false)
 function toggleLeftExpand(){ expandedLeft.value = !expandedLeft.value }
 
