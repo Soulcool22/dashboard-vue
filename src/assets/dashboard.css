@@ -120,3 +120,4 @@ header { padding: 12px 16px; border-bottom: 1px solid var(--border); background:
 .wl-card .wl-sub { font-size: 11px; font-weight: 400; color: var(--muted); }
 .rl-card .wl-name { font-size: 12px; font-weight: 500; }
 .rl-card .wl-sub { font-size: 11px; font-weight: 400; color: var(--muted); }
+.wl-name, .wl-sub { font-family: 'Noto Sans SC', 'PingFang SC', 'Microsoft YaHei', 'Segoe UI', 'Helvetica Neue', Arial, sans-serif; letter-spacing: 0.1px; }
