@@ -15,8 +15,8 @@
         逾期解决率：7.5%" /></div>
       </div>
       <div class="header-actions">
-        <el-button class="expand-btn" type="text" @click="toggleSearch" ref="searchToggleRef">
-          <svg width="20" height="20" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M21 38C30.3888 38 38 30.3888 38 21C38 11.6112 30.3888 4 21 4C11.6112 4 4 11.6112 4 21C4 30.3888 11.6112 38 21 38Z" stroke="#7f8081" stroke-width="4" stroke-linejoin="round"/><path d="M33.2218 33.2218L41.7071 41.7071" stroke="#7f8081" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <el-button class="expand-btn" :class="{ 'active': isSearchVisible }" type="text" @click="toggleSearch" ref="searchToggleRef">
+          <svg width="20" height="20" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M21 38C30.3888 38 38 30.3888 38 21C38 11.6112 30.3888 4 21 4C11.6112 4 4 11.6112 4 21C4 30.3888 11.6112 38 21 38Z" stroke="currentColor" stroke-width="4" stroke-linejoin="round"/><path d="M33.2218 33.2218L41.7071 41.7071" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </el-button>
         <el-button class="expand-btn" type="text" @click="$emit('toggle-left')" :class="{ 'active': isExpanded }">
           <svg width="20" height="20" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M22 42H6V26" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><path d="M26 6H42V22" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -24,14 +24,14 @@
       </div>
     </div>
     <div class="wl-columns" v-if="isExpanded && !isSearchVisible && projects && projects.length">
-      <div>列名1</div>
-      <div>列名2</div>
-      <div>列名3</div>
-      <div>列名4</div>
-      <div>列名5</div>
+      <div>项目名称</div>
+      <div>进度缩略图</div>
+      <div>关键里程碑达成率</div>
+      <div>开工准点率</div>
+      <div>完工准点率</div>
       <div>列名6</div>
       <div>列名7</div>
-      <div>列名8</div>
+      <div>进度兑现指数</div>
     </div>
     <div class="wl-list" v-if="!isSearchVisible">
       <div 

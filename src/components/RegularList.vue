@@ -15,14 +15,14 @@
       </div>
     </div>
     <div class="wl-columns" v-if="isExpanded && !collapsed && regulars && regulars.length">
-      <div>列名1</div>
-      <div>列名2</div>
-      <div>列名3</div>
-      <div>列名4</div>
-      <div>列名5</div>
+      <div>项目名称</div>
+      <div>进度缩略图</div>
+      <div>关键里程碑达成率</div>
+      <div>开工准点率</div>
+      <div>完工准点率</div>
       <div>列名6</div>
       <div>列名7</div>
-      <div>列名8</div>
+      <div>进度兑现指数</div>
     </div>
     <div class="wl-list" v-show="!collapsed">
       <div 
