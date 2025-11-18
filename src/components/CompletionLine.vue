@@ -47,17 +47,74 @@ function render(){
     planRates.push(Math.min(1, Math.max(0, rate + variation)))
   }
   const actualRates = []
+  let tempRates = []
   for(let i=0;i<days;i++){
     const planRate = planRates[i]
-    let actualRate
-    if(i < 10){ const lag = 0.20 + 0.10 * (1 - i/10) + Math.sin(i * 0.5) * 0.03; actualRate = Math.max(0.02, planRate - lag) }
-    else if(i < 25){ const cu = 0.15 - 0.08 * ((i - 10)/15) + Math.sin(i * 0.4) * 0.04; actualRate = Math.min(1, planRate - cu) }
-    else if(i < 45){ const ph = Math.sin((i - 25) * 0.25) * 0.08; const tr = -0.05 + 0.15 * ((i - 25)/20); actualRate = Math.min(1, Math.max(0.1, planRate + tr + ph)) }
-    else if(i < 65){ const sg = 0.08 + 0.12 * ((i - 45)/20) + Math.sin(i * 0.35) * 0.05; actualRate = Math.min(1, planRate + sg) }
-    else { const mt = 0.15 + Math.sin((i - 65) * 0.4) * 0.06; actualRate = Math.min(1, planRate + mt) }
-    if(i > 0 && actualRate < actualRates[i-1] * 0.85){ actualRate = actualRates[i-1] * 0.92 }
-    actualRates.push(Math.max(0.01, actualRate))
+    let actualRate;
+    const phase1 = Math.sin(i * 0.25) * 0.1;
+    const phase2 = Math.sin(i * 0.8) * 0.06;
+    const noise = (Math.random() - 0.5) * 0.04;
+    let deviation = phase1 + phase2 + noise;
+
+    if (i > 10 && i < 20) deviation -= 0.12;
+    if (i > 35 && i < 45) deviation += 0.12;
+    if (i > 50 && i < 55) deviation -= 0.08;
+
+    actualRate = planRate + deviation;
+    tempRates.push(actualRate);
   }
+
+  for(let i=0; i<tempRates.length; i++) {
+    let currentVal = Math.min(1, Math.max(0.01, tempRates[i]));
+    if (i > 0 && currentVal < actualRates[i-1]) {
+      currentVal = actualRates[i-1];
+    }
+    actualRates.push(currentVal);
+  }
+
+  // Find all intersection points and classify them
+  const blueMarkPoints = []; // Actual overtakes Plan (good)
+  const redMarkPoints = [];  // Plan overtakes Actual (bad)
+  const threshold = 0.015; // How close the lines need to be to be considered an intersection
+  let debounce = 0; // Simple debounce to avoid marking multiple points for one crossover
+
+  for (let i = 1; i < days; i++) {
+    if (debounce > 0) {
+      debounce--;
+      continue;
+    }
+
+    const diff = Math.abs(actualRates[i] - planRates[i]);
+
+    if (diff < threshold) {
+      const prevDiffSign = Math.sign(actualRates[i-1] - planRates[i-1]);
+      const nextDiffSign = Math.sign(actualRates[i+1] - planRates[i+1]);
+
+      // Check if it's a real crossover
+      if (prevDiffSign !== nextDiffSign) {
+        // Actual was behind, now is ahead -> Blue
+        if (prevDiffSign < 0) {
+          blueMarkPoints.push({ name: '领先', coord: [i, actualRates[i]] });
+        } 
+        // Actual was ahead, now is behind -> Red
+        else {
+          redMarkPoints.push({ name: '落后', coord: [i, actualRates[i]] });
+        }
+        debounce = 5; // Wait for 5 data points before marking another intersection
+      }
+    }
+  }
+
+  const baseMarkPointStyle = {
+    symbol: 'circle',
+    symbolSize: 10,
+    label: { show: false },
+    itemStyle: {
+      color: '#fff',
+      borderWidth: 2
+    }
+  };
+
   const axisLine = '#d1d5db'
   const axisLabel = '#6b7280'
   const gridLine = '#f3f4f6'
@@ -75,7 +132,20 @@ function render(){
     dataZoom: [{ type: 'inside', start: 0, end: 100, filterMode: 'none' }],
     tooltip: { trigger: 'axis', formatter: function(params){ let a=null, p=null; params.forEach(x=>{ if(x.seriesName==='实际任务完成率') a=x.value; if(x.seriesName==='计划完成率') p=x.value; }); const lines = params.map(x=> x.seriesName + ': ' + (x.value*100).toFixed(1) + '%'); const diff = (a!=null && p!=null) ? ((a-p)*100).toFixed(1) + '%' : ''; const s = diff ? (parseFloat(diff)>0 ? '超前' : parseFloat(diff)<0 ? '落后' : '持平') : ''; return params[0].axisValue + '<br/>' + lines.join('<br/>') + (diff?('<br/>差异(实-计): ' + diff + ' ' + s):''); } },
     series: [
-      { name: '实际任务完成率', type: 'line', data: actualRates, smooth: true, showSymbol: false, lineStyle: { width: lineWidthActual, color: actualLine }, emphasis: { focus: 'series', lineStyle: { width: lineWidthActual + 1 } }, areaStyle: { color: new echarts.graphic.LinearGradient(0,0,0,1,[ { offset: 0, color: areaStart }, { offset: 1, color: areaEnd } ]) } },
+      { 
+        name: '实际任务完成率', 
+        type: 'line', 
+        data: actualRates, 
+        smooth: true, 
+        showSymbol: false, 
+        lineStyle: { width: lineWidthActual, color: actualLine }, 
+        emphasis: { focus: 'series', lineStyle: { width: lineWidthActual + 1 } }, 
+        areaStyle: { color: new echarts.graphic.LinearGradient(0,0,0,1,[ { offset: 0, color: areaStart }, { offset: 1, color: areaEnd } ]) },
+        markPoint: [
+          { ...baseMarkPointStyle, data: blueMarkPoints, itemStyle: { ...baseMarkPointStyle.itemStyle, borderColor: '#3a7afe' } },
+          { ...baseMarkPointStyle, data: redMarkPoints, itemStyle: { ...baseMarkPointStyle.itemStyle, borderColor: '#f87171' } }
+        ]
+      },
       { name: '计划完成率', type: 'line', data: planRates, smooth: true, showSymbol: false, lineStyle: { width: lineWidthPlan + 0.5, color: planLine, type: 'dashed', opacity: 1, dashOffset: 0, cap: 'round' } }
     ]
   })
