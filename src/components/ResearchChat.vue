@@ -34,31 +34,43 @@
 
     <!-- Fixed Footer (Input Area) -->
     <div class="ai-dialogue-section">
-      <transition name="slide-up">
-        <div class="suggestions-panel" v-show="showSuggestions">
-          <div class="suggestions-title">猜你想问</div>
+      <div class="search-complex-wrapper" :class="{ 'is-expanded': showSuggestions }">
+        <!-- Suggestions Area (Upward Extension) -->
+        <div class="suggestions-area" v-show="showSuggestions">
+          <div class="suggestions-header">
+            <span class="title">猜你想问</span>
+            <el-button link size="small" class="close-suggestions" @click="showSuggestions = false">
+              <icon-down theme="outline" size="16" fill="#999"/>
+            </el-button>
+          </div>
           <div class="suggestions-list">
             <div 
               v-for="(item, index) in suggestions" 
               :key="index" 
               class="suggestion-item"
-              @click="selectSuggestion(item)"
+              @click.stop="selectSuggestion(item)"
+              @mousedown.prevent
             >
               {{ item }}
             </div>
           </div>
         </div>
-      </transition>
-      <div class="search-container">
-        <el-input 
-          v-model="searchQuery" 
-          placeholder="输入问题，例如：下周会有需求新增吗？" 
-          clearable
-          @focus="showSuggestions = true"
-          @blur="handleBlur"
-          @keyup.enter="onSearch"
-        ></el-input>
-        <el-button class="search-button" type="primary" @click="onSearch">↑</el-button>
+
+        <!-- Input Area -->
+        <div class="input-area">
+          <el-input 
+            v-model="searchQuery" 
+            placeholder="输入问题，例如：下周会有需求新增吗？" 
+            clearable
+            @focus="showSuggestions = true"
+            @blur="handleBlur"
+            @keyup.enter="onSearch"
+            class="transparent-input"
+          ></el-input>
+          <button class="search-btn-round" @click="onSearch">
+            <icon-up theme="outline" size="20" fill="#fff" :strokeWidth="3"/>
+          </button>
+        </div>
       </div>
     </div>
   </section>
@@ -66,6 +78,7 @@
 
 <script setup>
 import { ref, nextTick } from 'vue'
+import { Up, Down } from '@icon-park/vue-next'
 
 const searchQuery = ref('')
 const messages = ref([])
@@ -74,9 +87,7 @@ const chatContainer = ref(null)
 
 const suggestions = ref([
   '下周会有需求新增吗？',
-  '当前项目的风险点有哪些？',
-  '如何提升关键里程碑达成率？',
-  '资源分配是否合理？'
+  '当前项目的风险点有哪些？'
 ])
 
 function scrollToBottom() {
@@ -112,6 +123,7 @@ function selectSuggestion(text) {
 }
 
 function handleBlur() {
+  // Delay hiding to allow click events on suggestions to register
   setTimeout(() => {
     showSuggestions.value = false;
   }, 200);
@@ -126,7 +138,6 @@ function handleBlur() {
   height: 100%; 
   overflow: hidden; 
   font-family: 'Noto Sans SC', 'PingFang SC', 'Microsoft YaHei', 'Segoe UI', 'Helvetica Neue', Arial, sans-serif; 
-  /* Removed background-color to inherit from parent (white/card) */
 }
 
 /* Header */
@@ -153,7 +164,6 @@ function handleBlur() {
   font-weight: 600; 
   color: var(--text); 
   margin: 0;
-  /* Reset global styles to ensure no border */
   border: none;
   padding: 0;
   background: transparent;
@@ -163,7 +173,7 @@ function handleBlur() {
 .chat-content {
   flex-grow: 1;
   overflow-y: auto;
-  padding: 0; /* Padding moved to inner containers for better spacing control */
+  padding: 0;
   display: flex;
   flex-direction: column;
   scrollbar-width: thin; 
@@ -223,88 +233,123 @@ function handleBlur() {
   box-shadow: 0 1px 2px rgba(0,0,0,0.05);
 }
 
-/* AI Bubble Style */
 .msg.ai .msg-content {
-  background: #f3f4f6; /* Light gray for AI to differentiate from white background */
+  background: #f3f4f6;
   color: var(--text);
   border-top-left-radius: 2px;
 }
 
-/* User Bubble Style */
 .msg.user .msg-content {
   background: var(--accent);
   color: #fff;
   border-top-right-radius: 2px;
 }
 
-/* Footer (Search) */
+/* Footer (Search) - New Integrated Design */
 .ai-dialogue-section { 
   flex-shrink: 0;
   position: relative; 
-  background: var(--card); /* Ensure it matches */
-  padding: 10px 12px; 
+  background: var(--card); 
+  padding: 12px 16px; 
   border-top: none; 
 }
 
-.search-container {
+.search-complex-wrapper {
+  border: 2px solid var(--accent);
+  border-radius: 26px; /* Matches the look of a rounded input */
+  background: var(--bg);
   display: flex;
-  gap: 8px;
+  flex-direction: column;
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.5, 1);
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(88, 158, 248, 0.1);
 }
 
-/* Suggestions Panel */
-.suggestions-panel {
-  position: absolute;
-  bottom: 100%;
-  left: 12px;
-  right: 12px;
+.search-complex-wrapper.is-expanded {
+  border-radius: 16px; /* Slightly less rounded when expanded to look like a card */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  background: #fff;
+}
+
+/* Suggestions Area */
+.suggestions-area {
+  padding: 12px 16px 4px 16px;
+  border-bottom: 1px solid var(--border);
   background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.08);
-  padding: 12px;
-  margin-bottom: 8px;
-  z-index: 10;
 }
 
-.suggestions-title {
-  font-size: 12px;
-  color: var(--muted);
+.suggestions-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   margin-bottom: 8px;
+}
+
+.suggestions-header .title {
+  font-size: 12px;
   font-weight: 600;
+  color: var(--muted);
 }
 
 .suggestions-list {
   display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
+  flex-direction: column;
+  gap: 6px;
+  padding-bottom: 8px;
 }
 
 .suggestion-item {
-  background: var(--bg);
-  border: 1px solid var(--border);
-  border-radius: 16px;
-  padding: 6px 12px;
-  font-size: 12px;
+  font-size: 13px;
   color: var(--text);
+  padding: 8px 12px;
+  border-radius: 8px;
   cursor: pointer;
-  transition: all 0.2s ease;
+  background: var(--bg);
+  transition: background 0.2s;
 }
 
 .suggestion-item:hover {
   background: var(--accent-soft);
-  border-color: var(--accent);
   color: var(--accent);
 }
 
-/* Transition Animation */
-.slide-up-enter-active,
-.slide-up-leave-active {
-  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.5, 1);
+/* Input Area */
+.input-area {
+  display: flex;
+  align-items: center;
+  padding: 4px 6px 4px 16px; /* Right padding smaller for button */
+  background: transparent;
 }
 
-.slide-up-enter-from,
-.slide-up-leave-to {
-  opacity: 0;
-  transform: translateY(10px);
+/* Deep selector to override Element Plus Input styles */
+:deep(.transparent-input .el-input__wrapper) {
+  box-shadow: none !important;
+  border: none !important;
+  background: transparent !important;
+  padding: 0;
+}
+
+:deep(.transparent-input .el-input__inner) {
+  border: none !important;
+  height: 36px;
+}
+
+.search-btn-round {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--accent);
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.2s;
+  flex-shrink: 0;
+  margin-left: 8px;
+}
+
+.search-btn-round:hover {
+  background: #4080e0; /* Darker accent */
 }
 </style>
