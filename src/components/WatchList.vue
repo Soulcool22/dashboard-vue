@@ -16,10 +16,11 @@
       </div>
       <div class="header-actions">
         <el-button class="expand-btn" :class="{ 'active': isSearchVisible }" type="text" @click="toggleSearch" ref="searchToggleRef">
-          <svg width="20" height="20" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M21 38C30.3888 38 38 30.3888 38 21C38 11.6112 30.3888 4 21 4C11.6112 4 4 11.6112 4 21C4 30.3888 11.6112 38 21 38Z" stroke="currentColor" stroke-width="4" stroke-linejoin="round"/><path d="M33.2218 33.2218L41.7071 41.7071" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <Search theme="outline" size="18" :strokeWidth="4" />
         </el-button>
         <el-button class="expand-btn" type="text" @click="$emit('toggle-left')" :class="{ 'active': isExpanded }">
-          <svg width="20" height="20" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M22 42H6V26" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><path d="M26 6H42V22" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <MenuFold v-if="isExpanded" theme="outline" size="18" :strokeWidth="4" />
+          <MenuUnfold v-else theme="outline" size="18" :strokeWidth="4" />
         </el-button>
       </div>
       <div class="wl-columns" v-if="isExpanded && !isSearchVisible && projects && projects.length > 0">
@@ -93,8 +94,8 @@
           @click="$emit('select-project', p)"
         >
           <div class="wl-status" @click.stop="$emit('toggle-watch-status', p)">
-            <check-small v-if="p.isWatched" theme="two-tone" size="24" :fill="['#7f8081' ,'#ffffff']"/>
-            <plus v-else theme="two-tone" size="24" :fill="['#7f8081' ,'#ffffff']"/>
+            <CheckSmall v-if="p.isWatched" theme="two-tone" size="24" :fill="['#7f8081' ,'#ffffff']"/>
+            <Plus v-else theme="two-tone" size="24" :fill="['#7f8081' ,'#ffffff']"/>
           </div>
           <div class="wl-info">
             <div class="wl-name">{{ p.name }}</div>
@@ -112,7 +113,7 @@
 import { ref, watch, nextTick } from 'vue'
 import SparkLine from './SparkLine.vue'
 import InfoIcon from './InfoIcon.vue'
-import { Plus, CheckSmall, Search } from '@icon-park/vue-next'
+import { Plus, CheckSmall, Search, MenuUnfold, MenuFold } from '@icon-park/vue-next'
 
 const props = defineProps({
   projects: { type: Array, default: () => [] },

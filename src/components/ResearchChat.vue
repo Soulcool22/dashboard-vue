@@ -1,13 +1,19 @@
 <template>
   <section class="col col-right">
-    <div class="research-section">
+    <!-- Fixed Header -->
+    <div class="header-section">
       <h3 class="research-title">项目洞察</h3>
+    </div>
+
+    <!-- Scrollable Content Area -->
+    <div class="chat-content" ref="chatContainer">
+      <!-- Initial Analysis Report (Restored Original Style) -->
       <div class="research-content">
         <p><strong>项目整体表现分析：</strong>本期里程碑总体提升 2.3 个百分点，主要得益于采购环节的优化和生产效率的提升。其中，设计阶段完成率达到 85%，超出预期目标。</p>
         <p><strong>关键风险识别：</strong>采购环节平均延迟 3 天，预计影响兑现指数 0.8pp。主要原因为供应商交付周期延长，建议加强供应链缓冲管理，建立多供应商体系以降低单一依赖风险。</p>
         <p><strong>资源分配建议：</strong>当前人力投入与产出比为 1:1.2，建议将 20% 的资源重新分配至关键路径项目。跨部门协同效率提升 15%，但仍需加强评审机制。</p>
         <p><strong>下阶段重点关注：</strong></p>
-        <ul style="margin: 8px 0; padding-left: 20px;">
+        <ul>
           <li>供应链稳定性监控与应急预案制定</li>
           <li>关键里程碑节点的前置风险评估</li>
           <li>跨部门协同流程的标准化与优化</li>
@@ -15,12 +21,18 @@
         </ul>
         <p><strong>预测与建议：</strong>基于当前趋势分析，预计下期兑现指数将达到 82-85%，建议提前部署缓冲资源，确保关键节点按时交付。</p>
       </div>
-      <div class="dialogue-list" v-if="messages.length > 0">
+
+      <!-- Dialogue History -->
+      <div class="dialogue-container" v-if="messages.length > 0">
         <div v-for="(msg, index) in messages" :key="index" :class="['msg', msg.role]">
-          <strong>{{ msg.role === 'user' ? '我' : 'AI' }}:</strong> {{ msg.text }}
+          <div class="msg-content">
+            {{ msg.text }}
+          </div>
         </div>
       </div>
     </div>
+
+    <!-- Fixed Footer (Input Area) -->
     <div class="ai-dialogue-section">
       <transition name="slide-up">
         <div class="suggestions-panel" v-show="showSuggestions">
@@ -53,11 +65,12 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, nextTick } from 'vue'
 
 const searchQuery = ref('')
 const messages = ref([])
 const showSuggestions = ref(false)
+const chatContainer = ref(null)
 
 const suggestions = ref([
   '下周会有需求新增吗？',
@@ -66,14 +79,25 @@ const suggestions = ref([
   '资源分配是否合理？'
 ])
 
-function pushMsg(text, role){ messages.value.push({ text, role }) }
+function scrollToBottom() {
+  nextTick(() => {
+    if (chatContainer.value) {
+      chatContainer.value.scrollTop = chatContainer.value.scrollHeight
+    }
+  })
+}
+
+function pushMsg(text, role){ 
+  messages.value.push({ text, role })
+  scrollToBottom()
+}
 
 function onSearch(){ 
   const v = (searchQuery.value || '').trim(); 
   if(!v) return; 
   pushMsg(v, 'user'); 
   searchQuery.value = ''; 
-  showSuggestions.value = false; // Hide suggestions on search
+  showSuggestions.value = false; 
   setTimeout(() => reply(v), 400) 
 }
 
@@ -88,7 +112,6 @@ function selectSuggestion(text) {
 }
 
 function handleBlur() {
-  // Delay hiding to allow click event on suggestion item to trigger first
   setTimeout(() => {
     showSuggestions.value = false;
   }, 200);
@@ -96,42 +119,128 @@ function handleBlur() {
 </script>
 
 <style scoped>
+/* Main Layout */
 .col-right { 
   display: flex; 
   flex-direction: column; 
-  overflow-y: auto; /* Enable scrolling on the main container */
+  height: 100%; 
+  overflow: hidden; 
   font-family: 'Noto Sans SC', 'PingFang SC', 'Microsoft YaHei', 'Segoe UI', 'Helvetica Neue', Arial, sans-serif; 
-  scrollbar-width: none; /* Hide scrollbar for Firefox */
-}
-.col-right::-webkit-scrollbar { display: none; /* Hide scrollbar for Chrome/Safari */ }
-
-.research-section { 
-  /* Remove flex-grow and overflow-y to let it expand naturally */
-  display: flex; 
-  flex-direction: column; 
+  /* Removed background-color to inherit from parent (white/card) */
 }
 
-.research-title { font-family: 'Noto Sans SC', 'PingFang SC', 'Microsoft YaHei', 'Segoe UI', 'Helvetica Neue', Arial, sans-serif; font-size: 16px; font-weight: 600; color: var(--text); margin: 0; padding: 10px 16px; }
-.research-content { font-size: 13px; line-height: 1.7; color: var(--text); margin-bottom: 12px; padding: 0 16px; letter-spacing: 0.1px; }
+/* Header */
+.header-section {
+  flex-shrink: 0;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--border);
+  background: var(--card); /* Changed from var(--bg) to var(--card) to match */
+  z-index: 5;
+}
+
+.research-title { 
+  font-size: 16px; 
+  font-weight: 600; 
+  color: var(--text); 
+  margin: 0; 
+}
+
+/* Scrollable Middle Area */
+.chat-content {
+  flex-grow: 1;
+  overflow-y: auto;
+  padding: 0; /* Padding moved to inner containers for better spacing control */
+  display: flex;
+  flex-direction: column;
+  scrollbar-width: thin; 
+  scrollbar-color: var(--border) transparent;
+}
+
+.chat-content::-webkit-scrollbar {
+  width: 6px;
+}
+.chat-content::-webkit-scrollbar-thumb {
+  background-color: var(--border);
+  border-radius: 3px;
+}
+
+/* Original Research Content Styles */
+.research-content { 
+  font-size: 13px; 
+  line-height: 1.7; 
+  color: var(--text); 
+  padding: 16px; 
+  letter-spacing: 0.1px; 
+}
 .research-content p { margin: 0 0 1.1em; }
+.research-content p:last-child { margin-bottom: 0; }
 .research-content strong { font-weight: 600; color: #1c2538; }
 .research-content ul { list-style: none; padding-left: 0; margin: 1.1em 0; }
 .research-content li { padding-left: 1.2em; position: relative; margin-bottom: 0.6em; }
 .research-content li::before { content: '■'; position: absolute; left: 0; top: 0.1em; font-size: 0.7em; color: var(--accent); }
-.col-right .search-container :deep(.el-input__inner) { font-size: 12.5px; }
+
+/* Dialogue/Message Styles */
+.dialogue-container {
+  padding: 0 16px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.msg {
+  display: flex;
+  max-width: 100%;
+}
+
+.msg.user {
+  justify-content: flex-end;
+}
+
+.msg.ai {
+  justify-content: flex-start;
+}
+
+.msg-content {
+  padding: 10px 14px;
+  border-radius: 12px;
+  font-size: 13px;
+  line-height: 1.6;
+  max-width: 85%;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+}
+
+/* AI Bubble Style */
+.msg.ai .msg-content {
+  background: #f3f4f6; /* Light gray for AI to differentiate from white background */
+  color: var(--text);
+  border-top-left-radius: 2px;
+}
+
+/* User Bubble Style */
+.msg.user .msg-content {
+  background: var(--accent);
+  color: #fff;
+  border-top-right-radius: 2px;
+}
+
+/* Footer (Search) */
+.ai-dialogue-section { 
+  flex-shrink: 0;
+  position: relative; 
+  background: var(--card); /* Ensure it matches */
+  padding: 10px 12px; 
+  border-top: 1px solid var(--border); 
+}
+
+.search-container {
+  display: flex;
+  gap: 8px;
+}
 
 /* Suggestions Panel */
-.ai-dialogue-section { 
-  position: relative; 
-  background: var(--card); 
-  padding: 10px 12px; 
-  /* Remove margin-top: auto to let it follow content */
-  /* Remove border-top for unified look */
-  border-top: none; 
-}
 .suggestions-panel {
   position: absolute;
-  bottom: 100%; /* Position above the input container */
+  bottom: 100%;
   left: 12px;
   right: 12px;
   background: var(--card);
@@ -184,15 +293,4 @@ function handleBlur() {
   opacity: 0;
   transform: translateY(10px);
 }
-
-.dialogue-list {
-  margin: 0 16px 12px;
-  padding: 10px;
-  background: var(--bg);
-  border-radius: 8px;
-  font-size: 13px;
-}
-.msg { margin-bottom: 6px; }
-.msg.user { color: var(--accent); }
-.msg.ai { color: var(--text); }
 </style>
