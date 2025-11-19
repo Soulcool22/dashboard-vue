@@ -70,7 +70,10 @@
           <!-- Company-level content will go here -->
         </div>
       </section>
-      <ResearchChat />
+      <ResearchChat 
+        :is-company-view="isCompanyView"
+        :current-project="selectedProject"
+      />
     </main>
   </div>
 </template>

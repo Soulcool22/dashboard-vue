@@ -2,25 +2,13 @@
   <section class="col col-right">
     <!-- Fixed Header -->
     <div class="header-section">
-      <h3 class="research-title">项目洞察</h3>
+      <h3 class="research-title">{{ titleText }}</h3>
     </div>
 
     <!-- Scrollable Content Area -->
     <div class="chat-content" ref="chatContainer">
-      <!-- Initial Analysis Report (Restored Original Style) -->
-      <div class="research-content">
-        <p><strong>项目整体表现分析：</strong>本期里程碑总体提升 2.3 个百分点，主要得益于采购环节的优化和生产效率的提升。其中，设计阶段完成率达到 85%，超出预期目标。</p>
-        <p><strong>资金回款分析：</strong>当前回款进度收回80%，采购环节平均延迟 3 天，预计影响兑现指数 0.8pp。主要原因为供应商交付周期延长，建议加强供应链缓冲管理，建立多供应商体系以降低单一依赖风险。</p>
-        <p><strong>人力资源分析：</strong>当前人力投入与产出比为 1:1.2，建议将 20% 的资源重新分配至关键路径项目。跨部门协同效率提升 15%，但仍需加强评审机制。</p>
-        <p><strong>下阶段重点关注：</strong></p>
-        <ul>
-          <li>供应链稳定性监控与应急预案制定</li>
-          <li>关键里程碑节点的前置风险评估</li>
-          <li>跨部门协同流程的标准化与优化</li>
-          <li>资源配置的动态调整机制建立</li>
-        </ul>
-        <p><strong>预测与建议：</strong>基于当前趋势分析，预计下期兑现指数将达到 82-85%，建议提前部署缓冲资源，确保关键节点按时交付。</p>
-      </div>
+      <!-- Initial Analysis Report (Dynamic Content) -->
+      <div class="research-content" v-html="currentAnalysis"></div>
 
       <!-- Dialogue History -->
       <div class="dialogue-container" v-if="messages.length > 0">
@@ -45,7 +33,7 @@
           </div>
           <div class="suggestions-list">
             <div 
-              v-for="(item, index) in suggestions" 
+              v-for="(item, index) in currentSuggestions" 
               :key="index" 
               class="suggestion-item"
               @click.stop="selectSuggestion(item)"
@@ -60,7 +48,7 @@
         <div class="input-area">
           <el-input 
             v-model="searchQuery" 
-            placeholder="输入问题，例如：下周会有需求新增吗？" 
+            placeholder="输入问题..." 
             clearable
             @focus="showSuggestions = true"
             @blur="handleBlur"
@@ -77,18 +65,81 @@
 </template>
 
 <script setup>
-import { ref, nextTick } from 'vue'
+import { ref, nextTick, computed, watch, onMounted } from 'vue'
 import { Up, Down } from '@icon-park/vue-next'
+
+const props = defineProps({
+  isCompanyView: { type: Boolean, default: true },
+  currentProject: { type: Object, default: null }
+})
 
 const searchQuery = ref('')
 const messages = ref([])
 const showSuggestions = ref(false)
 const chatContainer = ref(null)
 
-const suggestions = ref([
+// --- Data Templates ---
+
+const companySuggestions = [
   '下周会有需求新增吗？',
-  '当前项目的风险点有哪些？'
-])
+  '当前整体项目的风险点有哪些？'
+]
+
+const projectSuggestions = [
+  '该项目本周进度正常吗？',
+  '关键里程碑是否有延期风险？'
+]
+
+const companyAnalysis = `
+  <p><strong>公司整体运营分析：</strong>本季度所有在建项目总体进度偏差可控，平均完成率 78%。供应链稳定性有所提升，但跨项目资源调度仍存在 15% 的效率损耗。</p>
+  <p><strong>关键风险识别：</strong>3 个项目处于黄色预警状态，主要集中在交付验收环节。建议加强公司级质量管控团队的介入。</p>
+  <p><strong>资源概览：</strong>设计资源利用率 92%，开发资源利用率 88%。</p>
+`
+
+function getProjectAnalysis(projectName) {
+  return `
+    <p><strong>[${projectName}] 项目周报摘要：</strong></p>
+    <p><strong>当前状态：</strong>项目处于快速开发阶段，核心模块完成度 65%。本周解决了 2 个关键阻塞性 Bug。</p>
+    <p><strong>风险预警：</strong>第三方接口联调进度滞后 2 天，可能影响下周的集成测试。</p>
+    <p><strong>下周计划：</strong>完成支付模块的联调，并启动第一轮全链路压测。</p>
+  `
+}
+
+// --- Reactive State based on Context ---
+
+const currentSuggestions = ref([...companySuggestions])
+const currentAnalysis = ref(companyAnalysis)
+
+const titleText = computed(() => {
+  if (props.isCompanyView) {
+    return '项目总体洞察'
+  } else if (props.currentProject) {
+    return `项目洞察：${props.currentProject.name}`
+  }
+  return '项目洞察'
+})
+
+// --- Context Switching Logic ---
+
+function initContext() {
+  messages.value = [] // Clear history on switch
+  if (props.isCompanyView) {
+    currentAnalysis.value = companyAnalysis
+    currentSuggestions.value = [...companySuggestions]
+  } else {
+    const pName = props.currentProject ? props.currentProject.name : '未知项目'
+    currentAnalysis.value = getProjectAnalysis(pName)
+    currentSuggestions.value = [...projectSuggestions]
+  }
+}
+
+// Watch for context changes
+watch([() => props.isCompanyView, () => props.currentProject], () => {
+  initContext()
+}, { immediate: true })
+
+
+// --- Chat Logic ---
 
 function scrollToBottom() {
   nextTick(() => {
@@ -112,8 +163,9 @@ function onSearch(){
   setTimeout(() => reply(v), 400) 
 }
 
-function reply(text){ 
-  const r = '占位回复：已记录问题“' + text + '”，将在接入真实数据后提供分析。'; 
+function reply(text){
+  const prefix = props.isCompanyView ? '【公司级回复】' : '【项目级回复】';
+  const r = prefix + '已收到关于“' + text + '”的提问。系统正在分析相关数据...'; 
   pushMsg(r, 'ai') 
 }
 
