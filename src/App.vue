@@ -92,12 +92,14 @@ function toggleLeftExpand(){ expandedLeft.value = !expandedLeft.value }
 const projects = ref([])
 function generateSeriesData() {
   const data = [];
-  let value = 70 + Math.random() * 15;
+  let value = 60 + Math.random() * 20; // Initial start between 60-80
   for (let i = 0; i < 16; i++) {
     data.push(Math.round(value));
-    value += (Math.random() - 0.5) * 5;
-    if (value > 95) value = 95;
-    if (value < 55) value = 55;
+    // Significantly increased volatility: +/- 7.5 change per step
+    value += (Math.random() - 0.5) * 15; 
+    // Clamping
+    if (value > 98) value = 98;
+    if (value < 30) value = 30;
   }
   return data;
 }
