@@ -21,6 +21,12 @@ const updates = ref([
   { time: '11:10', text: '赵六 提交了代码变更，修复了登录页面的一个显示BUG。' },
   { time: '09:30', text: '系统自动构建成功，版本号 v2.0.1-beta。' },
   { time: '09:00', text: '张三 创建了新的任务「数据库性能优化」。' },
+  { time: '17:20', text: '王五 发起了「Q4季度规划」的代码评审请求。' },
+  { time: '16:15', text: '测试团队 报告了「支付网关」模块的 2 个新缺陷。' },
+  { time: '13:45', text: '运维组 完成了生产环境的服务器安全补丁更新。' },
+  { time: '10:30', text: '产品经理 更新了「移动端适配」的需求规格说明书。' },
+  { time: '09:15', text: '前端组 启动了「组件库重构」的技术方案讨论。' },
+  { time: '08:50', text: '李四 评论了任务「首页加载速度优化」：建议使用懒加载。' },
 ])
 </script>
 
@@ -43,7 +49,9 @@ const updates = ref([
 }
 
 .updates-list {
-  /* No special properties needed here anymore */
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0 32px; /* Space between columns */
 }
 
 .update-item {

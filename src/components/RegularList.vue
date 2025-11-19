@@ -13,7 +13,7 @@
       </div>
       <div class="wl-columns" v-if="isExpanded && !collapsed && regulars && regulars.length > 0">
         <div>项目名称</div>
-        <div>进度缩略图</div>
+        <div>进度指数缩略图</div>
         <div>关键里程碑达成率</div>
         <div>开工准点率</div>
         <div>完工准点率</div>
