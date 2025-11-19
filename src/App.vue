@@ -34,7 +34,7 @@
         <div class="nav-bar">
           <span 
             class="nav-item" 
-            :class="{ 'link': !isCompanyView }"
+            :class="{ 'link': !isCompanyView, 'all-active': isCompanyView }"
             @click="!isCompanyView ? showCompanyView() : null"
           >全部</span>
           <template v-if="!isCompanyView && selectedProject">
@@ -209,7 +209,7 @@ function deltaText(p){ if(!p || !p.series || p.series.length < 2) return ''; con
 
 /* Breadcrumb Nav Styles */
 .nav-bar {
-  padding: 4px 0 12px 0;
+  padding: 2px 0 6px 0;
   font-size: 13px;
   color: var(--muted);
   display: flex;
@@ -218,6 +218,7 @@ function deltaText(p){ if(!p || !p.series || p.series.length < 2) return ''; con
 .nav-item {
   transition: color 0.2s;
   font-family: 'Noto Sans SC', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  line-height: 1.2;
 }
 .nav-item.link {
   cursor: pointer;
@@ -228,6 +229,10 @@ function deltaText(p){ if(!p || !p.series || p.series.length < 2) return ''; con
 .nav-item.active {
   color: var(--text);
   font-weight: 500;
+}
+.nav-item.all-active {
+  color: var(--text);
+  font-weight: 600;
 }
 .nav-divider {
   margin: 0 8px;
