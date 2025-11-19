@@ -273,16 +273,18 @@ function handleBlur() {
 
 /* Suggestions Area */
 .suggestions-area {
-  padding: 12px 16px 4px 16px;
+  padding: 8px 12px 4px 12px;
   border-bottom: 1px solid var(--border);
   background: var(--card);
+  max-height: 120px;
+  overflow-y: auto;
 }
 
 .suggestions-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 8px;
+  margin-bottom: 6px;
 }
 
 .suggestions-header .title {
@@ -294,14 +296,14 @@ function handleBlur() {
 .suggestions-list {
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  padding-bottom: 8px;
+  gap: 4px;
+  padding-bottom: 4px;
 }
 
 .suggestion-item {
   font-size: 13px;
   color: var(--text);
-  padding: 8px 12px;
+  padding: 6px 10px;
   border-radius: 8px;
   cursor: pointer;
   background: var(--bg);
