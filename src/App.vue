@@ -54,7 +54,7 @@
             </div>
           </div>
           <div v-else class="project-info">
-            <div class="project-main-title">公司运营总览</div>
+            <div class="project-main-title">全部</div>
           </div>
         </div>
 
@@ -84,7 +84,7 @@ import CompletionLine from './components/CompletionLine.vue'
 import ResearchChat from './components/ResearchChat.vue'
 import ProjectUpdates from './components/ProjectUpdates.vue'
 
-const expandedLeft = ref(true)
+const expandedLeft = ref(false)
 const regularCollapsed = ref(false)
 function toggleLeftExpand(){ expandedLeft.value = !expandedLeft.value }
 
