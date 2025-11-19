@@ -1,6 +1,9 @@
 <template>
   <div class="updates-card">
-    <h3 class="updates-title">今日动态</h3>
+    <h3 class="updates-title">
+      今日动态
+      <span class="daily-badge">日更</span>
+    </h3>
     <div class="updates-list">
       <div v-for="item in updates" :key="item.text" class="update-item">
         <div class="update-content">
@@ -46,6 +49,20 @@ const updates = ref([
   top: 0;
   background: var(--card);
   z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.daily-badge {
+  font-size: 11px;
+  font-weight: normal;
+  color: var(--accent);
+  background-color: var(--accent-soft);
+  padding: 1.5px 7px;
+  border-radius: 4px;
+  line-height: 1.4;
+  border: 1px solid rgba(88, 158, 248, 0.2);
 }
 
 .updates-list {
