@@ -60,9 +60,9 @@
 
         <!-- View Content -->
         <template v-if="!isCompanyView">
-          <KpiGrid :kpis="kpis" />
+          <KpiGrid :kpis="kpis" @select-kpi="handleSelectKpi" />
           <div class="chart-card-container">
-            <CompletionLine />
+            <CompletionLine :selected-kpi="selectedKpi" />
           </div>
           <ProjectUpdates class="updates-container" />
         </template>
@@ -123,6 +123,11 @@ const kpis = ref([
 // --- View State ---
 const isCompanyView = ref(true) // Show company view by default
 const selectedProject = ref(null)
+const selectedKpi = ref('任务完成率')
+
+function handleSelectKpi(kpi) {
+  selectedKpi.value = kpi.title
+}
 
 // --- Search and Filter Logic ---
 const searchQuery = ref('')
@@ -165,6 +170,7 @@ onMounted(() => {
 function handleSelectProject(project) {
   selectedProject.value = project
   isCompanyView.value = false // Switch to project view
+  selectedKpi.value = '任务完成率' // Reset KPI selection on project switch
 }
 function showCompanyView() {
   isCompanyView.value = true
@@ -174,7 +180,8 @@ function showCompanyView() {
 // Helper functions
 function lastValue(p){ if(!p || !p.series) return 0; const a=p.series; return a[a.length-1] }
 function deltaSign(p){ if(!p || !p.series || p.series.length < 2) return 0; const a=p.series; return a[a.length-1]-a[a.length-2] }
-function deltaText(p){ if(!p || !p.series || p.series.length < 2) return ''; const a=p.series; const prev=a[a.length-2]; const last=a[a.length-1]; const pct=prev?(((last-prev)/prev)*100).toFixed(2):'0.00'; const s=(last-prev)>=0?'↑ ':'↓ '; return s+Math.abs(pct)+'%' }
+function deltaText(p){ if(!p || !p.series || p.series.length < 2) return ''; const a=p.series; const prev=a[a.length-2]; const last=a[a.length-1]; const pct=prev?(((last-prev)/prev)*100).toFixed(2):'0.00'; const s=(last-prev)>=0?'↑ ':'↓ '; return s+Math.abs(pct)+'%'
+}
 </script>
 
 <style scoped>
