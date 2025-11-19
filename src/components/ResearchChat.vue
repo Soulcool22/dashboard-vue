@@ -133,16 +133,30 @@ function handleBlur() {
 .header-section {
   flex-shrink: 0;
   padding: 10px 16px;
-  border-bottom: 1px solid var(--border);
-  background: var(--card); /* Changed from var(--bg) to var(--card) to match */
+  background: var(--card);
   z-index: 5;
+  position: relative;
+}
+
+.header-section::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 5%;
+  width: 90%;
+  height: 1px;
+  background-color: var(--border);
 }
 
 .research-title { 
   font-size: 16px; 
   font-weight: 600; 
   color: var(--text); 
-  margin: 0; 
+  margin: 0;
+  /* Reset global styles to ensure no border */
+  border: none;
+  padding: 0;
+  background: transparent;
 }
 
 /* Scrollable Middle Area */
@@ -229,7 +243,7 @@ function handleBlur() {
   position: relative; 
   background: var(--card); /* Ensure it matches */
   padding: 10px 12px; 
-  border-top: 1px solid var(--border); 
+  border-top: none; 
 }
 
 .search-container {
