@@ -29,8 +29,8 @@
         <div>关键里程碑达成率</div>
         <div>开工准点率</div>
         <div>完工准点率</div>
-        <div>列名6</div>
-        <div>列名7</div>
+        <div>平均工期比</div>
+        <div>逾期趋势比</div>
         <div>进度兑现指数</div>
       </div>
     </div>
