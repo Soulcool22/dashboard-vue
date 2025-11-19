@@ -30,6 +30,19 @@
         />
       </section>
       <section class="col col-middle">
+        <!-- Navigation Breadcrumb -->
+        <div class="nav-bar">
+          <span 
+            class="nav-item" 
+            :class="{ 'link': !isCompanyView }"
+            @click="!isCompanyView ? showCompanyView() : null"
+          >全部</span>
+          <template v-if="!isCompanyView && selectedProject">
+            <span class="nav-divider">/</span>
+            <span class="nav-item active">{{ selectedProject.name }}</span>
+          </template>
+        </div>
+
         <!-- View Title Bar -->
         <div class="middle-header">
           <div v-if="!isCompanyView && selectedProject" class="project-info">
@@ -43,9 +56,6 @@
           <div v-else class="project-info">
             <div class="project-main-title">公司运营总览</div>
           </div>
-          <el-button v-if="!isCompanyView" @click="showCompanyView" class="home-btn" text>
-            <home theme="outline" size="22" fill="#999595" :strokeWidth="3" strokeLinejoin="bevel"/>
-          </el-button>
         </div>
 
         <!-- View Content -->
@@ -73,7 +83,6 @@ import KpiGrid from './components/KpiGrid.vue'
 import CompletionLine from './components/CompletionLine.vue'
 import ResearchChat from './components/ResearchChat.vue'
 import ProjectUpdates from './components/ProjectUpdates.vue'
-import { Home } from '@icon-park/vue-next'
 
 const expandedLeft = ref(true)
 const regularCollapsed = ref(false)
@@ -197,4 +206,31 @@ function deltaText(p){ if(!p || !p.series || p.series.length < 2) return ''; con
 .project-index-change { font-size: 12px; }
 .project-index-change.up { color: var(--up); }
 .project-index-change.down { color: var(--down); }
+
+/* Breadcrumb Nav Styles */
+.nav-bar {
+  padding: 4px 0 12px 0;
+  font-size: 13px;
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+}
+.nav-item {
+  transition: color 0.2s;
+  font-family: 'Noto Sans SC', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+}
+.nav-item.link {
+  cursor: pointer;
+}
+.nav-item.link:hover {
+  color: var(--accent);
+}
+.nav-item.active {
+  color: var(--text);
+  font-weight: 500;
+}
+.nav-divider {
+  margin: 0 8px;
+  color: var(--border);
+}
 </style>
