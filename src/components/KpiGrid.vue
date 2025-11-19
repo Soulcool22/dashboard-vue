@@ -4,7 +4,7 @@
       <el-card 
         v-for="(k, ki) in kpis" 
         :key="'kpi-'+ki" 
-        class="kpi" 
+        :class="['kpi', selectedKpi === k.title ? 'active' : '']" 
         shadow="never"
         @click="handleClick(k)"
       >
@@ -17,7 +17,7 @@
 </template>
 
 <script setup>
-const props = defineProps({ kpis: { type: Array, default: () => [] } })
+const props = defineProps({ kpis: { type: Array, default: () => [] }, selectedKpi: { type: String, default: '任务完成率' } })
 const emit = defineEmits(['select-kpi'])
 
 function handleClick(kpi) {
@@ -30,4 +30,5 @@ function kDeltaText(k){ const s = k.up ? '↑ ' : '↓ '; const p = k.title === 
 <style scoped>
 .kpi { cursor: pointer; transition: all 0.2s; }
 .kpi:hover { border-color: var(--accent); box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+.kpi.active { border-color: var(--accent); border-width: 1.5px; box-shadow: 0 2px 10px rgba(58,122,254,0.12); }
 </style>

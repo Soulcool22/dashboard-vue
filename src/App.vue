@@ -60,7 +60,7 @@
 
         <!-- View Content -->
         <template v-if="!isCompanyView">
-          <KpiGrid :kpis="kpis" @select-kpi="handleSelectKpi" />
+          <KpiGrid :kpis="kpis" :selected-kpi="selectedKpi" @select-kpi="handleSelectKpi" />
           <div class="chart-card-container">
             <CompletionLine :selected-kpi="selectedKpi" />
           </div>
