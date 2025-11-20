@@ -1,6 +1,6 @@
 <template>
   <div class="card chart-card">
-    <h3>{{ selectedKpi }}（折线）</h3>
+    <h3>{{ isOverview ? '项目整体趋势' : selectedKpi + '（折线）' }}</h3>
     <div ref="el" class="chart-box"></div>
   </div>
 </template>
@@ -10,16 +10,18 @@ import { onMounted, onBeforeUnmount, ref, watch } from 'vue'
 import * as echarts from 'echarts'
 
 const props = defineProps({
-  selectedKpi: { type: String, default: '任务完成率' }
+  selectedKpi: { type: String, default: '任务完成率' },
+  isOverview: { type: Boolean, default: false },
+  projectSeries: { type: Array, default: () => [] }
 })
 
 const el = ref(null)
 let chart = null
 let resizeObserver = null
 
-watch(() => props.selectedKpi, () => {
+watch(() => [props.selectedKpi, props.isOverview, props.projectSeries], () => {
   render()
-})
+}, { deep: true })
 
 onMounted(()=>{
   render()
@@ -85,29 +87,61 @@ function render(){
     chart = echarts.init(el.value)
   }
   
+  let actualRates = []
+  let planRates = []
+  let dates = []
   const days = 60
+  
   function fmt(d){ const m = (d.getMonth()+1).toString().padStart(2,'0'); const day = d.getDate().toString().padStart(2,'0'); return m+'-'+day }
-  const dates = []; const base = new Date(); base.setHours(0,0,0,0)
-  for(let i=days-1;i>=0;i--){ const d = new Date(base); d.setDate(base.getDate()-i); dates.push(fmt(d)) }
+  const base = new Date(); base.setHours(0,0,0,0)
 
-  const { planRates, actualRates } = generateMockData(props.selectedKpi)
+  if (props.isOverview && props.projectSeries && props.projectSeries.length > 0) {
+    // Overview Mode: Use project series data
+    // Normalize 0-100 to 0-1
+    actualRates = props.projectSeries.map(v => v / 100)
+    const len = actualRates.length
+    
+    // Generate dates for the series length
+    for(let i=len-1;i>=0;i--){ const d = new Date(base); d.setDate(base.getDate()-i); dates.push(fmt(d)) }
+
+    // Generate a simple "Plan" line for visual comparison (linear from start to end of actual)
+    if (len > 0) {
+       const start = actualRates[0]
+       const end = actualRates[len - 1]
+       // Make plan slightly smoother/idealized version of actual trend
+       for(let i=0; i<len; i++) {
+         const t = i / (len - 1 || 1)
+         planRates.push(start + (end - start) * t)
+       }
+    }
+
+  } else {
+    // KPI Mode: Use mock data generation
+    for(let i=days-1;i>=0;i--){ const d = new Date(base); d.setDate(base.getDate()-i); dates.push(fmt(d)) }
+    const data = generateMockData(props.selectedKpi)
+    actualRates = data.actualRates
+    planRates = data.planRates
+  }
 
   // Simple, robust logic to find the FIRST intersection
   const markPointData = [];
-  for (let i = 1; i < days; i++) {
-    if (actualRates[i-1] < planRates[i-1] && actualRates[i] >= planRates[i]) {
-      markPointData.push({
-        name: '交点',
-        coord: [i, actualRates[i]],
-        itemStyle: {
-          color: '#fff',
-          borderColor: '#3a7afe',
-          borderWidth: 2
-        },
-        label: { show: false }
-      });
-      break; 
-    }
+  // Only show intersection point if we have enough data and it's not a trivial match
+  if (actualRates.length > 1) {
+      for (let i = 1; i < actualRates.length; i++) {
+        if (actualRates[i-1] < planRates[i-1] && actualRates[i] >= planRates[i]) {
+          markPointData.push({
+            name: '交点',
+            coord: [i, actualRates[i]],
+            itemStyle: {
+              color: '#fff',
+              borderColor: '#3a7afe',
+              borderWidth: 2
+            },
+            label: { show: false }
+          });
+          break; 
+        }
+      }
   }
 
   const axisLine = '#d1d5db'
@@ -120,16 +154,32 @@ function render(){
   const lineWidthActual = 2
   const lineWidthPlan = 2
   
+  const seriesNameActual = props.isOverview ? '实际进度' : '实际' + props.selectedKpi
+  const seriesNamePlan = props.isOverview ? '计划进度' : '计划' + props.selectedKpi
+
   const option = {
     legend: { top: 0, right: 16, itemGap: 10, icon: 'rect', itemWidth: 14, itemHeight: 2 },
     grid: { left: 50, right: 24, top: 40, bottom: 28 },
     xAxis: { type: 'category', data: dates, boundaryGap: false, axisLine: { lineStyle: { color: axisLine } }, axisTick: { show: false }, axisLabel: { color: axisLabel } },
     yAxis: { type: 'value', min: 0, max: 1, axisLine: { show: false }, splitLine: { show: true, lineStyle: { color: gridLine } }, axisLabel: { color: axisLabel, formatter: v => Math.round(v*100)+'%' } },
     dataZoom: [{ type: 'inside', start: 0, end: 100, filterMode: 'none' }],
-    tooltip: { trigger: 'axis', formatter: function(params){ let a=null, p=null; params.forEach(x=>{ if(x.seriesName==='实际'+props.selectedKpi) a=x.value; if(x.seriesName==='计划'+props.selectedKpi) p=x.value; }); const lines = params.map(x=> x.seriesName + ': ' + (x.value*100).toFixed(1) + '%'); const diff = (a!=null && p!=null) ? ((a-p)*100).toFixed(1) + '%' : ''; const s = diff ? (parseFloat(diff)>0 ? '超前' : parseFloat(diff)<0 ? '落后' : '持平') : ''; return params[0].axisValue + '<br/>' + lines.join('<br/>') + (diff?('<br/>差异(实-计): ' + diff + ' ' + s):''); } },
+    tooltip: { 
+        trigger: 'axis', 
+        formatter: function(params){ 
+            let a=null, p=null; 
+            params.forEach(x=>{ 
+                if(x.seriesName===seriesNameActual) a=x.value; 
+                if(x.seriesName===seriesNamePlan) p=x.value; 
+            }); 
+            const lines = params.map(x=> x.seriesName + ': ' + (x.value*100).toFixed(1) + '%'); 
+            const diff = (a!=null && p!=null) ? ((a-p)*100).toFixed(1) + '%' : ''; 
+            const s = diff ? (parseFloat(diff)>0 ? '超前' : parseFloat(diff)<0 ? '落后' : '持平') : ''; 
+            return params[0].axisValue + '<br/>' + lines.join('<br/>') + (diff?('<br/>差异(实-计): ' + diff + ' ' + s):''); 
+        } 
+    },
     series: [
       { 
-        name: '实际' + props.selectedKpi, 
+        name: seriesNameActual, 
         type: 'line', 
         data: actualRates, 
         smooth: true, 
@@ -143,7 +193,7 @@ function render(){
           data: markPointData
         }
       },
-      { name: '计划' + props.selectedKpi, type: 'line', data: planRates, smooth: true, showSymbol: false, lineStyle: { width: lineWidthPlan + 0.5, color: planLine, type: 'dashed', opacity: 1, dashOffset: 0, cap: 'round' } }
+      { name: seriesNamePlan, type: 'line', data: planRates, smooth: true, showSymbol: false, lineStyle: { width: lineWidthPlan + 0.5, color: planLine, type: 'dashed', opacity: 1, dashOffset: 0, cap: 'round' } }
     ]
   }
   

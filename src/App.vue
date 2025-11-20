@@ -62,7 +62,11 @@
         <template v-if="!isCompanyView">
           <KpiGrid :kpis="kpis" :selected-kpi="selectedKpi" @select-kpi="handleSelectKpi" />
           <div class="chart-card-container">
-            <CompletionLine :selected-kpi="selectedKpi" />
+            <CompletionLine 
+              :selected-kpi="selectedKpi" 
+              :is-overview="isChartOverview"
+              :project-series="selectedProject?.series"
+            />
           </div>
           <ProjectUpdates class="updates-container" />
         </template>
@@ -127,11 +131,13 @@ const kpis = ref([
 
 // --- View State ---
 const isCompanyView = ref(true) // Show company view by default
+const isChartOverview = ref(false) // Track if we are in project overview mode (enlarged sparkline)
 const selectedProject = ref(null)
 const selectedKpi = ref('任务完成率')
 
 function handleSelectKpi(kpi) {
   selectedKpi.value = kpi.title
+  isChartOverview.value = false // Switch to specific KPI view
 }
 
 // --- Search and Filter Logic ---
@@ -175,11 +181,13 @@ onMounted(() => {
 function handleSelectProject(project) {
   selectedProject.value = project
   isCompanyView.value = false // Switch to project view
-  selectedKpi.value = '任务完成率' // Reset KPI selection on project switch
+  isChartOverview.value = true // Default to overview mode when project is selected
+  selectedKpi.value = '任务完成率' // Reset KPI selection (though hidden in overview)
 }
 function showCompanyView() {
   isCompanyView.value = true
   selectedProject.value = null // Deselect project
+  isChartOverview.value = false
 }
 
 // Helper functions
