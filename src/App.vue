@@ -133,7 +133,7 @@ const kpis = ref([
 const isCompanyView = ref(true) // Show company view by default
 const isChartOverview = ref(false) // Track if we are in project overview mode (enlarged sparkline)
 const selectedProject = ref(null)
-const selectedKpi = ref('任务完成率')
+const selectedKpi = ref(null) // null when in overview mode, KPI title when in KPI mode
 
 function handleSelectKpi(kpi) {
   selectedKpi.value = kpi.title
@@ -182,7 +182,7 @@ function handleSelectProject(project) {
   selectedProject.value = project
   isCompanyView.value = false // Switch to project view
   isChartOverview.value = true // Default to overview mode when project is selected
-  selectedKpi.value = '任务完成率' // Reset KPI selection (though hidden in overview)
+  selectedKpi.value = null // No KPI selected in overview mode (prevents highlight)
 }
 function showCompanyView() {
   isCompanyView.value = true

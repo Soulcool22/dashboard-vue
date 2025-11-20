@@ -1,6 +1,6 @@
 <template>
   <div class="card chart-card">
-    <h3>{{ isOverview ? '项目整体趋势' : selectedKpi + '（折线）' }}</h3>
+    <h3>{{ isOverview ? '进度兑现指数（折线）' : (selectedKpi ? selectedKpi + '（折线）' : '（折线）') }}</h3>
     <div ref="el" class="chart-box"></div>
   </div>
 </template>
@@ -10,7 +10,7 @@ import { onMounted, onBeforeUnmount, ref, watch } from 'vue'
 import * as echarts from 'echarts'
 
 const props = defineProps({
-  selectedKpi: { type: String, default: '任务完成率' },
+  selectedKpi: { type: String, default: null },
   isOverview: { type: Boolean, default: false },
   projectSeries: { type: Array, default: () => [] }
 })
@@ -89,20 +89,16 @@ function render(){
   
   let actualRates = []
   let planRates = []
-  let dates = []
-  const days = 60
+  let xAxisData = []
   
-  function fmt(d){ const m = (d.getMonth()+1).toString().padStart(2,'0'); const day = d.getDate().toString().padStart(2,'0'); return m+'-'+day }
-  const base = new Date(); base.setHours(0,0,0,0)
-
   if (props.isOverview && props.projectSeries && props.projectSeries.length > 0) {
     // Overview Mode: Use project series data
     // Normalize 0-100 to 0-1
     actualRates = props.projectSeries.map(v => v / 100)
     const len = actualRates.length
     
-    // Generate dates for the series length
-    for(let i=len-1;i>=0;i--){ const d = new Date(base); d.setDate(base.getDate()-i); dates.push(fmt(d)) }
+    // Use indices as x-axis labels for consistency with sparkline
+    xAxisData = Array.from({ length: len }, (_, i) => String(i + 1))
 
     // Generate a simple "Plan" line for visual comparison (linear from start to end of actual)
     if (len > 0) {
@@ -117,8 +113,12 @@ function render(){
 
   } else {
     // KPI Mode: Use mock data generation
-    for(let i=days-1;i>=0;i--){ const d = new Date(base); d.setDate(base.getDate()-i); dates.push(fmt(d)) }
-    const data = generateMockData(props.selectedKpi)
+    const days = 60
+    function fmt(d){ const m = (d.getMonth()+1).toString().padStart(2,'0'); const day = d.getDate().toString().padStart(2,'0'); return m+'-'+day }
+    const base = new Date(); base.setHours(0,0,0,0)
+    for(let i=days-1;i>=0;i--){ const d = new Date(base); d.setDate(base.getDate()-i); xAxisData.push(fmt(d)) }
+    
+    const data = generateMockData(props.selectedKpi || '任务完成率')
     actualRates = data.actualRates
     planRates = data.planRates
   }
@@ -154,13 +154,13 @@ function render(){
   const lineWidthActual = 2
   const lineWidthPlan = 2
   
-  const seriesNameActual = props.isOverview ? '实际进度' : '实际' + props.selectedKpi
-  const seriesNamePlan = props.isOverview ? '计划进度' : '计划' + props.selectedKpi
+  const seriesNameActual = props.isOverview ? '实际进度' : '实际' + (props.selectedKpi || '')
+  const seriesNamePlan = props.isOverview ? '计划进度' : '计划' + (props.selectedKpi || '')
 
   const option = {
     legend: { top: 0, right: 16, itemGap: 10, icon: 'rect', itemWidth: 14, itemHeight: 2 },
     grid: { left: 50, right: 24, top: 40, bottom: 28 },
-    xAxis: { type: 'category', data: dates, boundaryGap: false, axisLine: { lineStyle: { color: axisLine } }, axisTick: { show: false }, axisLabel: { color: axisLabel } },
+    xAxis: { type: 'category', data: xAxisData, boundaryGap: false, axisLine: { lineStyle: { color: axisLine } }, axisTick: { show: false }, axisLabel: { color: axisLabel } },
     yAxis: { type: 'value', min: 0, max: 1, axisLine: { show: false }, splitLine: { show: true, lineStyle: { color: gridLine } }, axisLabel: { color: axisLabel, formatter: v => Math.round(v*100)+'%' } },
     dataZoom: [{ type: 'inside', start: 0, end: 100, filterMode: 'none' }],
     tooltip: { 
