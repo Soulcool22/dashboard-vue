@@ -136,8 +136,14 @@ const selectedProject = ref(null)
 const selectedKpi = ref(null) // null when in overview mode, KPI title when in KPI mode
 
 function handleSelectKpi(kpi) {
-  selectedKpi.value = kpi.title
-  isChartOverview.value = false // Switch to specific KPI view
+  // Toggle: if clicking already selected KPI, return to overview
+  if (selectedKpi.value === kpi.title) {
+    selectedKpi.value = null
+    isChartOverview.value = true
+  } else {
+    selectedKpi.value = kpi.title
+    isChartOverview.value = false // Switch to specific KPI view
+  }
 }
 
 // --- Search and Filter Logic ---
