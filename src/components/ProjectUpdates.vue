@@ -1,5 +1,5 @@
 <template>
-  <div class="updates-wrapper">
+  <div class="updates-wrapper" ref="wrapperRef">
     <!-- Left Column: Today's Updates -->
     <div class="section-column">
       <h3 class="section-title">
@@ -9,7 +9,7 @@
       <div class="list-container">
         <div v-for="item in updates" :key="item.text" class="list-item">
           <div class="item-content">
-            <p class="item-text">{{ item.text }}</p>
+            <p class="item-text" @mouseenter="onTextEnter(item.text, $event)" @mouseleave="onTextLeave">{{ item.text }}</p>
           </div>
         </div>
       </div>
@@ -33,6 +33,7 @@
         </div>
       </div>
     </div>
+    <div v-if="bubble.visible" class="tooltip-bubble" :style="{ top: bubble.top + 'px', left: bubble.left + 'px' }">{{ bubble.text }}</div>
   </div>
 </template>
 
@@ -68,6 +69,26 @@ const workOrders = ref([
 const sortedWorkOrders = computed(() => {
   return [...workOrders.value].sort((a, b) => a.sortValue - b.sortValue)
 })
+
+const wrapperRef = ref(null)
+const bubble = ref({ visible: false, text: '', top: 0, left: 0 })
+
+function onTextEnter(text, e) {
+  const el = e.currentTarget || e.target
+  if (!el) return
+  const truncated = el.scrollWidth > el.clientWidth
+  if (!truncated) return
+  const r = el.getBoundingClientRect()
+  const w = wrapperRef.value ? wrapperRef.value.getBoundingClientRect() : { top: 0, left: 0 }
+  bubble.value.text = text
+  bubble.value.top = r.top - w.top - 8
+  bubble.value.left = r.left - w.left + 6
+  bubble.value.visible = true
+}
+
+function onTextLeave() {
+  bubble.value.visible = false
+}
 </script>
 
 <style scoped>
@@ -77,6 +98,7 @@ const sortedWorkOrders = computed(() => {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 32px;
+  position: relative;
 }
 
 .section-column {
@@ -169,6 +191,19 @@ const sortedWorkOrders = computed(() => {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.tooltip-bubble {
+  position: absolute;
+  background: #333;
+  color: #fff;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  z-index: 9999;
+  max-width: 260px;
+  pointer-events: none;
+  white-space: normal;
 }
 
 .order-info {
