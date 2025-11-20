@@ -164,6 +164,13 @@ const sortedWorkOrders = computed(() => {
   line-height: 1.5;
 }
 
+/* 今日动态文本强制不换行并截断 */
+.section-column:first-child .item-text {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 .order-info {
   display: flex;
   align-items: center;
