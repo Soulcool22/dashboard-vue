@@ -193,18 +193,7 @@ function onTextLeave() {
   text-overflow: ellipsis;
 }
 
-.tooltip-bubble {
-  position: absolute;
-  background: #333;
-  color: #fff;
-  padding: 8px 12px;
-  border-radius: 6px;
-  font-size: 12px;
-  z-index: 9999;
-  max-width: 260px;
-  pointer-events: none;
-  white-space: normal;
-}
+
 
 .order-info {
   display: flex;
