@@ -24,7 +24,7 @@ function handleClick(kpi) {
   emit('select-kpi', kpi)
 }
 
-function kDeltaText(k){ const s = k.up ? '↑ ' : '↓ '; const p = k.title === '关键里程碑达成率' ? '较计划 ' : '环比 '; return p + s + k.delta }
+function kDeltaText(k){ const s = k.up ? '↑ ' : '↓ '; const p = (k.title === '关键里程碑达成率' || k.title === '任务完成率') ? '较计划 ' : '环比 '; return p + s + k.delta }
 </script>
 
 <style scoped>

@@ -68,7 +68,16 @@
               :project-series="selectedProject?.series"
             />
           </div>
-          <ProjectUpdates class="updates-container" />
+          <!-- 根据是否选中 KPI 卡片来决定显示归因分析还是项目更新 -->
+          <AttributionAnalysis 
+            v-if="selectedKpi" 
+            :selected-kpi="selectedKpi"
+            class="updates-container"
+          />
+          <ProjectUpdates 
+            v-else
+            class="updates-container" 
+          />
         </template>
         <div v-else class="company-view-placeholder">
           <!-- Company-level content will go here -->
@@ -90,6 +99,7 @@ import KpiGrid from './components/KpiGrid.vue'
 import CompletionLine from './components/CompletionLine.vue'
 import ResearchChat from './components/ResearchChat.vue'
 import ProjectUpdates from './components/ProjectUpdates.vue'
+import AttributionAnalysis from './components/AttributionAnalysis.vue'
 
 const expandedLeft = ref(false)
 const regularCollapsed = ref(false)
