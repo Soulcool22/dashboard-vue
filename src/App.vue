@@ -80,7 +80,7 @@
           />
         </template>
         <div v-else class="company-view-placeholder">
-          <!-- Company-level content will go here -->
+          <CompanyDashboard />
         </div>
       </section>
       <ResearchChat 
@@ -100,6 +100,7 @@ import CompletionLine from './components/CompletionLine.vue'
 import ResearchChat from './components/ResearchChat.vue'
 import ProjectUpdates from './components/ProjectUpdates.vue'
 import AttributionAnalysis from './components/AttributionAnalysis.vue'
+import CompanyDashboard from './components/CompanyDashboard.vue'
 
 const expandedLeft = ref(false)
 const regularCollapsed = ref(false)
