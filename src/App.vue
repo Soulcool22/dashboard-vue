@@ -54,7 +54,7 @@
             </div>
           </div>
           <div v-else class="project-info">
-            <div class="project-main-title">全部</div>
+            <!-- Company view header removed as requested -->
           </div>
         </div>
 

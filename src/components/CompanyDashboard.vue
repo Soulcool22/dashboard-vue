@@ -3,15 +3,12 @@
     <!-- Header Section -->
     <div class="dashboard-header">
       <div class="header-title">
-        <icon-chart-line theme="filled" size="20" fill="#3b82f6" />
         <span>项目态势总览</span>
       </div>
       <div class="header-meta">
-        <span class="meta-label">统计周期：</span>
-        <span class="meta-value">2025 Q4 (10.01 - 12.31)</span>
+        <span class="meta-item">统计周期：2025 Q4</span>
         <span class="meta-divider">|</span>
-        <span class="meta-label">更新时间：</span>
-        <span class="meta-value">今日 14:30</span>
+        <span class="meta-item">更新于 14:30</span>
       </div>
     </div>
 
@@ -19,56 +16,71 @@
     <div class="hero-section">
       <!-- Left: Health Index -->
       <div class="health-card">
-        <div class="health-chart">
-          <div class="gauge-container" ref="gaugeRef"></div>
-          <div class="health-score">
-            <span class="score-value">82.5</span>
-            <span class="score-label">健康指数</span>
+        <div class="health-main">
+          <div class="gauge-wrapper">
+            <div class="gauge-container" ref="gaugeRef"></div>
+            <div class="health-score-overlay">
+              <span class="score-val">82.5</span>
+              <span class="score-lbl">健康指数</span>
+            </div>
           </div>
         </div>
-        <div class="health-metrics">
-          <div class="metric-item">
-            <span class="m-label">在建项目</span>
-            <span class="m-value">12</span>
+        <div class="health-stats">
+          <div class="stat-box">
+            <span class="stat-val">12</span>
+            <span class="stat-lbl">在建项目</span>
           </div>
-          <div class="metric-item">
-            <span class="m-label">总进度</span>
-            <span class="m-value">68%</span>
+          <div class="stat-divider"></div>
+          <div class="stat-box">
+            <span class="stat-val">68%</span>
+            <span class="stat-lbl">总进度</span>
           </div>
-          <div class="metric-item warning">
-            <span class="m-label">风险预警</span>
-            <span class="m-value">3</span>
+          <div class="stat-divider"></div>
+          <div class="stat-box warning">
+            <span class="stat-val">3</span>
+            <span class="stat-lbl">风险预警</span>
           </div>
         </div>
       </div>
 
       <!-- Right: Executive Summary -->
       <div class="insight-card">
-        <div class="card-header">
-          <span class="card-title">
-            <icon-brain theme="outline" size="18" :strokeWidth="3" />
-            决策内参
-          </span>
-          <span class="insight-tag">AI 生成</span>
+        <div class="insight-header">
+          <span class="insight-title">管理视点</span>
         </div>
-        <div class="insight-content">
-          <div class="insight-main">
-            <icon-quote theme="filled" size="24" fill="#cbd5e1" class="quote-icon left" />
-            <p class="insight-text">
-              整体项目群运行<span class="highlight positive">平稳有序</span>，核心指标处于健康区间。
-              但需重点关注 <span class="highlight negative">Q4 交付高峰</span> 带来的资源挤兑风险。
-              建议立即启动 <span class="highlight warning">「支付网关」</span> 项目的专项攻坚，避免拖累整体里程碑。
-            </p>
-            <icon-quote theme="filled" size="24" fill="#cbd5e1" class="quote-icon right" />
-          </div>
-          <div class="insight-bullets">
-            <div class="bullet-item">
-              <icon-attention theme="filled" size="14" fill="#e6a23c" />
-              <span>资源饱和度已达 92%，建议暂停非关键性需求变更。</span>
+        <div class="insight-body">
+          <div class="insight-text-row">
+            <div class="insight-paragraph">
+              整体项目群运行<span class="text-highlight">平稳有序</span>，核心指标处于健康区间。但需重点关注 <span class="text-highlight warning">Q4 交付高峰</span> 带来的资源挤兑风险。建议立即启动「支付网关」项目的专项攻坚。
             </div>
-            <div class="bullet-item">
-              <icon-trend-two theme="filled" size="14" fill="#15803d" />
-              <span>自动化测试覆盖率提升至 75%，返工率环比下降 12%。</span>
+          </div>
+          <div class="insight-metrics-row">
+            <div class="mini-metric">
+              <div class="mm-icon resource">
+                <icon-people theme="filled" size="16" fill="#e6a23c" />
+              </div>
+              <div class="mm-content">
+                <span class="mm-label">资源饱和度</span>
+                <span class="mm-value warning">92%</span>
+              </div>
+            </div>
+            <div class="mini-metric">
+              <div class="mm-icon quality">
+                <icon-check-one theme="filled" size="16" fill="#15803d" />
+              </div>
+              <div class="mm-content">
+                <span class="mm-label">自动化覆盖</span>
+                <span class="mm-value success">75%</span>
+              </div>
+            </div>
+            <div class="mini-metric">
+              <div class="mm-icon efficiency">
+                <icon-lightning theme="filled" size="16" fill="#3b82f6" />
+              </div>
+              <div class="mm-content">
+                <span class="mm-label">交付效率</span>
+                <span class="mm-value">High</span>
+              </div>
             </div>
           </div>
         </div>
@@ -297,67 +309,78 @@ function initTrendChart() {
 .dashboard-header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  padding-bottom: 8px;
+  align-items: flex-end;
+  padding-bottom: 12px;
   border-bottom: 1px solid var(--border);
+  margin-top: -4px; /* Slight pull up */
 }
 .header-title {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 16px;
+  font-size: 24px; /* Increased size */
   font-weight: 700;
   color: var(--text);
+  letter-spacing: -0.5px;
+  line-height: 1.2;
 }
 .header-meta {
   font-size: 12px;
   color: var(--muted);
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
+  padding-bottom: 4px;
 }
 .meta-value {
-  color: var(--text);
   font-weight: 500;
+  color: var(--text);
 }
 .meta-divider {
   color: var(--border);
-  margin: 0 4px;
 }
 
 /* Hero Section */
 .hero-section {
   display: grid;
-  grid-template-columns: 240px 1fr;
+  grid-template-columns: 220px 1fr;
   gap: 16px;
-  height: 180px;
+  height: 160px;
 }
 
+/* Health Card - Refined */
 .health-card {
-  background: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%);
+  background: #fff;
   border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 16px;
+  border-radius: 8px;
+  padding: 0;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: space-between;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.03);
 }
 
-.health-chart {
+.health-main {
+  flex: 1;
   position: relative;
-  width: 160px;
-  height: 80px; /* Half circle height */
-  margin-bottom: 10px;
+  background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-top: 10px;
 }
+
+.gauge-wrapper {
+  position: relative;
+  width: 140px;
+  height: 70px;
+}
+
 .gauge-container {
   width: 100%;
   height: 100%;
 }
-.health-score {
+
+.health-score-overlay {
   position: absolute;
-  bottom: 0;
+  bottom: -5px;
   left: 50%;
   transform: translateX(-50%);
   text-align: center;
@@ -365,115 +388,167 @@ function initTrendChart() {
   flex-direction: column;
   align-items: center;
 }
-.score-value {
-  font-size: 28px;
+
+.score-val {
+  font-size: 26px;
   font-weight: 800;
   color: var(--text);
   line-height: 1;
+  font-family: 'Roboto', sans-serif; /* More technical font if available */
 }
-.score-label {
-  font-size: 12px;
+
+.score-lbl {
+  font-size: 11px;
   color: var(--muted);
   margin-top: 2px;
 }
 
-.health-metrics {
-  width: 100%;
-  display: flex;
-  justify-content: space-around;
-  border-top: 1px solid var(--border);
-  padding-top: 12px;
-}
-.metric-item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 2px;
-}
-.m-label { font-size: 11px; color: var(--muted); }
-.m-value { font-size: 14px; font-weight: 600; color: var(--text); }
-.metric-item.warning .m-value { color: #e6a23c; }
-
-.insight-card {
-  background: #fff;
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 16px 20px;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.02);
-}
-
-.card-header {
+.health-stats {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  padding: 10px 16px;
+  background: #fff;
+  border-top: 1px solid var(--border);
 }
-.card-title {
+
+.stat-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+}
+
+.stat-val {
   font-size: 14px;
-  font-weight: 600;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.stat-lbl {
+  font-size: 10px;
+  color: var(--muted);
+}
+
+.stat-box.warning .stat-val { color: #e6a23c; }
+
+.stat-divider {
+  width: 1px;
+  height: 16px;
+  background: var(--border);
+}
+
+/* Insight Card - Professional */
+.insight-card {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 16px 20px;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+  position: relative;
+  overflow: hidden;
+}
+
+.insight-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 100%;
+  background: var(--accent);
+}
+
+.insight-header {
+  margin-bottom: 10px;
+}
+
+.insight-title {
+  font-size: 14px;
+  font-weight: 700;
   color: var(--text);
   display: flex;
   align-items: center;
   gap: 6px;
 }
-.insight-tag {
-  font-size: 10px;
-  background: linear-gradient(90deg, #6366f1 0%, #8b5cf6 100%);
-  color: white;
-  padding: 2px 8px;
-  border-radius: 10px;
-}
 
-.insight-content {
+.insight-body {
   flex: 1;
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  gap: 12px;
+  justify-content: space-between;
 }
 
-.insight-main {
-  position: relative;
-  padding: 0 24px;
+.insight-text-row {
+  margin-bottom: 12px;
 }
-.quote-icon {
-  position: absolute;
-  opacity: 0.3;
-}
-.quote-icon.left { top: -8px; left: -4px; }
-.quote-icon.right { bottom: -8px; right: -4px; }
 
-.insight-text {
+.insight-paragraph {
   font-size: 14px;
   line-height: 1.6;
   color: var(--text);
   text-align: justify;
-  margin: 0;
 }
-.highlight {
-  font-weight: 600;
-  padding: 0 2px;
-}
-.highlight.positive { color: #15803d; }
-.highlight.negative { color: #dc2626; }
-.highlight.warning { color: #e6a23c; }
 
-.insight-bullets {
+.text-highlight {
+  font-weight: 600;
+  color: var(--text);
+  background: linear-gradient(120deg, rgba(88, 158, 248, 0.15) 0%, rgba(88, 158, 248, 0) 100%);
+  padding: 0 4px;
+  border-radius: 2px;
+}
+
+.text-highlight.warning {
+  background: linear-gradient(120deg, rgba(230, 162, 60, 0.15) 0%, rgba(230, 162, 60, 0) 100%);
+  color: #b45309;
+}
+
+.insight-metrics-row {
   display: flex;
-  flex-direction: column;
-  gap: 6px;
-  padding-top: 8px;
+  gap: 24px;
+  padding-top: 12px;
   border-top: 1px dashed var(--border);
 }
-.bullet-item {
+
+.mini-metric {
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 12px;
+}
+
+.mm-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mm-icon.resource { background: rgba(230, 162, 60, 0.1); }
+.mm-icon.quality { background: rgba(21, 128, 61, 0.1); }
+.mm-icon.efficiency { background: rgba(59, 130, 246, 0.1); }
+
+.mm-content {
+  display: flex;
+  flex-direction: column;
+}
+
+.mm-label {
+  font-size: 10px;
   color: var(--muted);
 }
+
+.mm-value {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.mm-value.warning { color: #e6a23c; }
+.mm-value.success { color: #15803d; }
 
 /* Middle Section */
 .middle-section {
