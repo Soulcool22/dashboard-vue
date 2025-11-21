@@ -12,131 +12,136 @@
       </div>
     </div>
 
-    <!-- Hero Section: Core Status & Insights -->
-    <div class="hero-section">
-      <!-- Left: Health Index -->
-      <div class="health-card">
-        <div class="health-main">
-          <div class="gauge-wrapper">
-            <div class="gauge-container" ref="gaugeRef"></div>
-            <div class="health-score-overlay">
-              <span class="score-val">82.5</span>
-              <span class="score-lbl">健康指数</span>
+    <!-- Region Navigation -->
+    <div class="region-nav">
+      <div 
+        v-for="region in regions" 
+        :key="region" 
+        class="nav-pill" 
+        :class="{ active: currentRegion === region }"
+        @click="currentRegion = region"
+      >
+        {{ region }}
+      </div>
+    </div>
+
+    <!-- National View Content -->
+    <template v-if="currentRegion === '全国'">
+      <!-- Hero Section: Core Status & Insights (Refactored) -->
+      <div class="hero-section national-hero">
+        <!-- Full Width Executive Summary -->
+        <div class="insight-card full-width">
+          <div class="insight-header">
+            <span class="insight-title">管理视点</span>
+          </div>
+          <div class="insight-body">
+            <div class="insight-text-row">
+              <div class="insight-paragraph">
+                整体项目群运行<span class="text-highlight">平稳有序</span>，核心指标处于健康区间。但需重点关注 <span class="text-highlight warning">Q4 交付高峰</span> 带来的资源挤兑风险。建议立即启动「支付网关」项目的专项攻坚。
+              </div>
             </div>
-          </div>
-        </div>
-        <div class="health-stats">
-          <div class="stat-box">
-            <span class="stat-val">12</span>
-            <span class="stat-lbl">在建项目</span>
-          </div>
-          <div class="stat-divider"></div>
-          <div class="stat-box">
-            <span class="stat-val">68%</span>
-            <span class="stat-lbl">总进度</span>
-          </div>
-          <div class="stat-divider"></div>
-          <div class="stat-box warning">
-            <span class="stat-val">3</span>
-            <span class="stat-lbl">风险预警</span>
+            <div class="insight-metrics-row">
+              <div class="mini-metric">
+                <div class="mm-icon health">
+                  <span class="health-val">82.5</span>
+                </div>
+                <div class="mm-content">
+                  <span class="mm-label">健康指数</span>
+                  <span class="mm-value">稳健</span>
+                </div>
+              </div>
+              <div class="metric-divider"></div>
+              <div class="mini-metric">
+                <div class="mm-icon resource">
+                  <icon-people theme="filled" size="16" fill="#e6a23c" />
+                </div>
+                <div class="mm-content">
+                  <span class="mm-label">资源饱和度</span>
+                  <span class="mm-value warning">92%</span>
+                </div>
+              </div>
+              <div class="metric-divider"></div>
+              <div class="mini-metric">
+                <div class="mm-icon quality">
+                  <icon-check-one theme="filled" size="16" fill="#15803d" />
+                </div>
+                <div class="mm-content">
+                  <span class="mm-label">自动化覆盖</span>
+                  <span class="mm-value success">75%</span>
+                </div>
+              </div>
+              <div class="metric-divider"></div>
+              <div class="mini-metric">
+                <div class="mm-icon efficiency">
+                  <icon-lightning theme="filled" size="16" fill="#3b82f6" />
+                </div>
+                <div class="mm-content">
+                  <span class="mm-label">交付效率</span>
+                  <span class="mm-value">High</span>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
 
-      <!-- Right: Executive Summary -->
-      <div class="insight-card">
-        <div class="insight-header">
-          <span class="insight-title">管理视点</span>
+      <!-- Middle Section: Risk Focus -->
+      <div class="middle-section">
+        <div class="section-header">
+          <span class="section-title">重点关注 (Top 3)</span>
+          <span class="section-subtitle">需管理层介入协调的项目</span>
         </div>
-        <div class="insight-body">
-          <div class="insight-text-row">
-            <div class="insight-paragraph">
-              整体项目群运行<span class="text-highlight">平稳有序</span>，核心指标处于健康区间。但需重点关注 <span class="text-highlight warning">Q4 交付高峰</span> 带来的资源挤兑风险。建议立即启动「支付网关」项目的专项攻坚。
+        <div class="risk-grid">
+          <div class="risk-card" v-for="(project, idx) in riskProjects" :key="idx">
+            <div class="risk-header">
+              <span class="risk-name">{{ project.name }}</span>
+              <span class="risk-badge" :class="project.level">{{ project.levelText }}</span>
             </div>
-          </div>
-          <div class="insight-metrics-row">
-            <div class="mini-metric">
-              <div class="mm-icon resource">
-                <icon-people theme="filled" size="16" fill="#e6a23c" />
-              </div>
-              <div class="mm-content">
-                <span class="mm-label">资源饱和度</span>
-                <span class="mm-value warning">92%</span>
-              </div>
+            <div class="risk-reason">
+              <span class="reason-label">风险归因：</span>
+              <span class="reason-text">{{ project.reason }}</span>
             </div>
-            <div class="mini-metric">
-              <div class="mm-icon quality">
-                <icon-check-one theme="filled" size="16" fill="#15803d" />
-              </div>
-              <div class="mm-content">
-                <span class="mm-label">自动化覆盖</span>
-                <span class="mm-value success">75%</span>
-              </div>
+            <div class="risk-action">
+              <span class="action-label">建议行动：</span>
+              <span class="action-text">{{ project.action }}</span>
             </div>
-            <div class="mini-metric">
-              <div class="mm-icon efficiency">
-                <icon-lightning theme="filled" size="16" fill="#3b82f6" />
-              </div>
-              <div class="mm-content">
-                <span class="mm-label">交付效率</span>
-                <span class="mm-value">High</span>
-              </div>
+            <div class="risk-progress">
+              <el-progress :percentage="project.progress" :status="project.status" :stroke-width="6" :show-text="false" />
             </div>
           </div>
         </div>
       </div>
-    </div>
 
-    <!-- Middle Section: Risk Focus -->
-    <div class="middle-section">
-      <div class="section-header">
-        <span class="section-title">重点关注 (Top 3)</span>
-        <span class="section-subtitle">需管理层介入协调的项目</span>
-      </div>
-      <div class="risk-grid">
-        <div class="risk-card" v-for="(project, idx) in riskProjects" :key="idx">
-          <div class="risk-header">
-            <span class="risk-name">{{ project.name }}</span>
-            <span class="risk-badge" :class="project.level">{{ project.levelText }}</span>
+      <!-- Bottom Section: Trends -->
+      <div class="bottom-section">
+        <div class="chart-wrapper">
+          <div class="chart-header">
+            <span class="chart-title">项目群交付趋势 (近6个月)</span>
+            <div class="chart-legend">
+              <span class="legend-item plan"><span class="dot"></span>计划交付</span>
+              <span class="legend-item actual"><span class="dot"></span>实际交付</span>
+            </div>
           </div>
-          <div class="risk-reason">
-            <span class="reason-label">风险归因：</span>
-            <span class="reason-text">{{ project.reason }}</span>
-          </div>
-          <div class="risk-action">
-            <span class="action-label">建议行动：</span>
-            <span class="action-text">{{ project.action }}</span>
-          </div>
-          <div class="risk-progress">
-            <el-progress :percentage="project.progress" :status="project.status" :stroke-width="6" />
-          </div>
+          <div class="trend-chart" ref="trendChartRef"></div>
         </div>
       </div>
-    </div>
+    </template>
 
-    <!-- Bottom Section: Trends -->
-    <div class="bottom-section">
-      <div class="chart-wrapper">
-        <div class="chart-header">
-          <span class="chart-title">项目群交付趋势 (近6个月)</span>
-          <div class="chart-legend">
-            <span class="legend-item plan"><span class="dot"></span>计划交付</span>
-            <span class="legend-item actual"><span class="dot"></span>实际交付</span>
-          </div>
-        </div>
-        <div class="trend-chart" ref="trendChartRef"></div>
-      </div>
-    </div>
+    <!-- Regional View Content -->
+    <RegionalDashboard v-else :region-name="currentRegion" />
+
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, onMounted, onUnmounted, watch, nextTick } from 'vue'
 import * as echarts from 'echarts'
+import RegionalDashboard from './RegionalDashboard.vue'
 
-const gaugeRef = ref(null)
+const currentRegion = ref('全国')
+const regions = ['全国', '华东', '华南', '华北', '西部', '广东', '海外']
+
 const trendChartRef = ref(null)
-let gaugeChart = null
 let trendChart = null
 
 const riskProjects = ref([
@@ -169,70 +174,27 @@ const riskProjects = ref([
   }
 ])
 
+// Watch for region changes to re-init charts if returning to National view
+watch(currentRegion, (newVal) => {
+  if (newVal === '全国') {
+    nextTick(() => {
+      initTrendChart()
+    })
+  }
+})
+
 onMounted(() => {
-  initGauge()
   initTrendChart()
   window.addEventListener('resize', handleResize)
 })
 
 onUnmounted(() => {
   window.removeEventListener('resize', handleResize)
-  if (gaugeChart) gaugeChart.dispose()
   if (trendChart) trendChart.dispose()
 })
 
 function handleResize() {
-  gaugeChart && gaugeChart.resize()
   trendChart && trendChart.resize()
-}
-
-function initGauge() {
-  if (!gaugeRef.value) return
-  gaugeChart = echarts.init(gaugeRef.value)
-  
-  const option = {
-    series: [
-      {
-        type: 'gauge',
-        startAngle: 180,
-        endAngle: 0,
-        min: 0,
-        max: 100,
-        splitNumber: 5,
-        radius: '100%',
-        center: ['50%', '75%'], // Semi-circle layout
-        itemStyle: {
-          color: '#3b82f6',
-          shadowColor: 'rgba(0,138,255,0.45)',
-          shadowBlur: 10,
-          shadowOffsetX: 2,
-          shadowOffsetY: 2
-        },
-        progress: {
-          show: true,
-          roundCap: true,
-          width: 12
-        },
-        pointer: {
-          show: false
-        },
-        axisLine: {
-          roundCap: true,
-          lineStyle: {
-            width: 12,
-            color: [[1, '#e2e8f0']] // Background color
-          }
-        },
-        axisTick: { show: false },
-        splitLine: { show: false },
-        axisLabel: { show: false },
-        title: { show: false },
-        detail: { show: false },
-        data: [{ value: 82.5 }]
-      }
-    ]
-  }
-  gaugeChart.setOption(option)
 }
 
 function initTrendChart() {
@@ -302,143 +264,71 @@ function initTrendChart() {
   display: flex;
   flex-direction: column;
   gap: 16px;
-  /* Removed height: 100% and overflow-y: auto to let parent handle scrolling */
 }
 
 /* Header */
 .dashboard-header {
   display: flex;
   justify-content: space-between;
-  align-items: flex-end;
+  align-items: center;
   padding-bottom: 12px;
   border-bottom: 1px solid var(--border);
-  margin-top: -4px; /* Slight pull up */
 }
+
 .header-title {
-  font-size: 24px; /* Increased size */
+  font-size: 24px;
   font-weight: 700;
   color: var(--text);
   letter-spacing: -0.5px;
-  line-height: 1.2;
 }
+
 .header-meta {
-  font-size: 12px;
-  color: var(--muted);
   display: flex;
   align-items: center;
+  gap: 12px;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.meta-divider { color: var(--border); }
+
+/* Region Navigation */
+.region-nav {
+  display: flex;
   gap: 8px;
   padding-bottom: 4px;
 }
-.meta-value {
+
+.nav-pill {
+  padding: 6px 16px;
+  background: #f1f5f9;
+  border-radius: 20px;
+  font-size: 13px;
+  color: var(--muted);
+  cursor: pointer;
+  transition: all 0.2s;
   font-weight: 500;
+}
+
+.nav-pill:hover {
+  background: #e2e8f0;
   color: var(--text);
 }
-.meta-divider {
-  color: var(--border);
+
+.nav-pill.active {
+  background: #eff6ff;
+  color: #3b82f6;
+  font-weight: 600;
 }
 
 /* Hero Section */
 .hero-section {
-  display: grid;
-  grid-template-columns: 220px 1fr;
+  display: flex;
+  flex-direction: column;
   gap: 16px;
-  height: 160px;
 }
 
-/* Health Card - Refined */
-.health-card {
-  background: #fff;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.03);
-}
-
-.health-main {
-  flex: 1;
-  position: relative;
-  background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding-top: 10px;
-}
-
-.gauge-wrapper {
-  position: relative;
-  width: 140px;
-  height: 70px;
-}
-
-.gauge-container {
-  width: 100%;
-  height: 100%;
-}
-
-.health-score-overlay {
-  position: absolute;
-  bottom: -5px;
-  left: 50%;
-  transform: translateX(-50%);
-  text-align: center;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.score-val {
-  font-size: 26px;
-  font-weight: 800;
-  color: var(--text);
-  line-height: 1;
-  font-family: 'Roboto', sans-serif; /* More technical font if available */
-}
-
-.score-lbl {
-  font-size: 11px;
-  color: var(--muted);
-  margin-top: 2px;
-}
-
-.health-stats {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 10px 16px;
-  background: #fff;
-  border-top: 1px solid var(--border);
-}
-
-.stat-box {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 1px;
-}
-
-.stat-val {
-  font-size: 14px;
-  font-weight: 700;
-  color: var(--text);
-}
-
-.stat-lbl {
-  font-size: 10px;
-  color: var(--muted);
-}
-
-.stat-box.warning .stat-val { color: #e6a23c; }
-
-.stat-divider {
-  width: 1px;
-  height: 16px;
-  background: var(--border);
-}
-
-/* Insight Card - Professional */
+/* Insight Card (Refactored for Full Width) */
 .insight-card {
   background: #fff;
   border: 1px solid var(--border);
@@ -446,23 +336,14 @@ function initTrendChart() {
   padding: 16px 20px;
   display: flex;
   flex-direction: column;
+  gap: 12px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.03);
-  position: relative;
-  overflow: hidden;
-}
-
-.insight-card::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 4px;
-  height: 100%;
-  background: var(--accent);
 }
 
 .insight-header {
-  margin-bottom: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .insight-title {
@@ -471,101 +352,111 @@ function initTrendChart() {
   color: var(--text);
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
+}
+
+.insight-title::before {
+  content: '';
+  display: block;
+  width: 4px;
+  height: 14px;
+  background: #3b82f6;
+  border-radius: 2px;
 }
 
 .insight-body {
-  flex: 1;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  gap: 16px;
 }
 
 .insight-text-row {
-  margin-bottom: 12px;
-}
-
-.insight-paragraph {
   font-size: 14px;
   line-height: 1.6;
   color: var(--text);
-  text-align: justify;
+}
+
+.insight-paragraph {
+  margin: 0;
 }
 
 .text-highlight {
   font-weight: 600;
-  color: var(--text);
-  background: linear-gradient(120deg, rgba(88, 158, 248, 0.15) 0%, rgba(88, 158, 248, 0) 100%);
+  background: #f1f5f9;
   padding: 0 4px;
-  border-radius: 2px;
+  border-radius: 4px;
+  color: var(--text);
 }
 
 .text-highlight.warning {
-  background: linear-gradient(120deg, rgba(230, 162, 60, 0.15) 0%, rgba(230, 162, 60, 0) 100%);
-  color: #b45309;
+  background: #fff7ed;
+  color: #c2410c;
 }
 
+/* Metrics Row in Insight Card */
 .insight-metrics-row {
   display: flex;
+  align-items: center;
   gap: 24px;
-  padding-top: 12px;
-  border-top: 1px dashed var(--border);
+  padding-top: 16px;
+  border-top: 1px solid #f1f5f9;
 }
 
 .mini-metric {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
 }
 
 .mm-icon {
-  width: 28px;
-  height: 28px;
-  border-radius: 6px;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
+  background: #f8fafc;
 }
 
-.mm-icon.resource { background: rgba(230, 162, 60, 0.1); }
-.mm-icon.quality { background: rgba(21, 128, 61, 0.1); }
-.mm-icon.efficiency { background: rgba(59, 130, 246, 0.1); }
+.mm-icon.health { background: #eff6ff; }
+.health-val { font-weight: 700; color: #3b82f6; font-size: 13px; }
 
 .mm-content {
   display: flex;
   flex-direction: column;
+  gap: 2px;
 }
 
-.mm-label {
-  font-size: 10px;
-  color: var(--muted);
-}
-
-.mm-value {
-  font-size: 13px;
-  font-weight: 700;
-  color: var(--text);
-}
-
+.mm-label { font-size: 11px; color: var(--muted); }
+.mm-value { font-size: 13px; font-weight: 600; color: var(--text); }
 .mm-value.warning { color: #e6a23c; }
 .mm-value.success { color: #15803d; }
 
-/* Middle Section */
+.metric-divider {
+  width: 1px;
+  height: 24px;
+  background: #e2e8f0;
+}
+
+/* Middle Section: Risk Focus */
 .middle-section {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 12px;
 }
+
 .section-header {
   display: flex;
   align-items: baseline;
   gap: 8px;
 }
+
 .section-title {
   font-size: 14px;
-  font-weight: 600;
+  font-weight: 700;
   color: var(--text);
 }
+
 .section-subtitle {
   font-size: 12px;
   color: var(--muted);
@@ -576,16 +467,18 @@ function initTrendChart() {
   grid-template-columns: repeat(3, 1fr);
   gap: 12px;
 }
+
 .risk-card {
   background: #fff;
   border: 1px solid var(--border);
   border-radius: 8px;
-  padding: 12px;
+  padding: 12px 16px;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 10px;
   transition: transform 0.2s, box-shadow 0.2s;
 }
+
 .risk-card:hover {
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(0,0,0,0.05);
@@ -596,85 +489,88 @@ function initTrendChart() {
   justify-content: space-between;
   align-items: center;
 }
+
 .risk-name {
   font-size: 13px;
   font-weight: 600;
   color: var(--text);
 }
+
 .risk-badge {
-  font-size: 10px;
-  padding: 1px 6px;
+  font-size: 11px;
+  padding: 2px 6px;
   border-radius: 4px;
+  font-weight: 500;
 }
-.risk-badge.high { background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; }
-.risk-badge.medium { background: #fffbeb; color: #d97706; border: 1px solid #fde68a; }
+
+.risk-badge.high { background: #fef2f2; color: #ef4444; }
+.risk-badge.medium { background: #fff7ed; color: #f97316; }
 
 .risk-reason, .risk-action {
-  font-size: 11px;
+  font-size: 12px;
   line-height: 1.4;
   display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-.reason-label, .action-label { color: var(--muted); }
-.reason-text { color: var(--text); }
-.action-text { color: #3b82f6; }
-
-.risk-progress {
-  margin-top: 4px;
+  gap: 4px;
 }
 
-/* Bottom Section */
+.reason-label, .action-label { color: var(--muted); flex-shrink: 0; }
+.reason-text, .action-text { color: var(--text); }
+
+.risk-progress { margin-top: 4px; }
+
+/* Bottom Section: Trends */
 .bottom-section {
-  flex: 1;
-  min-height: 200px;
-  background: #fff;
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 16px;
   display: flex;
   flex-direction: column;
 }
 
 .chart-wrapper {
-  width: 100%;
-  height: 100%;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 16px;
+  height: 240px;
   display: flex;
   flex-direction: column;
 }
+
 .chart-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 10px;
+  margin-bottom: 12px;
 }
+
 .chart-title {
   font-size: 14px;
-  font-weight: 600;
+  font-weight: 700;
   color: var(--text);
 }
+
 .chart-legend {
   display: flex;
-  gap: 12px;
+  gap: 16px;
   font-size: 12px;
 }
+
 .legend-item {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 6px;
   color: var(--muted);
 }
+
 .legend-item .dot {
   width: 8px;
   height: 8px;
   border-radius: 50%;
 }
-.legend-item.plan .dot { background: #94a3b8; }
+
+.legend-item.plan .dot { background: #cbd5e1; }
 .legend-item.actual .dot { background: #3b82f6; }
 
 .trend-chart {
   flex: 1;
   width: 100%;
-  min-height: 180px;
 }
 </style>
