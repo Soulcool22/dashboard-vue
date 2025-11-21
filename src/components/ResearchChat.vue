@@ -252,7 +252,7 @@ function handleBlur() {
   font-size: 13px; 
   line-height: 1.7; 
   color: var(--text); 
-  padding: 16px; 
+  padding: 2px 16px 16px; 
   letter-spacing: 0.1px; 
 }
 .research-content p { margin: 0 0 1.1em; }
