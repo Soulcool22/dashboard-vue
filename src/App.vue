@@ -77,7 +77,7 @@
           />
         </template>
         <div v-else class="company-view-placeholder">
-          <CompanyDashboard />
+          <CompanyDashboard @select-project-name="selectProjectByName" />
         </div>
       </section>
       <ResearchChat 
@@ -185,6 +185,16 @@ function toggleWatchStatus(projectToToggle) {
       const [added] = regulars.value.splice(indexInRegulars, 1)
       projects.value.push(added)
     }
+  }
+}
+
+function selectProjectByName(name) {
+  const p = projects.value.find(p => p.name === name) || regulars.value.find(p => p.name === name)
+  if (p) {
+    selectedProject.value = p
+    isCompanyView.value = false
+    isChartOverview.value = true
+    selectedKpi.value = null
   }
 }
 

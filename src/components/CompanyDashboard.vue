@@ -94,7 +94,7 @@
         <div class="risk-grid">
           <div class="risk-card" v-for="(project, idx) in riskProjects" :key="idx">
             <div class="risk-header">
-              <span class="risk-name">{{ project.name }}</span>
+              <span class="risk-name" @click="handleRiskNameClick(project.name)">{{ project.name }}</span>
               <span class="risk-badge" :class="project.level">{{ project.levelText }}</span>
             </div>
             <div class="risk-reason">
@@ -107,6 +107,7 @@
               <span class="action-text">{{ project.action }}</span>
             </div>
             <div class="risk-progress">
+              <span class="progress-label">当前进度</span>
               <el-progress :percentage="project.progress" :status="project.status" :stroke-width="6" :show-text="false" />
             </div>
           </div>
@@ -139,6 +140,8 @@ import { ref, onMounted, onUnmounted, watch, nextTick } from 'vue'
 import * as echarts from 'echarts'
 import RegionalDashboard from './RegionalDashboard.vue'
 
+const emits = defineEmits(['select-project-name'])
+
 const currentRegion = ref('全国')
 const regions = ['全国', '华东', '华南', '华北', '西部', '广东', '海外']
 
@@ -147,7 +150,7 @@ let trendChart = null
 
 const riskProjects = ref([
   {
-    name: '支付网关升级',
+    name: '乌鲁木齐',
     level: 'high',
     levelText: '高风险',
     category: '供应商问题',
@@ -177,6 +180,8 @@ const riskProjects = ref([
     status: 'warning'
   }
 ])
+
+function handleRiskNameClick(name){ emits('select-project-name', name) }
 
 // Watch for region changes to re-init charts if returning to National view
 watch(currentRegion, (newVal) => {
@@ -498,6 +503,7 @@ function initTrendChart() {
   font-size: 13px;
   font-weight: 600;
   color: var(--text);
+  cursor: pointer;
 }
 
 .risk-badge {
@@ -520,7 +526,9 @@ function initTrendChart() {
 .reason-category { color: #3b82f6; font-weight: 600; margin: 0 4px; }
 .reason-text, .action-text { color: var(--text); }
 
-.risk-progress { margin-top: 4px; }
+.risk-progress { margin-top: 4px; display: flex; align-items: center; gap: 8px; }
+.risk-progress :deep(.el-progress) { flex: 1; min-width: 0; }
+.progress-label { font-size: 11px; color: var(--muted); }
 
 /* Bottom Section: Trends */
 .bottom-section {
