@@ -10,7 +10,7 @@
       >
         <div class="kpi-title">{{ k.title }}</div>
         <div class="kpi-value">{{ k.value }}</div>
-        <div class="kpi-delta" :class="k.up ? 'up' : 'down'">{{ kDeltaText(k) }}</div>
+        <div v-if="showDelta(k)" class="kpi-delta" :class="k.up ? 'up' : 'down'">{{ kDeltaText(k) }}</div>
       </el-card>
     </div>
   </div>
@@ -25,6 +25,7 @@ function handleClick(kpi) {
 }
 
 function kDeltaText(k){ const s = k.up ? '↑ ' : '↓ '; const p = (k.title === '关键里程碑达成率' || k.title === '任务完成率') ? '较计划 ' : '环比 '; return p + s + k.delta }
+function showDelta(k){ return k.title !== '资金到账率' }
 </script>
 
 <style scoped>

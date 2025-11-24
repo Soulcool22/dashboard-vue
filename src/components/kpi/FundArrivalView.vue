@@ -73,8 +73,8 @@ const emit = defineEmits(['stats-changed'])
 const fundStages = ref([
   { name: '预付款 (30%)', due: '¥375w', actual: '¥375w', percent: 100, status: 'normal', statusText: '已结清' },
   { name: '进度款-1期 (20%)', due: '¥250w', actual: '¥250w', percent: 100, status: 'normal', statusText: '已结清' },
-  { name: '进度款-2期 (20%)', due: '¥250w', actual: '¥250w', percent: 100, status: 'normal', statusText: '已结清' },
-  { name: '进度款-3期 (20%)', due: '¥250w', actual: '¥75w', percent: 30, status: 'overdue', statusText: '逾期未付' },
+  { name: '进度款-2期 (20%)', due: '¥250w', actual: '¥200w', percent: 80, status: 'overdue', statusText: '未结清' },
+  { name: '进度款-3期 (20%)', due: '¥250w', actual: '¥75w', percent: 30, status: 'overdue', statusText: '未结清' },
   { name: '质保金 (10%)', due: '¥125w', actual: '¥0', percent: 0, status: 'pending', statusText: '未达节点' }
 ])
 
@@ -99,11 +99,11 @@ onMounted(() => {
 .fund-overview { display: flex; align-items: center; justify-content: space-evenly; gap: 0; background: #f8fafc; padding: 12px 12px; border-radius: 8px; border: 1px solid #e2e8f0; }
 .fund-metric-box { display: flex; flex-direction: column; gap: 4px; align-items: center; text-align: center; flex: 1; }
 .fund-metric-box .label { font-size: 12px; color: var(--muted); }
-.fund-metric-box .value { font-size: 18px; font-weight: 700; color: var(--text); font-family: 'Roboto Mono', monospace; font-variant-numeric: tabular-nums; font-feature-settings: "tnum"; line-height: 1.1; }
+.fund-metric-box .value { font-size: 18px; font-weight: 700; color: var(--text); font-family: 'Roboto Mono', monospace; font-variant-numeric: tabular-nums; font-feature-settings: "tnum"; line-height: 1.1; display: inline-flex; align-items: center; gap: 8px; }
 .fund-metric-box .value .currency { font-size: 0.9em; color: var(--muted); margin-right: 4px; }
 .fund-metric-box .value .amount { letter-spacing: 0.2px; }
-.fund-metric-box .value.highlight { color: var(--up); }
-.fund-metric-box .sub-text { font-size: 11px; color: var(--up); background: #f0fdf4; padding: 1px 4px; border-radius: 4px; width: fit-content; border: 1px solid rgba(22,163,74,0.18); }
+.fund-metric-box .value.highlight { color: #3b82f6; }
+.fund-metric-box .sub-text { font-size: 11px; color: #3b82f6; background: #eff6ff; padding: 1px 6px; border-radius: 4px; width: fit-content; margin-left: 2px; line-height: 1.2; }
 .fund-divider { width: 1px; height: 32px; background: #cbd5e1; margin: 0 12px; }
 .fund-stages { display: flex; flex-direction: column; gap: 8px; }
 .stage-header { display: grid; grid-template-columns: 2fr 3fr 1fr; font-size: 12px; color: var(--muted); padding: 0 4px; }

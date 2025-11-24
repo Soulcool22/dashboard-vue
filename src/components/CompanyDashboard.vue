@@ -56,7 +56,7 @@
                   <icon-people theme="filled" size="16" fill="#e6a23c" />
                 </div>
                 <div class="mm-content">
-                  <span class="mm-label">资源饱和度</span>
+                  <span class="mm-label">人员健康度</span>
                   <span class="mm-value warning">92%</span>
                 </div>
               </div>
@@ -66,7 +66,7 @@
                   <icon-check-one theme="filled" size="16" fill="#15803d" />
                 </div>
                 <div class="mm-content">
-                  <span class="mm-label">人员健康度</span>
+                  <span class="mm-label">资金回款比</span>
                   <span class="mm-value success">75%</span>
                 </div>
               </div>

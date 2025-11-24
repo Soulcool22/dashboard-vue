@@ -234,20 +234,6 @@ const attributionData = {
   }
 }
 
-attributionData['资金到账率'] = {
-  type: '风险预警',
-  summary: '本期资金到账率为 76%，环比 ↑ +3%。进度款-3期逾期未付是主要风险点。',
-  factors: [
-    { title: '预付款与前两期进度款结清', value: '+2.0%', impact: 'positive', description: '预付款与前两期进度款均已到账，形成正向贡献。' },
-    { title: '进度款-3期逾期', value: '-1.5%', impact: 'negative', description: '第 3 期进度款到账仅 30%，且逾期 15 天，拖累整体到账率。' },
-    { title: '结算资料准备效率', value: '+0.5%', impact: 'positive', description: '财务与项目组协同，提升了结算资料的准备效率。' }
-  ],
-  recommendations: [
-    '建立逾期款项红黄灯机制，超过 7 天自动升级催收',
-    '与客户确认结算节奏，提前锁定下一期付款节点',
-    '对逾期阶段设置负责人与时限，形成闭环'
-  ]
-}
 
 attributionData['项目支出金额'] = {
   type: '中性观察',
