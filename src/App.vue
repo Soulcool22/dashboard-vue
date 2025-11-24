@@ -108,7 +108,7 @@ const projects = ref([])
 function generateSeriesData() {
   const data = [];
   let value = 60 + Math.random() * 20; // Initial start between 60-80
-  for (let i = 0; i < 16; i++) {
+  for (let i = 0; i < 60; i++) {
     data.push(Math.round(value));
     // Significantly increased volatility: +/- 7.5 change per step
     value += (Math.random() - 0.5) * 15; 
