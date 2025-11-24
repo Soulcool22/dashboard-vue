@@ -250,7 +250,10 @@ const summaryText = computed(() => {
   const arrow = m.up ? '↑' : '↓'
   const sign = m.up ? '+' : '-'
   const mode = props.compareMode || (props.selectedKpi === '关键里程碑达成率' || props.selectedKpi === '任务完成率' ? '较计划' : '环比')
-  return `本期${props.selectedKpi}为 ${m.value}，${mode} ${arrow} ${sign}${m.delta}。`
+  const s = attribution.value.summary || ''
+  const parts = s.split('。')
+  const supp = parts.length > 1 ? parts.slice(1).join('。') : ''
+  return '本期' + props.selectedKpi + '为 ' + m.value + '，' + mode + ' ' + arrow + ' ' + sign + m.delta + '。' + supp
 })
 </script>
 
