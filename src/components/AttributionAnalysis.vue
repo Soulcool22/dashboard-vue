@@ -234,6 +234,51 @@ const attributionData = {
   }
 }
 
+attributionData['资金到账率'] = {
+  type: '风险预警',
+  summary: '本期资金到账率为 76%，环比 ↑ +3%。进度款-3期逾期未付是主要风险点。',
+  factors: [
+    { title: '预付款与前两期进度款结清', value: '+2.0%', impact: 'positive', description: '预付款与前两期进度款均已到账，形成正向贡献。' },
+    { title: '进度款-3期逾期', value: '-1.5%', impact: 'negative', description: '第 3 期进度款到账仅 30%，且逾期 15 天，拖累整体到账率。' },
+    { title: '结算资料准备效率', value: '+0.5%', impact: 'positive', description: '财务与项目组协同，提升了结算资料的准备效率。' }
+  ],
+  recommendations: [
+    '建立逾期款项红黄灯机制，超过 7 天自动升级催收',
+    '与客户确认结算节奏，提前锁定下一期付款节点',
+    '对逾期阶段设置负责人与时限，形成闭环'
+  ]
+}
+
+attributionData['项目支出金额'] = {
+  type: '中性观察',
+  summary: '本期项目支出金额为 81%，整体与预算匹配度良好。材料与外包支出是主要构成。',
+  factors: [
+    { title: '材料采购集中期', value: '+1.2%', impact: 'neutral', description: '二期材料集中采购导致当期支出抬升，但在预算内。' },
+    { title: '外包服务进度款', value: '+0.8%', impact: 'neutral', description: '外包合同按节点支付，支出随交付节奏释放。' },
+    { title: '人员成本稳定', value: '±0.0%', impact: 'neutral', description: '人员编制稳定，人工成本基本维持在预算线附近。' }
+  ],
+  recommendations: [
+    '继续按里程碑控制采购与外包付款节奏',
+    '对大额支出设置事前评审与事后复盘',
+    '月度对比预算偏差，超过 5% 触发预警'
+  ]
+}
+
+attributionData['人员健康度'] = {
+  type: '风险预警',
+  summary: '本期人员健康度为 72%，环比 ↓ -3%。核心成员负载偏高与人员变动导致健康度下滑。',
+  factors: [
+    { title: '核心成员负载过高', value: '-2.0%', impact: 'negative', description: '关键岗位连续两周工时超过阈值，影响效率与稳定性。' },
+    { title: '人员流动与交接', value: '-1.0%', impact: 'negative', description: '人员变动导致知识交接耗时，对短期产能造成影响。' },
+    { title: '弹性与调休机制', value: '+0.5%', impact: 'positive', description: '弹性工作与调休机制缓解了部分负载压力。' }
+  ],
+  recommendations: [
+    '对关键岗位设置双人备份与轮岗计划',
+    '控制周工时阈值，超过即触发调整与支援',
+    '加速新人融入与交接文档标准化'
+  ]
+}
+
 const attribution = computed(() => {
   return attributionData[props.selectedKpi] || {
     type: '数据分析中',

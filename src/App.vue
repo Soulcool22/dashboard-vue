@@ -59,7 +59,7 @@
         <template v-if="!isCompanyView">
           <KpiGrid :kpis="kpis" :selected-kpi="selectedKpi" @select-kpi="handleSelectKpi" />
           <div class="chart-card-container">
-            <CompletionLine 
+            <KpiPanel 
               :selected-kpi="selectedKpi" 
               :is-overview="isChartOverview"
               :project-series="selectedProject?.series"
@@ -96,7 +96,7 @@ import { ref, computed, onMounted } from 'vue'
 import WatchList from './components/WatchList.vue'
 import RegularList from './components/RegularList.vue'
 import KpiGrid from './components/KpiGrid.vue'
-import CompletionLine from './components/CompletionLine.vue'
+import KpiPanel from './components/KpiPanel.vue'
 import ResearchChat from './components/ResearchChat.vue'
 import ProjectUpdates from './components/ProjectUpdates.vue'
 import AttributionAnalysis from './components/AttributionAnalysis.vue'
