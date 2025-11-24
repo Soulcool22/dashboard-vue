@@ -266,6 +266,8 @@ function deltaText(p){ if(!p || !p.series || p.series.length < 2) return ''; con
 }
 .nav-item.link {
   cursor: pointer;
+  color: var(--accent);
+  font-weight: 600;
 }
 .nav-item.link:hover {
   color: var(--accent);

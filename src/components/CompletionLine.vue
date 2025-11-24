@@ -100,19 +100,9 @@ function render(){
     // Use indices as x-axis labels for consistency with sparkline
     xAxisData = Array.from({ length: len }, (_, i) => String(i + 1))
 
-    // Generate a simple "Plan" line for visual comparison (linear from start to end of actual)
-    if (len > 0) {
-       const start = actualRates[0]
-       const end = actualRates[len - 1]
-       // Make plan slightly smoother/idealized version of actual trend
-       for(let i=0; i<len; i++) {
-         const t = i / (len - 1 || 1)
-         planRates.push(start + (end - start) * t)
-       }
-    }
+    // 移除参考线：不再生成计划线
 
   } else {
-    // KPI Mode: Use mock data generation
     const days = 60
     function fmt(d){ const m = (d.getMonth()+1).toString().padStart(2,'0'); const day = d.getDate().toString().padStart(2,'0'); return m+'-'+day }
     const base = new Date(); base.setHours(0,0,0,0)
@@ -123,26 +113,8 @@ function render(){
     planRates = data.planRates
   }
 
-  // Simple, robust logic to find the FIRST intersection
-  const markPointData = [];
-  // Only show intersection point if we have enough data and it's not a trivial match
-  if (actualRates.length > 1) {
-      for (let i = 1; i < actualRates.length; i++) {
-        if (actualRates[i-1] < planRates[i-1] && actualRates[i] >= planRates[i]) {
-          markPointData.push({
-            name: '交点',
-            coord: [i, actualRates[i]],
-            itemStyle: {
-              color: '#fff',
-              borderColor: '#3a7afe',
-              borderWidth: 2
-            },
-            label: { show: false }
-          });
-          break; 
-        }
-      }
-  }
+  // 移除交点逻辑：不再计算实际与计划交点
+  const markPointData = []
 
   const axisLine = '#d1d5db'
   const axisLabel = '#6b7280'
@@ -150,12 +122,10 @@ function render(){
   const actualLine = '#15803d'
   const areaStart = 'rgba(21,128,61,0.45)'
   const areaEnd = 'rgba(187,247,208,0.05)'
-  const planLine = '#64748b'
   const lineWidthActual = 2
-  const lineWidthPlan = 2
   
   const seriesNameActual = props.isOverview ? '实际进度' : '实际' + (props.selectedKpi || '')
-  const seriesNamePlan = props.isOverview ? '计划进度' : '计划' + (props.selectedKpi || '')
+  const seriesNamePlan = !props.isOverview ? ('计划' + (props.selectedKpi || '')) : null
 
   const option = {
     legend: { top: 0, right: 16, itemGap: 10, icon: 'rect', itemWidth: 14, itemHeight: 2 },
@@ -169,32 +139,33 @@ function render(){
             let a=null, p=null; 
             params.forEach(x=>{ 
                 if(x.seriesName===seriesNameActual) a=x.value; 
-                if(x.seriesName===seriesNamePlan) p=x.value; 
+                if(seriesNamePlan && x.seriesName===seriesNamePlan) p=x.value; 
             }); 
             const lines = params.map(x=> x.seriesName + ': ' + (x.value*100).toFixed(1) + '%'); 
-            const diff = (a!=null && p!=null) ? ((a-p)*100).toFixed(1) + '%' : ''; 
-            const s = diff ? (parseFloat(diff)>0 ? '超前' : parseFloat(diff)<0 ? '落后' : '持平') : ''; 
+            const diff = (a!=null && p!=null) ? ((a-p)*100).toFixed(1) + '%' : '';
+            const s = diff ? (parseFloat(diff)>0 ? '超前' : parseFloat(diff)<0 ? '落后' : '持平') : '';
             return params[0].axisValue + '<br/>' + lines.join('<br/>') + (diff?('<br/>差异(实-计): ' + diff + ' ' + s):''); 
         } 
     },
-    series: [
-      { 
-        name: seriesNameActual, 
-        type: 'line', 
-        data: actualRates, 
-        smooth: true, 
-        showSymbol: false, 
-        lineStyle: { width: lineWidthActual, color: actualLine }, 
-        emphasis: { focus: 'series', lineStyle: { width: lineWidthActual + 1 } }, 
-        areaStyle: { color: new echarts.graphic.LinearGradient(0,0,0,1,[ { offset: 0, color: areaStart }, { offset: 1, color: areaEnd } ]) },
-        markPoint: {
-          symbol: 'circle',
-          symbolSize: 7,
-          data: markPointData
+    series: (function(){
+      const arr = [
+        { 
+          name: seriesNameActual, 
+          type: 'line', 
+          data: actualRates, 
+          smooth: true, 
+          showSymbol: false, 
+          lineStyle: { width: lineWidthActual, color: actualLine }, 
+          emphasis: { focus: 'series', lineStyle: { width: lineWidthActual + 1 } }, 
+          areaStyle: { color: new echarts.graphic.LinearGradient(0,0,0,1,[ { offset: 0, color: areaStart }, { offset: 1, color: areaEnd } ]) },
+          markPoint: { symbol: 'circle', symbolSize: 7, data: markPointData }
         }
-      },
-      { name: seriesNamePlan, type: 'line', data: planRates, smooth: true, showSymbol: false, lineStyle: { width: lineWidthPlan + 0.5, color: planLine, type: 'dashed', opacity: 1, dashOffset: 0, cap: 'round' } }
-    ]
+      ]
+      if (!props.isOverview && planRates && planRates.length) {
+        arr.push({ name: seriesNamePlan, type: 'line', data: planRates, smooth: true, showSymbol: false, lineStyle: { width: lineWidthActual + 0.5, color: '#64748b', type: 'dashed' } })
+      }
+      return arr
+    })()
   }
   
   chart.setOption(option, true) // true = notMerge, force update

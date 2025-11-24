@@ -66,7 +66,7 @@
                   <icon-check-one theme="filled" size="16" fill="#15803d" />
                 </div>
                 <div class="mm-content">
-                  <span class="mm-label">自动化覆盖</span>
+                  <span class="mm-label">人员健康度</span>
                   <span class="mm-value success">75%</span>
                 </div>
               </div>
@@ -160,7 +160,7 @@ const riskProjects = ref([
     status: 'exception'
   },
   {
-    name: 'CRM 系统重构',
+    name: 'SSJS前海',
     level: 'medium',
     levelText: '中风险',
     category: '资源缺口',
@@ -170,7 +170,7 @@ const riskProjects = ref([
     status: 'warning'
   },
   {
-    name: '移动端 V3.0',
+    name: '临沂-机场',
     level: 'medium',
     levelText: '中风险',
     category: '质量缺陷返工',
@@ -285,7 +285,7 @@ function initTrendChart() {
 }
 
 .header-title {
-  font-size: 24px;
+  font-size: 20px;
   font-weight: 700;
   color: var(--text);
   letter-spacing: -0.5px;
