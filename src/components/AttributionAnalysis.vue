@@ -5,10 +5,10 @@
         <icon-analysis theme="outline" size="16" :strokeWidth="3" />
         归因分析
       </h3>
-      <span class="insight-badge">{{ attribution.type }}</span>
+      <span class="insight-badge" :class="badgeToneClass">{{ attribution.type }}</span>
     </div>
 
-    <div class="summary-section">
+    <div class="summary-section" :class="sectionToneClass">
       <div class="summary-text">{{ summaryText }}</div>
     </div>
 
@@ -255,6 +255,16 @@ const summaryText = computed(() => {
   const supp = parts.length > 1 ? parts.slice(1).join('。') : ''
   return '本期' + props.selectedKpi + '为 ' + m.value + '，' + mode + ' ' + arrow + ' ' + sign + m.delta + '。' + supp
 })
+
+const badgeToneClass = computed(() => {
+  const t = (attribution.value.type || '')
+  return t.includes('风险') ? 'red' : 'blue'
+})
+
+const sectionToneClass = computed(() => {
+  const t = (attribution.value.type || '')
+  return t.includes('风险') ? 'red-mode' : 'blue-mode'
+})
 </script>
 
 <style scoped>
@@ -299,11 +309,35 @@ const summaryText = computed(() => {
   border: 1px solid rgba(88, 158, 248, 0.2);
 }
 
+.insight-badge.blue {
+  color: var(--accent);
+  background-color: var(--accent-soft);
+  border-color: rgba(88, 158, 248, 0.2);
+}
+
+
+.insight-badge.red {
+  color: #ef4444;
+  background-color: rgba(239, 68, 68, 0.10);
+  border: 1px solid rgba(239, 68, 68, 0.22);
+}
+
 .summary-section {
   background: linear-gradient(135deg, rgba(88, 158, 248, 0.05) 0%, rgba(88, 158, 248, 0.02) 100%);
   padding: 12px;
   border-radius: 6px;
   border-left: 3px solid var(--accent);
+}
+
+.summary-section.blue-mode {
+  background: linear-gradient(135deg, rgba(88, 158, 248, 0.05) 0%, rgba(88, 158, 248, 0.02) 100%);
+  border-left-color: var(--accent);
+}
+
+
+.summary-section.red-mode {
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.04) 0%, rgba(239, 68, 68, 0.015) 100%);
+  border-left-color: #ef4444;
 }
 
 .summary-text {
