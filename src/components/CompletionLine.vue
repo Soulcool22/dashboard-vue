@@ -1,12 +1,89 @@
 <template>
   <div class="card chart-card">
-    <h3>{{ isOverview ? '进度兑现指数（折线）' : (selectedKpi ? selectedKpi + '（折线）' : '（折线）') }}</h3>
-    <div ref="el" class="chart-box"></div>
+    <!-- Header -->
+    <div class="card-header">
+      <h3>{{ isOverview ? '进度兑现指数（折线）' : (selectedKpi ? selectedKpi + (selectedKpi === '资金到账率' ? '详情' : '（折线）') : '（折线）') }}</h3>
+    </div>
+
+    <!-- Specialized View for Fund Arrival Rate -->
+    <div v-if="selectedKpi === '资金到账率'" class="fund-dashboard">
+      <!-- Top Section: Overall Status -->
+      <div class="fund-overview">
+        <div class="fund-metric-box total">
+          <div class="label">总应收金额</div>
+          <div class="value">¥ 12,500,000</div>
+        </div>
+        <div class="fund-divider"></div>
+        <div class="fund-metric-box received">
+          <div class="label">实际已收</div>
+          <div class="value highlight">¥ 9,500,000</div>
+          <div class="sub-text">到账率 76%</div>
+        </div>
+        <div class="fund-divider"></div>
+        <div class="fund-metric-box pending">
+          <div class="label">待收金额</div>
+          <div class="value">¥ 3,000,000</div>
+        </div>
+      </div>
+
+      <!-- Middle Section: Payment Stages -->
+      <div class="fund-stages">
+        <div class="stage-header">
+          <span>款项节点</span>
+          <span>到账进度</span>
+          <span>状态</span>
+        </div>
+        <div class="stage-list">
+          <div v-for="(stage, idx) in fundStages" :key="idx" class="stage-item">
+            <div class="stage-info">
+              <span class="stage-name">{{ stage.name }}</span>
+              <span class="stage-amount">应收: {{ stage.due }} / 实收: {{ stage.actual }}</span>
+            </div>
+            <div class="stage-progress">
+              <el-progress 
+                :percentage="stage.percent" 
+                :status="stage.status === 'overdue' ? 'exception' : (stage.percent === 100 ? 'success' : '')"
+                :stroke-width="8"
+                :show-text="false"
+              />
+              <span class="progress-val">{{ stage.percent }}%</span>
+            </div>
+            <div class="stage-status">
+              <span class="status-badge" :class="stage.status">
+                {{ stage.statusText }}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bottom Section: Overdue Alerts -->
+      <div class="fund-alerts" v-if="overdueItems.length > 0">
+        <div class="alert-title">
+          <icon-attention theme="filled" size="14" fill="#ef4444" />
+          <span>逾期风险提醒</span>
+        </div>
+        <div class="alert-list">
+          <div v-for="(item, idx) in overdueItems" :key="idx" class="alert-item">
+            <span class="alert-dot"></span>
+            <span class="alert-text">
+              <span class="alert-stage">{{ item.name }}</span>
+              应收 <span class="alert-money">{{ item.due }}</span>，
+              已逾期 <span class="alert-days">{{ item.days }}</span> 天，
+              请尽快催收。
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Generic Line Chart for Other KPIs -->
+    <div v-else ref="el" class="chart-box"></div>
   </div>
 </template>
 
 <script setup>
-import { onMounted, onBeforeUnmount, ref, watch } from 'vue'
+import { onMounted, onBeforeUnmount, ref, watch, computed } from 'vue'
 import * as echarts from 'echarts'
 
 const props = defineProps({
@@ -16,6 +93,22 @@ const props = defineProps({
 })
 const emit = defineEmits(['stats-changed'])
 
+// --- Fund Arrival Data Logic ---
+const fundStages = ref([
+  { name: '预付款 (30%)', due: '¥375w', actual: '¥375w', percent: 100, status: 'normal', statusText: '已结清' },
+  { name: '进度款-1期 (20%)', due: '¥250w', actual: '¥250w', percent: 100, status: 'normal', statusText: '已结清' },
+  { name: '进度款-2期 (20%)', due: '¥250w', actual: '¥250w', percent: 100, status: 'normal', statusText: '已结清' },
+  { name: '进度款-3期 (20%)', due: '¥250w', actual: '¥75w', percent: 30, status: 'overdue', statusText: '逾期未付' },
+  { name: '质保金 (10%)', due: '¥125w', actual: '¥0', percent: 0, status: 'pending', statusText: '未达节点' }
+])
+
+const overdueItems = computed(() => {
+  return [
+    { name: '进度款-3期', due: '¥175w', days: 15 }
+  ]
+})
+
+// --- Existing Chart Logic ---
 // 缓存 KPI 模式的示例数据，避免每次点击都重新生成
 const mockCache = new Map()
 
@@ -24,13 +117,30 @@ let chart = null
 let resizeObserver = null
 
 watch(() => [props.selectedKpi, props.isOverview, props.projectSeries], () => {
-  render()
+  if (props.selectedKpi !== '资金到账率') {
+    setTimeout(() => render(), 0)
+  }
 }, { deep: true })
 
+watch(() => props.selectedKpi, (v) => {
+  if (v === '资金到账率') {
+    if (resizeObserver) {
+      resizeObserver.disconnect()
+      resizeObserver = null
+    }
+    if (chart) {
+      chart.dispose()
+      chart = null
+    }
+  }
+})
+
 onMounted(()=>{
-  render()
-  resizeObserver = new ResizeObserver(onResize)
-  resizeObserver.observe(el.value)
+  if (props.selectedKpi !== '资金到账率') {
+    render()
+  }
+  // Observe the container, not the chart element directly, or handle nulls
+  // For simplicity, we'll try to observe if el exists, otherwise we might need a wrapper
 })
 
 onBeforeUnmount(()=>{
@@ -39,7 +149,6 @@ onBeforeUnmount(()=>{
   }
   if(chart){ chart.dispose(); chart=null }
 })
-function onResize(){ if(chart) chart.resize() }
 
 function generateMockData(seedStr) {
   const days = 60
@@ -87,8 +196,18 @@ function generateMockData(seedStr) {
 
 function render(){
   if(!el.value) return
+  if (chart && chart.getDom && chart.getDom() !== el.value) {
+    chart.dispose()
+    chart = null
+  }
   if (!chart) {
     chart = echarts.init(el.value)
+    if (!resizeObserver) {
+      resizeObserver = new ResizeObserver(() => chart && chart.resize())
+    } else {
+      resizeObserver.disconnect()
+    }
+    resizeObserver.observe(el.value)
   }
   
   let actualRates = []
@@ -195,4 +314,213 @@ function render(){
 </script>
 
 <style scoped>
+.card-header {
+  margin-bottom: 12px;
+}
+.card-header h3 {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+/* Fund Dashboard Styles */
+.fund-dashboard {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  height: 100%;
+  padding: 0 4px;
+  overflow-y: auto;
+}
+
+/* Top Section */
+.fund-overview {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #f8fafc;
+  padding: 12px 16px;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+}
+
+.fund-metric-box {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.fund-metric-box .label {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.fund-metric-box .value {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text);
+  font-family: 'Roboto Mono', monospace; /* Use monospaced for numbers if available */
+}
+
+.fund-metric-box .value.highlight {
+  color: #3b82f6;
+  font-size: 18px;
+}
+
+.fund-metric-box .sub-text {
+  font-size: 11px;
+  color: #3b82f6;
+  background: #eff6ff;
+  padding: 1px 4px;
+  border-radius: 4px;
+  width: fit-content;
+}
+
+.fund-divider {
+  width: 1px;
+  height: 32px;
+  background: #cbd5e1;
+}
+
+/* Middle Section: Stages */
+.fund-stages {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.stage-header {
+  display: grid;
+  grid-template-columns: 2fr 3fr 1fr;
+  font-size: 12px;
+  color: var(--muted);
+  padding: 0 4px;
+}
+
+.stage-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.stage-item {
+  display: grid;
+  grid-template-columns: 2fr 3fr 1fr;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 12px;
+  background: #fff;
+  border: 1px solid #f1f5f9;
+  border-radius: 6px;
+  transition: all 0.2s;
+}
+
+.stage-item:hover {
+  border-color: #e2e8f0;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+}
+
+.stage-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.stage-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.stage-amount {
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.stage-progress {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.stage-progress :deep(.el-progress) {
+  flex: 1;
+}
+
+.progress-val {
+  font-size: 12px;
+  color: var(--muted);
+  width: 32px;
+  text-align: right;
+}
+
+.stage-status {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.status-badge {
+  font-size: 11px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-weight: 500;
+}
+
+.status-badge.normal { background: #f0fdf4; color: #15803d; }
+.status-badge.overdue { background: #fef2f2; color: #ef4444; }
+.status-badge.pending { background: #f8fafc; color: #94a3b8; }
+
+/* Bottom Section: Alerts */
+.fund-alerts {
+  margin-top: 4px;
+  background: #fff1f2;
+  border: 1px solid #fecaca;
+  border-radius: 6px;
+  padding: 10px 12px;
+}
+
+.alert-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #991b1b;
+  margin-bottom: 6px;
+}
+
+.alert-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.alert-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 12px;
+  color: #7f1d1d;
+  line-height: 1.4;
+}
+
+.alert-dot {
+  width: 4px;
+  height: 4px;
+  background: #ef4444;
+  border-radius: 50%;
+  margin-top: 6px;
+}
+
+.alert-stage { font-weight: 600; }
+.alert-money { font-weight: 700; font-family: 'Roboto Mono', monospace; }
+.alert-days { font-weight: 700; text-decoration: underline; }
+
+/* Generic Chart Box */
+.chart-box {
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+}
 </style>
