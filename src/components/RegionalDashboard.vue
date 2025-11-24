@@ -9,12 +9,12 @@
         </div>
         <div class="kpi-divider"></div>
         <div class="kpi-card">
-          <span class="kpi-label">总进度</span>
-          <span class="kpi-value">72%</span>
+          <span class="kpi-label">本月计划交付</span>
+          <span class="kpi-value">6</span>
         </div>
         <div class="kpi-divider"></div>
         <div class="kpi-card">
-          <span class="kpi-label">本月交付</span>
+          <span class="kpi-label">本月已交付</span>
           <span class="kpi-value">3</span>
         </div>
         <div class="kpi-divider"></div>
@@ -215,7 +215,7 @@ function initChart() {
 }
 
 .kpi-label {
-  font-size: 12px;
+  font-size: 13px;
   color: var(--muted);
 }
 
@@ -325,7 +325,7 @@ function initChart() {
 
 .col-name { font-weight: 500; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .col-status { display: flex; align-items: center; gap: 6px; color: var(--text); }
-.col-manager { color: var(--muted); text-align: right; }
+.col-manager { color: var(--muted); text-align: right; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
 .status-dot { width: 6px; height: 6px; border-radius: 50%; }
 .status-dot.normal { background: #15803d; }
@@ -333,7 +333,8 @@ function initChart() {
 .status-dot.risk { background: #e6a23c; }
 
 .col-progress { display: flex; align-items: center; gap: 8px; }
-.progress-text { min-width: 30px; text-align: right; color: var(--muted); font-size: 11px; }
+.col-progress :deep(.el-progress) { flex: 1; min-width: 0; }
+.progress-text { min-width: 36px; text-align: right; color: var(--muted); font-size: 11px; }
 
 /* Chart */
 .chart-container {

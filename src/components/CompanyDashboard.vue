@@ -77,7 +77,7 @@
                 </div>
                 <div class="mm-content">
                   <span class="mm-label">交付效率</span>
-                  <span class="mm-value">High</span>
+                  <span class="mm-value">高</span>
                 </div>
               </div>
             </div>
@@ -99,6 +99,7 @@
             </div>
             <div class="risk-reason">
               <span class="reason-label">风险归因：</span>
+              <span class="reason-category">{{ project.category }}</span>
               <span class="reason-text">{{ project.reason }}</span>
             </div>
             <div class="risk-action">
@@ -149,6 +150,7 @@ const riskProjects = ref([
     name: '支付网关升级',
     level: 'high',
     levelText: '高风险',
+    category: '供应商问题',
     reason: '第三方渠道接口变更，导致联调受阻',
     action: '协调渠道方技术负责人召开紧急会议',
     progress: 45,
@@ -158,6 +160,7 @@ const riskProjects = ref([
     name: 'CRM 系统重构',
     level: 'medium',
     levelText: '中风险',
+    category: '资源缺口',
     reason: '核心开发人员请假，进度滞后 3 天',
     action: '从「报表组」临时抽调 1 名高级开发支援',
     progress: 72,
@@ -167,6 +170,7 @@ const riskProjects = ref([
     name: '移动端 V3.0',
     level: 'medium',
     levelText: '中风险',
+    category: '质量缺陷返工',
     reason: 'UI 验收反馈问题较多，修复耗时',
     action: '组织 UI 与前端坐班集中修复',
     progress: 88,
@@ -508,12 +512,12 @@ function initTrendChart() {
 
 .risk-reason, .risk-action {
   font-size: 12px;
-  line-height: 1.4;
-  display: flex;
-  gap: 4px;
+  line-height: 1.6;
+  display: block;
 }
 
 .reason-label, .action-label { color: var(--muted); flex-shrink: 0; }
+.reason-category { color: #3b82f6; font-weight: 600; margin: 0 4px; }
 .reason-text, .action-text { color: var(--text); }
 
 .risk-progress { margin-top: 4px; }
