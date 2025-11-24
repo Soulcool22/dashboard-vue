@@ -44,17 +44,14 @@
         </div>
 
         <!-- View Title Bar -->
-        <div class="middle-header">
-          <div v-if="!isCompanyView && selectedProject" class="project-info">
+        <div class="middle-header" v-if="!isCompanyView && selectedProject">
+          <div class="project-info">
             <div class="project-main-title">{{ selectedProject.name }}</div>
             <div class="project-index-row">
               <div class="project-index-value">{{ lastValue(selectedProject).toFixed(2) }}</div>
               <div class="project-index-label">进度兑现指数</div>
               <div class="project-index-change" :class="deltaSign(selectedProject) >= 0 ? 'up' : 'down'">{{ deltaText(selectedProject) }}</div>
             </div>
-          </div>
-          <div v-else class="project-info">
-            <!-- Company view header removed as requested -->
           </div>
         </div>
 
@@ -246,7 +243,7 @@ function deltaText(p){ if(!p || !p.series || p.series.length < 2) return ''; con
 
 /* Breadcrumb Nav Styles */
 .nav-bar {
-  padding: 2px 0 6px 0;
+  padding: 2px 0 2px 0;
   font-size: 13px;
   color: var(--muted);
   display: flex;
