@@ -133,10 +133,10 @@ const regulars = ref([
   { name: 'SSKJ前海', sector: '潘勇', series: generateSeriesData() }
 ])
 const kpis = ref([
-  { title: '任务完成率', value: '76%', delta: '+3%', up: true },
-  { title: '开工准点率', value: '78%', delta: '+2%', up: true },
-  { title: '完工准点率', value: '81%', delta: '+1%', up: true },
-  { title: '关键里程碑达成率', value: '72%', delta: '-3%', up: false },
+  { title: '资金到账率', value: '76%', delta: '+3%', up: true },
+  { title: '任务完成率', value: '78%', delta: '+2%', up: true },
+  { title: '项目支出金额', value: '81%', delta: '+1%', up: true },
+  { title: '人员健康度', value: '72%', delta: '-3%', up: false },
   { title: '逾期任务率', value: '22%', delta: '-1%', up: true }
 ])
 
