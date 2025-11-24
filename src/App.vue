@@ -63,12 +63,15 @@
               :selected-kpi="selectedKpi" 
               :is-overview="isChartOverview"
               :project-series="selectedProject?.series"
+              @stats-changed="updateKpiFromChart"
             />
           </div>
           <!-- 根据是否选中 KPI 卡片来决定显示归因分析还是项目更新 -->
           <AttributionAnalysis 
             v-if="selectedKpi" 
             :selected-kpi="selectedKpi"
+            :metrics="kpiLiveMetrics"
+            :compare-mode="kpiLiveCompareMode"
             class="updates-container"
           />
           <ProjectUpdates 
@@ -137,6 +140,9 @@ const kpis = ref([
   { title: '逾期任务率', value: '22%', delta: '-1%', up: true }
 ])
 
+const kpiLiveMetrics = ref(null)
+const kpiLiveCompareMode = ref('')
+
 // --- View State ---
 const isCompanyView = ref(true) // Show company view by default
 const isChartOverview = ref(false) // Track if we are in project overview mode (enlarged sparkline)
@@ -196,6 +202,32 @@ function selectProjectByName(name) {
     isChartOverview.value = true
     selectedKpi.value = null
   }
+}
+
+function updateKpiFromChart(payload){
+  if (!selectedKpi.value) return
+  const idx = kpis.value.findIndex(k => k.title === selectedKpi.value)
+  if (idx === -1) return
+  const lastPct = Math.round((payload.last || 0) * 100)
+  let up = payload.isUp
+  let deltaPct = 0
+  if (selectedKpi.value === '关键里程碑达成率' || selectedKpi.value === '任务完成率') {
+    if (payload.planLast != null) {
+      deltaPct = Math.abs(Math.round((payload.last - payload.planLast) * 100))
+      up = (payload.last - payload.planLast) >= 0
+    } else {
+      deltaPct = Math.abs(Math.round((payload.last - (payload.prev || payload.last)) * 100))
+      up = (payload.prev != null) ? (payload.last - payload.prev) >= 0 : up
+    }
+    kpiLiveCompareMode.value = '较计划'
+  } else {
+    deltaPct = Math.abs(Math.round((payload.last - (payload.prev || payload.last)) * 100))
+    up = (payload.prev != null) ? (payload.last - payload.prev) >= 0 : up
+    kpiLiveCompareMode.value = '环比'
+  }
+  const updated = { ...kpis.value[idx], value: lastPct + '%', delta: deltaPct + '%', up }
+  kpis.value.splice(idx, 1, updated)
+  kpiLiveMetrics.value = { value: updated.value, delta: updated.delta, up: updated.up }
 }
 
 // --- Selection and View Logic ---

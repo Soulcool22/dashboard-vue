@@ -14,6 +14,7 @@ const props = defineProps({
   isOverview: { type: Boolean, default: false },
   projectSeries: { type: Array, default: () => [] }
 })
+const emit = defineEmits(['stats-changed'])
 
 const el = ref(null)
 let chart = null
@@ -119,9 +120,22 @@ function render(){
   const axisLine = '#d1d5db'
   const axisLabel = '#6b7280'
   const gridLine = '#f3f4f6'
-  const actualLine = '#15803d'
-  const areaStart = 'rgba(21,128,61,0.45)'
-  const areaEnd = 'rgba(187,247,208,0.05)'
+  let isUp = true
+  if (actualRates.length >= 2) {
+    const prev = actualRates[actualRates.length - 2]
+    const last = actualRates[actualRates.length - 1]
+    isUp = (last - prev) >= 0
+  }
+  const actualLine = isUp ? '#15803d' : '#dc2626'
+  const areaStart = isUp ? 'rgba(21,128,61,0.45)' : 'rgba(220,38,38,0.25)'
+  const areaEnd = isUp ? 'rgba(187,247,208,0.05)' : 'rgba(255,255,255,0)'
+
+  if (actualRates.length) {
+    const last = actualRates[actualRates.length - 1]
+    const prev = actualRates.length > 1 ? actualRates[actualRates.length - 2] : null
+    const planLast = planRates && planRates.length ? planRates[planRates.length - 1] : null
+    emit('stats-changed', { last, prev, planLast, isUp, isOverview: props.isOverview, kpi: props.selectedKpi })
+  }
   const lineWidthActual = 2
   
   const seriesNameActual = props.isOverview ? '实际进度' : '实际' + (props.selectedKpi || '')
