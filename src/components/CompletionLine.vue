@@ -16,6 +16,9 @@ const props = defineProps({
 })
 const emit = defineEmits(['stats-changed'])
 
+// 缓存 KPI 模式的示例数据，避免每次点击都重新生成
+const mockCache = new Map()
+
 const el = ref(null)
 let chart = null
 let resizeObserver = null
@@ -109,7 +112,12 @@ function render(){
     const base = new Date(); base.setHours(0,0,0,0)
     for(let i=days-1;i>=0;i--){ const d = new Date(base); d.setDate(base.getDate()-i); xAxisData.push(fmt(d)) }
     
-    const data = generateMockData(props.selectedKpi || '任务完成率')
+    const key = props.selectedKpi || '任务完成率'
+    let data = mockCache.get(key)
+    if (!data) {
+      data = generateMockData(key)
+      mockCache.set(key, data)
+    }
     actualRates = data.actualRates
     planRates = data.planRates
   }
@@ -182,7 +190,7 @@ function render(){
     })()
   }
   
-  chart.setOption(option, true) // true = notMerge, force update
+  chart.setOption(option, false)
 }
 </script>
 
