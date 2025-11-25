@@ -6,6 +6,7 @@
 import { computed } from 'vue'
 import CompletionLine from './CompletionLine.vue'
 import FundArrivalView from './kpi/FundArrivalView.vue'
+import ProjectExpenditureView from './kpi/ProjectExpenditureView.vue'
 
 const props = defineProps({
   selectedKpi: { type: String, default: null },
@@ -15,7 +16,8 @@ const props = defineProps({
 const emit = defineEmits(['stats-changed'])
 
 const viewMap = {
-  '资金到账率': FundArrivalView
+  '资金到账率': FundArrivalView,
+  '项目支出金额': ProjectExpenditureView
 }
 
 const currentComp = computed(() => {

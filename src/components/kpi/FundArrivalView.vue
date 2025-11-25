@@ -99,7 +99,7 @@ onMounted(() => {
 .fund-overview { display: flex; align-items: center; justify-content: space-evenly; gap: 0; background: #f8fafc; padding: 12px 12px; border-radius: 8px; border: 1px solid #e2e8f0; }
 .fund-metric-box { display: flex; flex-direction: column; gap: 4px; align-items: center; text-align: center; flex: 1; }
 .fund-metric-box .label { font-size: 12px; color: var(--muted); }
-.fund-metric-box .value { font-size: 18px; font-weight: 700; color: var(--text); font-family: 'Roboto Mono', monospace; font-variant-numeric: tabular-nums; font-feature-settings: "tnum"; line-height: 1.1; display: inline-flex; align-items: center; gap: 8px; }
+.fund-metric-box .value { font-size: 18px; font-weight: 700; color: var(--text); font-family: sans-serif; font-variant-numeric: tabular-nums; font-feature-settings: "tnum"; line-height: 1.1; display: inline-flex; align-items: center; gap: 8px; }
 .fund-metric-box .value .currency { font-size: 0.9em; color: var(--muted); margin-right: 4px; }
 .fund-metric-box .value .amount { letter-spacing: 0.2px; }
 .fund-metric-box .value.highlight { color: #3b82f6; }

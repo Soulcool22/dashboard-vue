@@ -68,7 +68,7 @@
           </div>
           <!-- 根据是否选中 KPI 卡片来决定显示归因分析还是项目更新 -->
           <AttributionAnalysis 
-            v-if="selectedKpi && selectedKpi !== '资金到账率'" 
+            v-if="selectedKpi && selectedKpi !== '资金到账率' && selectedKpi !== '项目支出金额'" 
             :selected-kpi="selectedKpi"
             :metrics="kpiLiveMetrics"
             :compare-mode="kpiLiveCompareMode"
