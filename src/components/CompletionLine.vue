@@ -109,22 +109,21 @@ function render(){
   let planRates = []
   let xAxisData = []
   
-  if (props.isOverview && props.projectSeries && props.projectSeries.length > 0) {
-    // Overview Mode: Use project series data
-    // Normalize 0-100 to 0-1
-    actualRates = props.projectSeries.map(v => v / 100)
-    const len = actualRates.length
-    
-    // Use indices as x-axis labels for consistency with sparkline
-    xAxisData = Array.from({ length: len }, (_, i) => String(i + 1))
-
-    // 移除参考线：不再生成计划线
-
-  } else {
-    const days = 60
+  function buildDateLabels(len){
     function fmt(d){ const m = (d.getMonth()+1).toString().padStart(2,'0'); const day = d.getDate().toString().padStart(2,'0'); return m+'-'+day }
     const base = new Date(); base.setHours(0,0,0,0)
-    for(let i=days-1;i>=0;i--){ const d = new Date(base); d.setDate(base.getDate()-i); xAxisData.push(fmt(d)) }
+    const arr = []
+    for(let i=len-1;i>=0;i--){ const d = new Date(base); d.setDate(base.getDate()-i); arr.push(fmt(d)) }
+    return arr
+  }
+
+  if (props.isOverview && props.projectSeries && props.projectSeries.length > 0) {
+    actualRates = props.projectSeries.map(v => v / 100)
+    const len = actualRates.length
+    xAxisData = buildDateLabels(len)
+  } else {
+    const days = 60
+    xAxisData = buildDateLabels(days)
     
     const key = props.selectedKpi || '任务完成率'
     let data = mockCache.get(key)
