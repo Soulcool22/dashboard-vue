@@ -196,7 +196,9 @@ const titleText = computed(() => {
   if (props.isCompanyView) {
     return '项目总体洞察'
   } else if (props.currentProject) {
-    return `项目洞察：${props.currentProject.name}`
+    // 根据视图状态显示不同标题
+    const prefix = isAlternativeView.value ? '项目风险' : '项目洞察'
+    return `${prefix}：${props.currentProject.name}`
   }
   return '项目洞察'
 })
