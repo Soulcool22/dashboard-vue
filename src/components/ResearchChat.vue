@@ -2,22 +2,41 @@
   <section class="col col-right">
     <!-- Fixed Header -->
     <div class="header-section">
-      <h3 class="research-title">{{ titleText }}</h3>
+      <div class="header-content">
+        <div class="switch-btn" @click="toggleView" v-if="!isCompanyView">
+          <icon-switch theme="two-tone" size="22" :fill="['#15803d' ,'#ffffff']" :strokeWidth="3" strokeLinejoin="bevel"/>
+        </div>
+        <h3 class="research-title">{{ titleText }}</h3>
+      </div>
     </div>
 
     <!-- Scrollable Content Area -->
     <div class="chat-content" ref="chatContainer">
-      <!-- Initial Analysis Report (Dynamic Content) -->
-      <div class="research-content" v-html="currentAnalysis"></div>
+      <!-- 默认视图：分析报告 + 对话 -->
+      <template v-if="!isAlternativeView">
+        <!-- Initial Analysis Report (Dynamic Content) -->
+        <div class="research-content" v-html="currentAnalysis"></div>
 
-      <!-- Dialogue History -->
-      <div class="dialogue-container" v-if="messages.length > 0">
-        <div v-for="(msg, index) in messages" :key="index" :class="['msg', msg.role]">
-          <div class="msg-content">
-            {{ msg.text }}
+        <!-- Dialogue History -->
+        <div class="dialogue-container" v-if="messages.length > 0">
+          <div v-for="(msg, index) in messages" :key="index" :class="['msg', msg.role]">
+            <div class="msg-content">
+              {{ msg.text }}
+            </div>
           </div>
         </div>
-      </div>
+      </template>
+
+      <!-- 新视图：占位内容 -->
+      <template v-else>
+        <div class="alternative-view">
+          <div class="placeholder-content">
+            <h4>新视图</h4>
+            <p>这里是切换后的全新视图内容区域</p>
+            <p>可以在这里添加任何自定义内容</p>
+          </div>
+        </div>
+      </template>
     </div>
 
     <!-- Fixed Footer (Input Area) -->
@@ -66,7 +85,7 @@
 
 <script setup>
 import { ref, nextTick, computed, watch, onMounted } from 'vue'
-import { Up, Down } from '@icon-park/vue-next'
+import { Up, Down, Switch } from '@icon-park/vue-next'
 
 const props = defineProps({
   isCompanyView: { type: Boolean, default: true },
@@ -77,6 +96,12 @@ const searchQuery = ref('')
 const messages = ref([])
 const showSuggestions = ref(false)
 const chatContainer = ref(null)
+const isAlternativeView = ref(false) // 新增：控制视图切换
+
+// 切换视图函数
+function toggleView() {
+  isAlternativeView.value = !isAlternativeView.value
+}
 
 // --- Data Templates ---
 
@@ -218,6 +243,13 @@ function handleBlur() {
   background-color: var(--border);
 }
 
+.header-content {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 12px;
+}
+
 .research-title { 
   font-size: 16px; 
   font-weight: 600; 
@@ -226,6 +258,22 @@ function handleBlur() {
   border: none;
   padding: 0;
   background: transparent;
+}
+
+.switch-btn {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+
+.switch-btn:hover {
+  background: rgba(21, 128, 61, 0.08);
 }
 
 /* Scrollable Middle Area */
@@ -261,6 +309,34 @@ function handleBlur() {
 .research-content ul { list-style: none; padding-left: 0; margin: 1.1em 0; }
 .research-content li { padding-left: 1.2em; position: relative; margin-bottom: 0.6em; }
 .research-content li::before { content: '■'; position: absolute; left: 0; top: 0.1em; font-size: 0.7em; color: var(--accent); }
+
+/* Alternative View Styles */
+.alternative-view {
+  padding: 16px;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.placeholder-content {
+  text-align: center;
+  color: var(--text);
+}
+
+.placeholder-content h4 {
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0 0 12px 0;
+  color: var(--accent);
+}
+
+.placeholder-content p {
+  font-size: 14px;
+  color: var(--muted);
+  margin: 8px 0;
+}
+
 
 /* Dialogue/Message Styles */
 .dialogue-container {
