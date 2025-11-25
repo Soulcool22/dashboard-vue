@@ -4,7 +4,7 @@
     <div class="header-section">
       <div class="header-content">
         <div class="switch-btn" @click="toggleView" v-if="!isCompanyView">
-          <icon-switch theme="two-tone" size="22" :fill="['#15803d' ,'#ffffff']" :strokeWidth="3" strokeLinejoin="bevel"/>
+        <icon-switch theme="outline" size="22" fill="#999595" :strokeWidth="4" strokeLinejoin="bevel"/>
         </div>
         <h3 class="research-title">{{ titleText }}</h3>
       </div>
@@ -275,7 +275,7 @@ function handleBlur() {
 }
 
 .switch-btn:hover {
-  background: rgba(21, 128, 61, 0.08);
+  background: rgba(153, 149, 149, 0.1);
 }
 
 /* Scrollable Middle Area */
