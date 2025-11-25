@@ -158,10 +158,12 @@ function initContext() {
   if (props.isCompanyView) {
     currentAnalysis.value = companyAnalysis
     currentSuggestions.value = [...companySuggestions]
+    isAlternativeView.value = false // 公司视图：显示默认视图
   } else {
     const pName = props.currentProject ? props.currentProject.name : '未知项目'
     currentAnalysis.value = getProjectAnalysis(pName)
     currentSuggestions.value = [...projectSuggestions]
+    isAlternativeView.value = true // 项目视图：默认显示新视图
   }
 }
 
