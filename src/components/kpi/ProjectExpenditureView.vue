@@ -4,32 +4,21 @@
       <h3>项目支出分析</h3>
     </div>
     <div class="expenditure-container">
-      <!-- 顶部概览区域 (仿 FundArrivalView 风格但更精致) -->
-      <div class="overview-panel">
-        <div class="metric-item">
-          <div class="metric-content">
-            <div class="metric-label">总预算</div>
-            <div class="metric-value">{{ formatFullNumber(totalBudget) }}</div>
-          </div>
+      <div class="fund-overview">
+        <div class="fund-metric-box total">
+          <div class="label">总预算</div>
+          <div class="value"><span class="currency">¥</span><span class="amount">{{ formatFullNumber(totalBudget) }}</span></div>
         </div>
-        
-        <div class="metric-divider"></div>
-        
-        <div class="metric-item">
-          <div class="metric-content">
-            <div class="metric-label">累计支出</div>
-            <div class="metric-value highlight">{{ formatFullNumber(totalExpenditure) }}</div>
-            <div class="metric-sub">执行率 {{ budgetUtilization }}%</div>
-          </div>
+        <div class="fund-divider"></div>
+        <div class="fund-metric-box received">
+          <div class="label">累计支出</div>
+          <div class="value highlight"><span class="currency">¥</span><span class="amount">{{ formatFullNumber(totalExpenditure) }}</span></div>
+          <div class="sub-text">执行率 {{ budgetUtilization }}%</div>
         </div>
-        
-        <div class="metric-divider"></div>
-        
-        <div class="metric-item">
-          <div class="metric-content">
-            <div class="metric-label">剩余预算</div>
-            <div class="metric-value">{{ formatFullNumber(remainingBudget) }}</div>
-          </div>
+        <div class="fund-divider"></div>
+        <div class="fund-metric-box pending">
+          <div class="label">剩余预算</div>
+          <div class="value"><span class="currency">¥</span><span class="amount">{{ formatFullNumber(remainingBudget) }}</span></div>
         </div>
       </div>
 
@@ -221,33 +210,16 @@ onMounted(async () => {
   overflow-y: auto;
 }
 
-/* 概览区域 */
-.overview-panel {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
-  border-radius: 8px;
-  padding: 16px;
-}
-
-.metric-item {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  flex: 1;
-  justify-content: center;
-}
-
-.metric-content { display: flex; flex-direction: column; gap: 4px; align-items: center; text-align: center; }
-.metric-label { font-size: 12px; color: var(--muted); }
-.metric-value { font-size: 20px; font-weight: 700; color: var(--text); font-family: sans-serif; line-height: 1.1; }
-.metric-value.highlight { color: var(--text); }
-.metric-value .unit { font-size: 11px; font-weight: normal; color: var(--muted); margin-left: 2px; }
-.metric-sub { font-size: 11px; color: #f59e0b; background: rgba(245, 158, 11, 0.1); padding: 1px 6px; border-radius: 4px; width: fit-content; margin-top: 2px; }
-
-.metric-divider { width: 1px; height: 32px; background: #e2e8f0; margin: 0 10px; }
+/* 顶部概览复制资金到账率风格 */
+.fund-overview { display: flex; align-items: center; justify-content: space-evenly; gap: 0; background: #f8fafc; padding: 12px 12px; border-radius: 8px; border: 1px solid #e2e8f0; }
+.fund-metric-box { display: flex; flex-direction: column; gap: 4px; align-items: center; text-align: center; flex: 1; }
+.fund-metric-box .label { font-size: 12px; color: var(--muted); }
+.fund-metric-box .value { font-size: 18px; font-weight: 700; color: var(--text); font-family: sans-serif; font-variant-numeric: tabular-nums; font-feature-settings: "tnum"; line-height: 1.1; display: inline-flex; align-items: center; gap: 8px; }
+.fund-metric-box .value .currency { font-size: 0.9em; color: var(--muted); margin-right: 4px; }
+.fund-metric-box .value .amount { letter-spacing: 0.2px; }
+.fund-metric-box .value.highlight { color: #3b82f6; }
+.fund-metric-box .sub-text { font-size: 11px; color: #3b82f6; background: #eff6ff; padding: 1px 6px; border-radius: 4px; width: fit-content; margin-left: 2px; line-height: 1.2; }
+.fund-divider { width: 1px; height: 32px; background: #cbd5e1; margin: 0 12px; }
 
 /* 图表区域 */
 .chart-wrapper {
