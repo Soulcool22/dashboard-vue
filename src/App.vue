@@ -208,6 +208,17 @@ function updateKpiFromChart(payload){
   if (!selectedKpi.value) return
   const idx = kpis.value.findIndex(k => k.title === selectedKpi.value)
   if (idx === -1) return
+  // 项目支出金额：卡片显示实际支出金额，来源于图表数据
+  if (selectedKpi.value === '项目支出金额') {
+    const amt = Math.round(payload.amount || 0)
+    const formatted = '¥ ' + new Intl.NumberFormat('en-US').format(amt)
+    const updated = { ...kpis.value[idx], value: formatted }
+    kpis.value.splice(idx, 1, updated)
+    kpiLiveMetrics.value = { value: updated.value }
+    kpiLiveCompareMode.value = ''
+    return
+  }
+
   const lastPct = Math.round((payload.last || 0) * 100)
   let up = payload.isUp
   let deltaPct = 0

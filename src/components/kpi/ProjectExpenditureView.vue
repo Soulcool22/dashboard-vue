@@ -190,7 +190,8 @@ function initChart() {
 
 onMounted(async () => {
   const last = budgetUtilization.value / 100
-  emit('stats-changed', { last, prev: 0.68, isUp: true, isOverview: false, kpi: '项目支出金额' })
+  const amount = totalExpenditure.value
+  emit('stats-changed', { last, prev: 0.68, isUp: true, isOverview: false, kpi: '项目支出金额', amount })
   await nextTick()
   initChart()
   window.addEventListener('resize', () => chartInstance?.resize())
