@@ -122,15 +122,78 @@ function generateSeriesData() {
   return data;
 }
 const regulars = ref([
-  { name: '前海综合保税区车道', sector: '潘勇', series: generateSeriesData() },
-  { name: '乌鲁木齐', sector: '潘勇', series: generateSeriesData() },
-  { name: 'SSJS前海', sector: '潘勇', series: generateSeriesData() },
-  { name: '国铁建-卡口', sector: '潘勇', series: generateSeriesData() },
-  { name: '2前海-车道', sector: '潘勇', series: generateSeriesData() },
-  { name: '临沂-机场', sector: '潘勇', series: generateSeriesData() },
-  { name: '前海-综合', sector: '潘勇', series: generateSeriesData() },
-  { name: '前海-维修', sector: '潘勇', series: generateSeriesData() },
-  { name: 'SSKJ前海', sector: '潘勇', series: generateSeriesData() }
+  { name: '前海综合保税区车道', sector: '潘勇', series: generateSeriesData(), risks: [] },
+  { 
+    name: '乌鲁木齐', 
+    sector: '潘勇', 
+    series: generateSeriesData(),
+    risks: [
+      {
+        level: 'high',
+        levelText: '高风险',
+        category: '供应商问题',
+        reason: '第三方渠道接口变更，导致联调受阻',
+        action: '协调渠道方技术负责人召开紧急会议',
+        impact: '可能延期 5-7 天',
+        deadline: '2025-11-30'
+      },
+      {
+        level: 'medium',
+        levelText: '中风险',
+        category: '技术债务',
+        reason: '历史代码耦合度高，重构工作量超预期',
+        action: '安排专项重构时间，分阶段解耦',
+        impact: '影响后续迭代速度',
+        deadline: '2025-12-15'
+      }
+    ]
+  },
+  { 
+    name: 'SSJS前海', 
+    sector: '潘勇', 
+    series: generateSeriesData(),
+    risks: [
+      {
+        level: 'medium',
+        levelText: '中风险',
+        category: '资源缺口',
+        reason: '核心开发人员请假，进度滞后 3 天',
+        action: '从「报表组」临时抽调 1 名高级开发支援',
+        impact: '部分功能延期交付',
+        deadline: '2025-12-05'
+      }
+    ]
+  },
+  { name: '国铁建-卡口', sector: '潘勇', series: generateSeriesData(), risks: [] },
+  { name: '2前海-车道', sector: '潘勇', series: generateSeriesData(), risks: [] },
+  { 
+    name: '临沂-机场', 
+    sector: '潘勇', 
+    series: generateSeriesData(),
+    risks: [
+      {
+        level: 'medium',
+        levelText: '中风险',
+        category: '质量缺陷返工',
+        reason: 'UI 验收反馈问题较多，修复耗时',
+        action: '组织 UI 与前端坐班集中修复',
+        impact: '测试周期延长 2 天',
+        deadline: '2025-11-28'
+      },
+      {
+        level: 'low',
+        levelText: '低风险',
+        category: '文档不足',
+        reason: '部分接口文档更新不及时',
+        action: '要求后端同步更新 API 文档',
+        impact: '联调效率降低',
+        deadline: '2025-12-01'
+      }
+    ]
+  },
+  { name: '前海-综合', sector: '潘勇', series: generateSeriesData(), risks: [] },
+  { name: '前海-维修', sector: '潘勇', series: generateSeriesData(), risks: [] },
+  { name: 'SSKJ前海', sector: '潘勇', series: generateSeriesData(), risks: [] }
 ])
 const kpis = ref([
   { title: '资金到账率', value: '76%', delta: '+3%', up: true },

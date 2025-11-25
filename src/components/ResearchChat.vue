@@ -27,14 +27,52 @@
         </div>
       </template>
 
-      <!-- 新视图：占位内容 -->
+      <!-- 新视图：风险问题列表 -->
       <template v-else>
-        <div class="alternative-view">
-          <div class="placeholder-content">
-            <h4>新视图</h4>
-            <p>这里是切换后的全新视图内容区域</p>
-            <p>可以在这里添加任何自定义内容</p>
-          </div>
+        <div class="risk-view">
+          <template v-if="projectRisks && projectRisks.length > 0">
+            <div class="risk-list">
+              <div 
+                v-for="(risk, index) in sortedRisks" 
+                :key="index"
+                class="risk-card"
+                :class="risk.level"
+              >
+                <div class="risk-card-header">
+                  <span class="risk-level-badge" :class="risk.level">{{ risk.levelText }}</span>
+                  <span class="risk-category">{{ risk.category }}</span>
+                </div>
+                <div class="risk-section">
+                  <div class="risk-label">问题描述</div>
+                  <div class="risk-content">{{ risk.reason }}</div>
+                </div>
+                <div class="risk-section">
+                  <div class="risk-label">建议行动</div>
+                  <div class="risk-content action">{{ risk.action }}</div>
+                </div>
+                <div class="risk-footer">
+                  <div class="risk-meta">
+                    <span class="meta-item">
+                      <span class="meta-label">影响：</span>
+                      <span class="meta-value">{{ risk.impact }}</span>
+                    </span>
+                    <span class="meta-divider">|</span>
+                    <span class="meta-item">
+                      <span class="meta-label">截止：</span>
+                      <span class="meta-value">{{ risk.deadline }}</span>
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </template>
+          <template v-else>
+            <div class="empty-state">
+              <div class="empty-icon">✓</div>
+              <div class="empty-title">暂无风险问题</div>
+              <div class="empty-desc">当前项目运行平稳</div>
+            </div>
+          </template>
         </div>
       </template>
     </div>
@@ -102,6 +140,18 @@ const isAlternativeView = ref(false) // 新增：控制视图切换
 function toggleView() {
   isAlternativeView.value = !isAlternativeView.value
 }
+
+// 计算属性：获取当前项目的风险数据并排序
+const projectRisks = computed(() => {
+  if (!props.currentProject || !props.currentProject.risks) return []
+  return props.currentProject.risks
+})
+
+const sortedRisks = computed(() => {
+  const risks = [...projectRisks.value]
+  const levelOrder = { 'high': 1, 'medium': 2, 'low': 3 }
+  return risks.sort((a, b) => levelOrder[a.level] - levelOrder[b.level])
+})
 
 // --- Data Templates ---
 
@@ -312,33 +362,176 @@ function handleBlur() {
 .research-content li { padding-left: 1.2em; position: relative; margin-bottom: 0.6em; }
 .research-content li::before { content: '■'; position: absolute; left: 0; top: 0.1em; font-size: 0.7em; color: var(--accent); }
 
-/* Alternative View Styles */
-.alternative-view {
+/* Risk View Styles */
+.risk-view {
   padding: 16px;
   height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  overflow-y: auto;
 }
 
-.placeholder-content {
-  text-align: center;
+.risk-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.risk-card {
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 14px 16px;
+  transition: all 0.2s;
+  position: relative;
+}
+
+.risk-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+  border-color: #cbd5e1;
+}
+
+.risk-card.high {
+  border-left: 3px solid #ef4444;
+}
+
+.risk-card.medium {
+  border-left: 3px solid #f97316;
+}
+
+.risk-card.low {
+  border-left: 3px solid #eab308;
+}
+
+.risk-card-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.risk-level-badge {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 4px;
+  letter-spacing: 0.3px;
+}
+
+.risk-level-badge.high {
+  background: #fef2f2;
+  color: #dc2626;
+}
+
+.risk-level-badge.medium {
+  background: #fff7ed;
+  color: #ea580c;
+}
+
+.risk-level-badge.low {
+  background: #fefce8;
+  color: #ca8a04;
+}
+
+.risk-category {
+  font-size: 12px;
+  font-weight: 600;
+  color: #3b82f6;
+  background: #eff6ff;
+  padding: 3px 8px;
+  border-radius: 4px;
+}
+
+.risk-section {
+  margin-bottom: 10px;
+}
+
+.risk-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--muted);
+  margin-bottom: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.risk-content {
+  font-size: 13px;
+  line-height: 1.6;
   color: var(--text);
 }
 
-.placeholder-content h4 {
-  font-size: 18px;
-  font-weight: 600;
-  margin: 0 0 12px 0;
-  color: var(--accent);
+.risk-content.action {
+  color: #15803d;
+  font-weight: 500;
 }
 
-.placeholder-content p {
-  font-size: 14px;
+.risk-footer {
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px solid #f1f5f9;
+}
+
+.risk-meta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 12px;
+}
+
+.meta-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.meta-label {
   color: var(--muted);
-  margin: 8px 0;
+  font-weight: 500;
 }
 
+.meta-value {
+  color: var(--text);
+  font-weight: 600;
+}
+
+.meta-divider {
+  color: #e2e8f0;
+}
+
+/* Empty State */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  padding: 40px 20px;
+}
+
+.empty-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: #f0fdf4;
+  color: #15803d;
+  font-size: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 16px;
+  font-weight: 600;
+}
+
+.empty-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 8px;
+}
+
+.empty-desc {
+  font-size: 13px;
+  color: var(--muted);
+}
 
 /* Dialogue/Message Styles */
 .dialogue-container {
