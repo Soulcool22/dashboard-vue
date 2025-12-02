@@ -22,21 +22,23 @@
         </div>
       </div>
 
-      <!-- ECharts 图表区域 -->
-      <div class="chart-wrapper">
-        <div class="section-header">
-          <span class="section-title">月度支出趋势</span>
-          <div class="chart-legend">
-            <span class="legend-item"><span class="dot personnel"></span>人员</span>
-            <span class="legend-item"><span class="dot labor"></span>劳务</span>
-            <span class="legend-item"><span class="dot other"></span>其他</span>
+      <!-- 图表和列表并列区域 -->
+      <div class="chart-breakdown-row">
+        <!-- ECharts 图表区域 -->
+        <div class="chart-wrapper">
+          <div class="section-header">
+            <span class="section-title">月度支出趋势</span>
+            <div class="chart-legend">
+              <span class="legend-item"><span class="dot personnel"></span>人员</span>
+              <span class="legend-item"><span class="dot labor"></span>劳务</span>
+              <span class="legend-item"><span class="dot other"></span>其他</span>
+            </div>
           </div>
+          <div ref="chartRef" class="expenditure-chart"></div>
         </div>
-        <div ref="chartRef" class="expenditure-chart"></div>
-      </div>
 
-      <!-- 分类详情列表 -->
-      <div class="breakdown-list">
+        <!-- 分类详情列表 -->
+        <div class="breakdown-list">
         <div class="list-header">
           <span>支出构成</span>
           <span>占比详情</span>
@@ -95,6 +97,7 @@
             </div>
           </div>
         </div>
+      </div>
       </div>
     </div>
   </div>
@@ -172,15 +175,15 @@ function initChart() {
     },
     series: [
       {
-        name: '人员', type: 'bar', stack: 'total', data: pData, barWidth: 20,
+        name: '人员', type: 'bar', stack: 'total', data: pData, barWidth: '40%', barCategoryGap: '30%',
         itemStyle: { color: '#589ef8', borderRadius: [0, 0, 0, 0] }
       },
       {
-        name: '劳务', type: 'bar', stack: 'total', data: lData, barWidth: 20,
+        name: '劳务', type: 'bar', stack: 'total', data: lData, barWidth: '50%',
         itemStyle: { color: '#34d399', borderRadius: [0, 0, 0, 0] }
       },
       {
-        name: '其他', type: 'bar', stack: 'total', data: oData, barWidth: 20,
+        name: '其他', type: 'bar', stack: 'total', data: oData, barWidth: '50%',
         itemStyle: { color: '#f59e0b', borderRadius: [4, 4, 0, 0] }
       }
     ]
@@ -222,8 +225,18 @@ onMounted(async () => {
 .fund-metric-box .sub-text { font-size: 11px; color: #3b82f6; background: #eff6ff; padding: 1px 6px; border-radius: 4px; width: fit-content; margin-left: 2px; line-height: 1.2; }
 .fund-divider { width: 1px; height: 32px; background: #cbd5e1; margin: 0 12px; }
 
+/* 图表和列表并列容器 */
+.chart-breakdown-row {
+  display: flex;
+  flex-direction: row;
+  gap: 16px;
+  align-items: flex-start;
+}
+
 /* 图表区域 */
 .chart-wrapper {
+  flex: 6;
+  min-width: 0;
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -240,28 +253,29 @@ onMounted(async () => {
 .expenditure-chart { width: 100%; height: 180px; }
 
 /* 列表区域 */
-.breakdown-list { display: flex; flex-direction: column; gap: 12px; }
-.list-header { display: flex; justify-content: space-between; font-size: 12px; color: var(--muted); margin-bottom: 4px; }
+.breakdown-list { display: flex; flex-direction: column; gap: 8px; flex: 4; min-width: 0; }
+.list-header { display: flex; justify-content: space-between; font-size: 11px; color: var(--muted); margin-bottom: 2px; }
 
 .list-item {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 12px;
+  gap: 8px;
+  padding: 8px;
   background: #fff;
   border: 1px solid #f1f5f9;
-  border-radius: 8px;
+  border-radius: 6px;
   transition: all 0.2s;
 }
 .list-item:hover { border-color: #e2e8f0; box-shadow: 0 2px 8px rgba(0,0,0,0.03); }
 
 .item-icon-box {
-  width: 32px;
-  height: 32px;
-  border-radius: 8px;
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
 }
 .item-icon-box.personnel { background: rgba(88, 158, 248, 0.08); }
 .item-icon-box.labor { background: rgba(52, 211, 153, 0.08); }
@@ -269,8 +283,8 @@ onMounted(async () => {
 
 .item-content { flex: 1; display: flex; flex-direction: column; gap: 6px; }
 .item-row-top { display: flex; justify-content: space-between; align-items: center; }
-.item-name { font-size: 13px; font-weight: 600; color: var(--text); }
-.item-amount { font-size: 13px; font-weight: 700; color: var(--text); font-family: sans-serif; }
+.item-name { font-size: 12px; font-weight: 600; color: var(--text); }
+.item-amount { font-size: 12px; font-weight: 700; color: var(--text); font-family: sans-serif; }
 
 .item-row-bottom { display: flex; align-items: center; gap: 8px; }
 .progress-bg { flex: 1; height: 4px; background: #f1f5f9; border-radius: 2px; overflow: hidden; }

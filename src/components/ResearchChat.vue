@@ -3,10 +3,21 @@
     <!-- Fixed Header -->
     <div class="header-section">
       <div class="header-content">
-        <div class="switch-btn" @click="toggleView" v-if="!isCompanyView">
-        <icon-switch theme="outline" size="22" fill="#999595" :strokeWidth="4" strokeLinejoin="bevel"/>
+        <h3 class="research-title">{{ baseTitle }}</h3>
+        <!-- Tab 切换（仅项目视图显示） -->
+        <div class="view-tabs" v-if="!isCompanyView">
+          <span class="tab-divider">|</span>
+          <span 
+            class="tab-link" 
+            :class="{ active: !isAlternativeView }" 
+            @click="isAlternativeView = false"
+          >洞察</span>
+          <span 
+            class="tab-link" 
+            :class="{ active: isAlternativeView }" 
+            @click="isAlternativeView = true"
+          >风险<span class="risk-dot" v-if="projectRisks.length > 0"></span></span>
         </div>
-        <h3 class="research-title">{{ titleText }}</h3>
       </div>
     </div>
 
@@ -123,7 +134,7 @@
 
 <script setup>
 import { ref, nextTick, computed, watch, onMounted } from 'vue'
-import { Up, Down, Switch } from '@icon-park/vue-next'
+import { Up, Down, Switch, Analysis, Caution } from '@icon-park/vue-next'
 
 const props = defineProps({
   isCompanyView: { type: Boolean, default: true },
@@ -192,16 +203,16 @@ function getProjectAnalysis(projectName) {
 const currentSuggestions = ref([...companySuggestions])
 const currentAnalysis = ref(companyAnalysis)
 
-const titleText = computed(() => {
+const baseTitle = computed(() => {
   if (props.isCompanyView) {
     return '项目总体洞察'
   } else if (props.currentProject) {
-    // 根据视图状态显示不同标题
-    const prefix = isAlternativeView.value ? '项目风险' : '项目洞察'
-    return `${prefix}：${props.currentProject.name}`
+    return props.currentProject.name
   }
   return '项目洞察'
 })
+
+const hasRisks = computed(() => projectRisks.value.length > 0)
 
 // --- Context Switching Logic ---
 
@@ -301,7 +312,7 @@ function handleBlur() {
   display: flex;
   align-items: center;
   justify-content: flex-start;
-  gap: 12px;
+  gap: 8px;
 }
 
 .research-title { 
@@ -314,20 +325,49 @@ function handleBlur() {
   background: transparent;
 }
 
-.switch-btn {
-  cursor: pointer;
+/* View Tabs - 简洁文字链接风格 */
+.view-tabs {
   display: flex;
   align-items: center;
-  justify-content: center;
-  width: 32px;
-  height: 32px;
-  border-radius: 6px;
-  transition: all 0.2s;
-  flex-shrink: 0;
+  gap: 0;
 }
 
-.switch-btn:hover {
-  background: rgba(153, 149, 149, 0.1);
+.tab-divider {
+  color: #d1d5db;
+  font-weight: 300;
+  margin: 0 8px;
+}
+
+.tab-link {
+  font-size: 14px;
+  color: #94a3b8;
+  cursor: pointer;
+  transition: all 0.2s;
+  position: relative;
+  padding: 4px 12px;
+  white-space: nowrap;
+  border-radius: 6px;
+}
+
+.tab-link:hover {
+  color: #64748b;
+  background: #f1f5f9;
+}
+
+.tab-link.active {
+  color: #3b82f6;
+  font-weight: 500;
+  background: #eff6ff;
+}
+
+.risk-dot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  background: #ef4444;
+  border-radius: 50%;
+  margin-left: 4px;
+  vertical-align: middle;
 }
 
 /* Scrollable Middle Area */
