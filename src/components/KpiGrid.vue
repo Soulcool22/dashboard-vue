@@ -31,5 +31,5 @@ function showDelta(k){ return k.title !== '资金到账率' && k.title !== '项�
 <style scoped>
 .kpi { cursor: pointer; transition: all 0.2s; }
 .kpi:hover { border-color: var(--accent); box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
-.kpi.active { border-color: var(--accent); border-width: 1.5px; box-shadow: 0 2px 10px rgba(58,122,254,0.12); }
+.kpi.active { border-color: var(--accent); border-width: 1.5px; box-shadow: 0 2px 11px rgba(26,115,232,0.20), 0 4px 6px rgba(26,115,232,0.15); }
 </style>

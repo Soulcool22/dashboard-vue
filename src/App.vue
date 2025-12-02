@@ -39,7 +39,15 @@
           >全部</span>
           <template v-if="!isCompanyView && selectedProject">
             <span class="nav-divider">/</span>
-            <span class="nav-item active">{{ selectedProject.name }}</span>
+            <span 
+              class="nav-item" 
+              :class="{ 'link': selectedKpi, 'active': !selectedKpi }"
+              @click="selectedKpi ? clearKpiSelection() : null"
+            >{{ selectedProject.name }}</span>
+            <template v-if="selectedKpi">
+              <span class="nav-divider">/</span>
+              <span class="nav-item active">{{ selectedKpi }}</span>
+            </template>
           </template>
         </div>
 
@@ -319,6 +327,10 @@ function showCompanyView() {
   selectedProject.value = null // Deselect project
   isChartOverview.value = false
 }
+function clearKpiSelection() {
+  selectedKpi.value = null
+  isChartOverview.value = true
+}
 
 // Helper functions
 function lastValue(p){ if(!p || !p.series) return 0; const a=p.series; return a[a.length-1] }
@@ -388,6 +400,6 @@ function deltaText(p){ if(!p || !p.series || p.series.length < 2) return ''; con
 }
 .nav-divider {
   margin: 0 8px;
-  color: var(--border);
+  color: var(--muted);
 }
 </style>
