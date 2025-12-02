@@ -1,21 +1,33 @@
-@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;600&display=swap');
 
 :root {
-  --bg: #fafafa;
+  --bg: #ffffff;
   --card: #ffffff;
-  --text: #2f3b52;
-  --muted: #8a94a6;
-  --border: #e6e9f0;
-  --accent: #589ef8; /* Lighter accent blue for border */
-  --accent-soft: #f5faff; /* Even softer blue for background */
-  --hover-bg: #f9fafb; /* Subtle hover background */
-  --up: #16a34a;
-  --down: #f87171;
+  --text: #202124;
+  --muted: #5f6368;
+  --border: #f1f3f4;
+  --accent: #1a73e8;
+  --accent-soft: #f8f9fa;
+  --hover-bg: #f8f9fa;
+  --up: #137333;
+  --down: #a50e0e;
   --layout-left: 320px;
   --layout-right: 408px;
+  
+  /* 统一数字字体 */
+  --font-number: 'Google Sans', 'Roboto', -apple-system, BlinkMacSystemFont, sans-serif;
 }
 * { box-sizing: border-box; }
-body { margin: 0; color: var(--text); background: var(--bg); font-family: -apple-system, BlinkMacSystemFont, Segoe UI, PingFang SC, Microsoft YaHei, sans-serif; min-width: 1280px; }
+body { 
+  margin: 0; 
+  color: var(--text); 
+  background: var(--bg); 
+  font-family: 'Noto Sans SC', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif; 
+  min-width: 1280px;
+  font-weight: 400;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
 header { padding: 12px 16px; border-bottom: 1px solid var(--border); background: var(--card); color: var(--accent); }
 .brand { display: flex; align-items: center; gap: 10px; font-weight: 600; }
 .badge { background: #eef3ff; color: var(--accent); border-radius: 999px; padding: 4px 10px; font-size: 12px; }
@@ -41,15 +53,15 @@ header { padding: 12px 16px; border-bottom: 1px solid var(--border); background:
 
 .col-right { overflow: hidden; }
 .col-left::after, .col-middle::after { content: ''; position: absolute; top: 16px; bottom: 16px; right: 0; width: 1px; background-color: var(--border); }
-.card { background: var(--card); border-radius: 12px; box-shadow: 0 1px 6px rgba(0,0,0,0.06); padding: 12px; }
+.card { background: var(--card); border-radius: 8px; box-shadow: none; padding: 12px; }
 .wl-card, .rl-card { padding: 0; background: transparent; border-radius: 0; box-shadow: none; }
 .chart-card { padding: 0; border: none; border-radius: 0; background: transparent; position: relative; box-shadow: none; }
 .chart-card h3 { margin: 0; padding: 10px 12px; font-size: 14px; font-weight: 600; color: var(--text); border-bottom: 1px solid var(--border); }
 .kpi-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 3px; }
-.kpi { padding: 0; border: 1px solid var(--border); border-radius: 6px; background: var(--card); }
+.kpi { padding: 0; border: none; border-radius: 8px; background: var(--card); }
 .kpi .el-card__body { padding: 6px 10px; }
-.kpi-title { font-size: 12px; color: var(--muted); margin-bottom: 2px; font-weight: 600; }
-.kpi-value { font-size: 16px; font-weight: 700; color: var(--text); }
+.kpi-title { font-size: 12px; color: var(--muted); margin-bottom: 2px; font-weight: 400; }
+.kpi-value { font-size: 16px; font-weight: 500; color: var(--text); font-family: var(--font-number); font-variant-numeric: tabular-nums; }
 .kpi-delta { font-size: 11px; margin-top: 2px; }
 .kpi-delta.up { color: var(--up); }
 .kpi-delta.down { color: var(--down); }
@@ -64,7 +76,7 @@ header { padding: 12px 16px; border-bottom: 1px solid var(--border); background:
   padding: 8px 12px;
   border-bottom: 1px solid var(--border);
 }
-.wl-card h3, .rl-card h3 { font-size: 15px; margin: 0; }
+.wl-card h3, .rl-card h3 { font-size: 15px; margin: 0; font-weight: 500; }
 .expand-btn { border: none; background: transparent; color: var(--muted); font-size: 12px; border-radius: 0; width: 24px; height: 24px; display:flex; align-items:center; justify-content:center; cursor: pointer; padding: 0; line-height: 0; vertical-align: middle; }
 .expand-btn svg { width: 20px; height: 20px; }
 .expand-btn.active { color: var(--accent); }
@@ -82,11 +94,11 @@ header { padding: 12px 16px; border-bottom: 1px solid var(--border); background:
   font-weight: 700;
 }
 .wl-info { display: flex; flex-direction: column; gap: 2px; }
-.wl-name { font-weight: 600; font-size: 14px; }
+.wl-name { font-weight: 500; font-size: 14px; }
 .wl-sub { font-size: 14px; color: var(--muted); }
 .wl-spark { height: 54px; width: 80px; }
 .wl-right { text-align: right; display: flex; flex-direction: column; align-items: flex-end; }
-.wl-price { font-weight: 600; font-size: 14px; }
+.wl-price { font-weight: 500; font-size: 14px; font-family: var(--font-number); font-variant-numeric: tabular-nums; }
 .wl-delta { font-size: 13px; }
 .wl-delta.up { color: var(--up); }
 .wl-delta.down { color: var(--down); }
@@ -128,8 +140,8 @@ header { padding: 12px 16px; border-bottom: 1px solid var(--border); background:
 ::-webkit-scrollbar { width: 0px; height: 0px; background: transparent; }
 ::-webkit-scrollbar-thumb { background: transparent; }
 * { scrollbar-width: none; scrollbar-color: transparent transparent; }
-.wl-card .wl-name { font-size: 13px; font-weight: 600; }
+.wl-card .wl-name { font-size: 13px; font-weight: 500; }
 .wl-card .wl-sub { font-size: 12px; font-weight: 400; color: var(--muted); }
-.rl-card .wl-name { font-size: 13px; font-weight: 500; }
+.rl-card .wl-name { font-size: 13px; font-weight: 400; }
 .rl-card .wl-sub { font-size: 12px; font-weight: 400; color: var(--muted); }
 .wl-name, .wl-sub { font-family: 'Noto Sans SC', 'PingFang SC', 'Microsoft YaHei', 'Segoe UI', 'Helvetica Neue', Arial, sans-serif; letter-spacing: 0.1px; }
