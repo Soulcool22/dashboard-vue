@@ -30,65 +30,98 @@
         />
       </section>
       <section class="col col-middle">
-        <!-- Navigation Breadcrumb -->
-        <div class="nav-bar">
-          <span 
-            class="nav-item" 
-            :class="{ 'link': !isCompanyView, 'all-active': isCompanyView }"
-            @click="!isCompanyView ? showCompanyView() : null"
-          >全部</span>
-          <template v-if="!isCompanyView && selectedProject">
-            <span class="nav-divider">/</span>
+        <div class="fixed-header-wrapper">
+          <!-- Navigation Breadcrumb -->
+          <div class="nav-bar">
             <span 
               class="nav-item" 
-              :class="{ 'link': selectedKpi, 'active': !selectedKpi }"
-              @click="selectedKpi ? clearKpiSelection() : null"
-            >{{ selectedProject.name }}</span>
-            <template v-if="selectedKpi">
+              :class="{ 'link': !isCompanyView, 'all-active': isCompanyView }"
+              @click="!isCompanyView ? showCompanyView() : null"
+            >全部</span>
+            <template v-if="!isCompanyView && selectedProject">
               <span class="nav-divider">/</span>
-              <span class="nav-item active">{{ selectedKpi }}</span>
+              <span 
+                class="nav-item" 
+                :class="{ 'link': selectedKpi, 'active': !selectedKpi }"
+                @click="selectedKpi ? clearKpiSelection() : null"
+              >{{ selectedProject.name }}</span>
+              <template v-if="selectedKpi">
+                <span class="nav-divider">/</span>
+                <span class="nav-item active">{{ selectedKpi }}</span>
+              </template>
             </template>
-          </template>
-        </div>
+          </div>
 
-        <!-- View Title Bar -->
-        <div class="middle-header" v-if="!isCompanyView && selectedProject">
-          <div class="project-info">
-            <div class="project-main-title">{{ selectedProject.name }}</div>
-            <div class="project-index-row">
-              <div class="project-index-value">{{ lastValue(selectedProject).toFixed(2) }}</div>
-              <div class="project-index-label">进度兑现指数</div>
-              <div class="project-index-change" :class="deltaSign(selectedProject) >= 0 ? 'up' : 'down'">{{ deltaText(selectedProject) }}</div>
+          <!-- View Title Bar -->
+          <div class="middle-header" v-if="!isCompanyView && selectedProject">
+            <div class="project-info">
+              <div class="project-main-title">{{ selectedProject.name }}</div>
+              <div class="project-index-row">
+                <div class="project-index-value">{{ lastValue(selectedProject).toFixed(2) }}</div>
+                <div class="project-index-label">进度兑现指数</div>
+                <div class="project-index-change" :class="deltaSign(selectedProject) >= 0 ? 'up' : 'down'">{{ deltaText(selectedProject) }}</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Company View Header (Fixed) -->
+          <div v-if="isCompanyView" class="company-header-group">
+            <div class="dashboard-header">
+              <div class="header-title">
+                <span>项目态势总览</span>
+              </div>
+              <div class="header-meta">
+                <span class="meta-item">统计周期：2025 Q4</span>
+                <span class="meta-divider">|</span>
+                <span class="meta-item">更新于 14:30</span>
+              </div>
+            </div>
+
+            <div class="region-nav" style="margin-top: 12px;">
+              <div 
+                v-for="region in regions" 
+                :key="region" 
+                class="nav-pill" 
+                :class="{ active: companyRegion === region }"
+                @click="companyRegion = region"
+              >
+                {{ region }}
+              </div>
             </div>
           </div>
         </div>
 
-        <!-- View Content -->
-        <template v-if="!isCompanyView">
-          <KpiGrid :kpis="kpis" :selected-kpi="selectedKpi" @select-kpi="handleSelectKpi" />
-          <div class="chart-card-container">
-            <KpiPanel 
-              :selected-kpi="selectedKpi" 
-              :is-overview="isChartOverview"
-              :project-series="selectedProject?.series"
-              @stats-changed="updateKpiFromChart"
+        <div class="scroll-content">
+          <!-- View Content -->
+          <template v-if="!isCompanyView">
+            <KpiGrid :kpis="kpis" :selected-kpi="selectedKpi" @select-kpi="handleSelectKpi" />
+            <div class="chart-card-container">
+              <KpiPanel 
+                :selected-kpi="selectedKpi" 
+                :is-overview="isChartOverview"
+                :project-series="selectedProject?.series"
+                @stats-changed="updateKpiFromChart"
+              />
+            </div>
+            <!-- 根据是否选中 KPI 卡片来决定显示归因分析还是项目更新 -->
+            <AttributionAnalysis 
+              v-if="selectedKpi && selectedKpi !== '资金到账率' && selectedKpi !== '项目支出金额'" 
+              :selected-kpi="selectedKpi"
+              :metrics="kpiLiveMetrics"
+              :compare-mode="kpiLiveCompareMode"
+              class="updates-container"
+            />
+            <ProjectUpdates 
+              v-else-if="!selectedKpi"
+              class="updates-container" 
+            />
+          </template>
+          <div v-else class="company-view-placeholder">
+            <CompanyDashboard 
+              :current-region="companyRegion"
+              @select-project-name="selectProjectByName" 
             />
           </div>
-          <!-- 根据是否选中 KPI 卡片来决定显示归因分析还是项目更新 -->
-          <AttributionAnalysis 
-            v-if="selectedKpi && selectedKpi !== '资金到账率' && selectedKpi !== '项目支出金额'" 
-            :selected-kpi="selectedKpi"
-            :metrics="kpiLiveMetrics"
-            :compare-mode="kpiLiveCompareMode"
-            class="updates-container"
-          />
-          <ProjectUpdates 
-            v-else-if="!selectedKpi"
-            class="updates-container" 
-          />
-        </template>
-        <div v-else class="company-view-placeholder">
-          <CompanyDashboard @select-project-name="selectProjectByName" />
         </div>
       </section>
       <ResearchChat 
@@ -115,6 +148,8 @@ const regularCollapsed = ref(false)
 function toggleLeftExpand(){ expandedLeft.value = !expandedLeft.value }
 
 // --- Data State ---
+const companyRegion = ref('全国')
+const regions = ['全国', '华东', '华南', '华北', '西部', '广东', '海外']
 const projects = ref([])
 function generateSeriesData() {
   const data = [];

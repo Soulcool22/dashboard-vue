@@ -1,30 +1,5 @@
 <template>
   <div class="company-dashboard">
-    <!-- Header Section -->
-    <div class="dashboard-header">
-      <div class="header-title">
-        <span>项目态势总览</span>
-      </div>
-      <div class="header-meta">
-        <span class="meta-item">统计周期：2025 Q4</span>
-        <span class="meta-divider">|</span>
-        <span class="meta-item">更新于 14:30</span>
-      </div>
-    </div>
-
-    <!-- Region Navigation -->
-    <div class="region-nav">
-      <div 
-        v-for="region in regions" 
-        :key="region" 
-        class="nav-pill" 
-        :class="{ active: currentRegion === region }"
-        @click="currentRegion = region"
-      >
-        {{ region }}
-      </div>
-    </div>
-
     <!-- National View Content -->
     <template v-if="currentRegion === '全国'">
       <!-- Hero Section: Core Status & Insights (Refactored) -->
@@ -140,10 +115,14 @@ import { ref, onMounted, onUnmounted, watch, nextTick } from 'vue'
 import * as echarts from 'echarts'
 import RegionalDashboard from './RegionalDashboard.vue'
 
-const emits = defineEmits(['select-project-name'])
+const props = defineProps({
+  currentRegion: {
+    type: String,
+    default: '全国'
+  }
+})
 
-const currentRegion = ref('全国')
-const regions = ['全国', '华东', '华南', '华北', '西部', '广东', '海外']
+const emits = defineEmits(['select-project-name'])
 
 const trendChartRef = ref(null)
 let trendChart = null
@@ -184,7 +163,7 @@ const riskProjects = ref([
 function handleRiskNameClick(name){ emits('select-project-name', name) }
 
 // Watch for region changes to re-init charts if returning to National view
-watch(currentRegion, (newVal) => {
+watch(() => props.currentRegion, (newVal) => {
   if (newVal === '全国') {
     nextTick(() => {
       initTrendChart()
