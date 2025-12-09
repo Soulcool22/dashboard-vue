@@ -57,12 +57,12 @@ header { padding: 12px 16px; border-bottom: 1px solid var(--border); background:
 .wl-card, .rl-card { padding: 0; background: transparent; border-radius: 0; box-shadow: none; }
 .chart-card { padding: 0; border: none; border-radius: 0; background: transparent; position: relative; box-shadow: none; }
 .chart-card h3 { margin: 0; padding: 10px 12px; font-size: 14px; font-weight: 600; color: var(--text); border-bottom: 1px solid var(--border); }
-.kpi-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 3px; }
+.kpi-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; }
 .kpi { padding: 0; border: none; border-radius: 8px; background: var(--card); box-shadow: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.06); }
-.kpi .el-card__body { padding: 6px 10px; }
-.kpi-title { font-size: 12px; color: var(--muted); margin-bottom: 2px; font-weight: 400; }
-.kpi-value { font-size: 16px; font-weight: 500; color: var(--text); font-family: var(--font-number); font-variant-numeric: tabular-nums; }
-.kpi-delta { font-size: 11px; margin-top: 2px; }
+.kpi .el-card__body { padding: 8px 10px; }
+.kpi-title { font-size: 11px; color: #3c4043; margin-bottom: 4px; font-weight: 400; letter-spacing: 0.2px; }
+.kpi-value { font-size: 20px; font-weight: 500; color: var(--text); font-family: var(--font-number); font-variant-numeric: tabular-nums; line-height: 1.2; }
+.kpi-delta { font-size: 12px; margin-top: 4px; font-family: var(--font-number); }
 .kpi-delta.up { color: var(--up); }
 .kpi-delta.down { color: var(--down); }
 .wl-card .wl-header, .rl-card .wl-header {
