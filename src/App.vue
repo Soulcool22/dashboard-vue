@@ -183,7 +183,7 @@ const regulars = ref([
       {
         level: 'medium',
         levelText: '中风险',
-        category: '技术债务',
+        category: '技术难题',
         reason: '历史代码耦合度高，重构工作量超预期',
         action: '安排专项重构时间，分阶段解耦',
         impact: '影响后续迭代速度',
@@ -226,7 +226,7 @@ const regulars = ref([
       {
         level: 'low',
         levelText: '低风险',
-        category: '文档不足',
+        category: '设计/深化延误',
         reason: '部分接口文档更新不及时',
         action: '要求后端同步更新 API 文档',
         impact: '联调效率降低',
