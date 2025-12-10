@@ -465,11 +465,14 @@ const displayedMembers = computed(() => {
   border-radius: 16px;
   background: transparent;
   transition: all 0.25s ease;
+  border: 1px solid transparent; /* Prepare for border transition */
 }
 
 .search-expand-wrapper.expanded {
-  background: #f8fafc;
+  background: #fff;
   padding-left: 12px;
+  border: 2px solid var(--accent); /* Blue border */
+  box-shadow: 0 2px 8px rgba(88, 158, 248, 0.1);
 }
 
 .search-input-inline {
@@ -499,9 +502,22 @@ const displayedMembers = computed(() => {
   flex-shrink: 0;
 }
 
+.search-expand-wrapper.expanded .search-toggle {
+  background: var(--accent);
+  color: #fff;
+  width: 28px;
+  height: 28px;
+  margin-right: 2px; /* Slight spacing from right edge */
+}
+
 .search-toggle:hover {
   background: #f1f5f9;
   color: var(--text);
+}
+
+.search-expand-wrapper.expanded .search-toggle:hover {
+  background: #4080e0; /* Darker accent */
+  color: #fff;
 }
 
 .member-list {

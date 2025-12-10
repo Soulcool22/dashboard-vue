@@ -99,6 +99,50 @@
         </div>
       </div>
       </div>
+
+      <!-- 重点支出事项追踪区域 -->
+      <div class="top-ranking-section">
+        <div class="section-header">
+          <span class="section-title">
+            <icon-ranking theme="outline" size="14" fill="#64748b" style="margin-right: 4px;"/>
+            重点支出事项追踪
+          </span>
+        </div>
+        <div class="ranking-list">
+          <div v-for="(item, index) in weightedTopExpenditures" 
+               :key="index" 
+               class="expenditure-row"
+               :style="{ '--row-weight-opacity': item.rowWeightOpacity }" >
+            <!-- 极简序号 -->
+            <div class="row-index">0{{ index + 1 }}</div>
+            
+            <!-- 事项主体 -->
+            <div class="row-main">
+              <div class="row-title-line">
+                <span class="row-name">{{ item.name }}</span>
+                <span class="row-tag">{{ item.category }}</span>
+              </div>
+              <div class="row-meta-line">
+                <span class="row-date">{{ item.date }}</span>
+                <span class="row-account">经办人：{{ item.handler || '系统自动' }}</span>
+              </div>
+            </div>
+
+            <!-- 金额与权重 -->
+            <div class="row-value-col">
+              <div class="row-amount">
+                <span class="currency">¥</span>
+                {{ formatFullNumber(item.amount) }}
+              </div>
+              <div class="row-weight-info">
+                <span>占当期 {{ item.percent }}%</span>
+              </div>
+            </div>
+
+            <!-- 底部权重条 (Visual Weight Bar) -->
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -106,10 +150,29 @@
 <script setup>
 import { ref, computed, onMounted, nextTick } from 'vue'
 import * as echarts from 'echarts'
+import { People as IconPeople, EngineeringBrand as IconEngineeringBrand, MoreApp as IconMoreApp, Ranking as IconRanking } from '@icon-park/vue-next'
 
 const emit = defineEmits(['stats-changed'])
 const chartRef = ref(null)
 let chartInstance = null
+
+// Mock Data for Top Expenditures
+const topExpenditures = ref([
+  { name: 'AI算力服务器集群采购 (第2批)', category: '设备采购', amount: 850000, date: '2025-10-15', percent: 12.5, handler: '李采购' },
+  { name: 'Oracle数据库年度授权费', category: '软件授权', amount: 420000, date: '2025-08-02', percent: 6.2, handler: '王运维' },
+  { name: '前端开发外包服务费 (Q3)', category: '劳务外包', amount: 280000, date: '2025-09-20', percent: 4.1, handler: '张研发' }
+])
+
+// 为每行计算动态 CSS 变量 --row-weight-opacity
+const weightedTopExpenditures = computed(() => {
+  const maxAmount = Math.max(...topExpenditures.value.map(item => item.amount));
+  return topExpenditures.value.map(item => ({
+    ...item,
+    rowWeightOpacity: (item.amount / maxAmount) * 0.1 // 最大金额对应0.1的透明度，递减
+  }));
+});
+
+// 数据定义
 
 // 数据定义
 const totalBudget = ref(12500000)
@@ -293,4 +356,127 @@ onMounted(async () => {
 .progress-bar.labor { background: #34d399; }
 .progress-bar.other { background: #f59e0b; }
 .item-percent { font-size: 11px; color: var(--muted); width: 28px; text-align: right; }
+
+/* Top Ranking Section (New Professional Style) */
+.top-ranking-section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background: #fff;
+  border-radius: 8px;
+  margin-top: 4px;
+}
+
+.top-ranking-section .section-header { margin-bottom: 2px; }
+.section-subtitle { font-size: 11px; color: var(--muted); font-weight: 400; margin-left: 8px; background: #f1f5f9; padding: 1px 6px; border-radius: 4px; }
+
+.ranking-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.expenditure-row {
+  position: relative;
+  display: flex;
+  align-items: center;
+  padding: 12px 12px;
+  background: #fff;
+  border-bottom: 1px solid #f1f5f9;
+  transition: all 0.2s;
+  /* 新增：基于权重动态背景 */
+  background: linear-gradient(90deg, rgba(59, 130, 246, var(--row-weight-opacity, 0)) 0%, rgba(59, 130, 246, 0) 100%), #fff; /* 默认白色背景，叠加动态渐变 */
+}
+
+.expenditure-row:hover {
+  background: linear-gradient(90deg, rgba(59, 130, 246, var(--row-weight-opacity, 0.05)) 0%, rgba(59, 130, 246, 0) 100%), #f8fafc; /* Hover时略微增强 */
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+  border-color: #e2e8f0;
+}
+
+.expenditure-row:last-child {
+  border-bottom: none;
+}
+
+/* 序号 */
+.row-index {
+  font-family: 'Roboto Mono', monospace; /* Technical font */
+  font-size: 12px;
+  color: #94a3b8;
+  width: 24px;
+  margin-right: 8px;
+  opacity: 0.6;
+}
+
+/* 主体内容 */
+.row-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0; /* Text truncation */
+}
+
+.row-title-line {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.row-name {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.row-tag {
+  font-size: 10px;
+  color: #64748b;
+  background: #f1f5f9;
+  padding: 1px 5px;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+
+.row-meta-line {
+  display: flex;
+  gap: 12px;
+  font-size: 11px;
+  color: #94a3b8;
+}
+
+/* 右侧数值 */
+.row-value-col {
+  text-align: right;
+  margin-left: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+}
+
+.row-amount {
+  font-family: sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text);
+  letter-spacing: 0.3px;
+}
+
+.row-amount .currency {
+  font-size: 11px;
+  color: #94a3b8;
+  margin-right: 2px;
+}
+
+.row-weight-info {
+  font-size: 10px;
+  color: var(--muted);
+}
+
+/* 底部权重条 */
 </style>

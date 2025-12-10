@@ -277,11 +277,11 @@ function medianValue(p){ const a=(p.series||[]).slice().sort((x,y)=>x-y); if(!a.
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 2px 6px rgba(58,122,254,0.24);
+  box-shadow: none;
 }
 
 .search-container :deep(.el-input__wrapper) {
-  border: 1px solid var(--border);
+  border: 2px solid var(--accent);
   border-radius: 22px;
   background: var(--card);
   box-shadow: none;

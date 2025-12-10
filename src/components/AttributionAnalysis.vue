@@ -1,52 +1,54 @@
 <template>
   <div class="attribution-wrapper">
-    <div class="attribution-header">
-      <h3 class="attribution-title">
-        <icon-analysis theme="outline" size="16" :strokeWidth="3" />
-        归因分析
-      </h3>
-      <span class="insight-badge" :class="badgeToneClass">{{ attribution.type }}</span>
-    </div>
+    <template v-if="selectedKpi !== '人员健康度'">
+      <div class="attribution-header">
+        <h3 class="attribution-title">
+          <icon-analysis theme="outline" size="16" :strokeWidth="3" />
+          归因分析
+        </h3>
+        <span class="insight-badge" :class="badgeToneClass">{{ attribution.type }}</span>
+      </div>
 
-    <div class="summary-section" :class="sectionToneClass">
-      <div class="summary-text">{{ summaryText }}</div>
-    </div>
+      <div class="summary-section" :class="sectionToneClass">
+        <div class="summary-text">{{ summaryText }}</div>
+      </div>
 
-    <div class="factors-section">
-      <h4 class="section-subtitle">主要影响因素</h4>
-      <div class="factor-list">
-        <div 
-          v-for="(factor, index) in attribution.factors" 
-          :key="index" 
-          class="factor-item"
-          :class="factor.impact"
-        >
-          <div class="factor-header">
-            <icon-check-one 
-              v-if="factor.impact === 'positive'" 
-              theme="filled" 
-              size="16" 
-              fill="#15803d"
-            />
-            <icon-close-one 
-              v-if="factor.impact === 'negative'" 
-              theme="filled" 
-              size="16" 
-              fill="#dc2626"
-            />
-            <icon-info 
-              v-if="factor.impact === 'neutral'" 
-              theme="filled" 
-              size="16" 
-              fill="#64748b"
-            />
-            <span class="factor-title">{{ factor.title }}</span>
-            <span class="factor-value">{{ factor.value }}</span>
+      <div class="factors-section">
+        <h4 class="section-subtitle">主要影响因素</h4>
+        <div class="factor-list">
+          <div 
+            v-for="(factor, index) in attribution.factors" 
+            :key="index" 
+            class="factor-item"
+            :class="factor.impact"
+          >
+            <div class="factor-header">
+              <icon-check-one 
+                v-if="factor.impact === 'positive'" 
+                theme="filled" 
+                size="16" 
+                fill="#15803d"
+              />
+              <icon-close-one 
+                v-if="factor.impact === 'negative'" 
+                theme="filled" 
+                size="16" 
+                fill="#dc2626"
+              />
+              <icon-info 
+                v-if="factor.impact === 'neutral'" 
+                theme="filled" 
+                size="16" 
+                fill="#64748b"
+              />
+              <span class="factor-title">{{ factor.title }}</span>
+              <span class="factor-value">{{ factor.value }}</span>
+            </div>
+            <p class="factor-description">{{ factor.description }}</p>
           </div>
-          <p class="factor-description">{{ factor.description }}</p>
         </div>
       </div>
-    </div>
+    </template>
 
     <div class="recommendations-section" v-if="attribution.recommendations && attribution.recommendations.length > 0">
       <h4 class="section-subtitle">
