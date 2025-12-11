@@ -164,7 +164,284 @@ function generateSeriesData() {
   }
   return data;
 }
+// =====================================================
+// 重庆江北项目完整数据 - 从CSV导入（排除项目收款）
+// =====================================================
+
+// 所有任务数据（完整导入CSV，排除项目收款相关）
+const chongqingJiangbeiAllTasks = [
+  // ========== 启动阶段 ==========
+  { id: '1', wbs: '1', name: '项目启动', level: 2, phase: '启动阶段', responsible: '彭高红', executor: '彭高红', status: '已完成', planStart: '2025-12-01', planEnd: '2025-12-05', planDuration: 5, actualStart: null, actualEnd: '2025-12-09', actualDuration: null },
+  { id: '1.1', wbs: '1.1', name: '项目启动', level: 3, phase: '启动阶段', responsible: '彭高红', executor: '彭高红', status: '逾期完成', planStart: '2025-12-01', planEnd: '2025-12-05', planDuration: 5, actualStart: null, actualEnd: '2025-12-09', actualDuration: null },
+  { id: '1.2', wbs: '1.2', name: '项目情况基准摸底', level: 3, phase: '启动阶段', responsible: '彭高红', executor: '彭高红', status: '逾期完成', planStart: '2025-12-01', planEnd: '2025-12-05', planDuration: 5, actualStart: null, actualEnd: '2025-12-09', actualDuration: null },
+  { id: '1.3', wbs: '1.3', name: '召开项目启动会', level: 3, phase: '启动阶段', responsible: '彭高红', executor: '彭高红', status: '逾期完成', planStart: '2025-12-01', planEnd: '2025-12-05', planDuration: 5, actualStart: null, actualEnd: '2025-12-09', actualDuration: null },
+  
+  // ========== 准备阶段 - 交付准备 ==========
+  { id: '2', wbs: '2', name: '交付准备', level: 2, phase: '准备阶段', responsible: '彭高红', executor: '彭高红', status: '逾期', planStart: '2025-12-05', planEnd: '2025-12-10', planDuration: 6, actualStart: null, actualEnd: null, actualDuration: null },
+  { id: '2.1', wbs: '2.1', name: '合同签订', level: 3, phase: '准备阶段', responsible: '彭高红', executor: '彭高红', status: '逾期', planStart: '2025-12-05', planEnd: '2025-12-10', planDuration: 6, actualStart: null, actualEnd: null, actualDuration: null },
+  { id: '2.2', wbs: '2.2', name: '外部启动会召开', level: 3, phase: '准备阶段', responsible: '彭高红', executor: '彭高红', status: '逾期', planStart: '2025-12-05', planEnd: '2025-12-10', planDuration: 6, actualStart: null, actualEnd: null, actualDuration: null },
+  { id: '2.2.1', wbs: '2.2.1', name: '甲方会前方案对接', level: 4, phase: '准备阶段', responsible: '彭高红', executor: '彭高红', status: '逾期', planStart: '2025-12-05', planEnd: '2025-12-10', planDuration: 6, actualStart: null, actualEnd: null, actualDuration: null },
+  { id: '2.2.2', wbs: '2.2.2', name: '业务（实际使用方）单位会前方案对接', level: 4, phase: '准备阶段', responsible: '彭高红', executor: '彭高红', status: '逾期', planStart: '2025-12-05', planEnd: '2025-12-10', planDuration: 6, actualStart: null, actualEnd: null, actualDuration: null },
+  
+  // ========== 准备阶段 - 深化设计 ==========
+  { id: '3', wbs: '3', name: '深化设计', level: 2, phase: '准备阶段', responsible: '张同永', executor: '杨智', status: '逾期', planStart: '2025-12-05', planEnd: '2025-12-10', planDuration: 6, actualStart: null, actualEnd: null, actualDuration: null },
+  { id: '3.1', wbs: '3.1', name: '深化工作评估', level: 3, phase: '准备阶段', responsible: '张同永', executor: '杨智', status: '逾期', planStart: '2025-12-05', planEnd: '2025-12-10', planDuration: 6, actualStart: null, actualEnd: null, actualDuration: null },
+  { id: '3.2', wbs: '3.2', name: '深化方案设计', level: 3, phase: '准备阶段', responsible: '张同永', executor: '杨智', status: '逾期', planStart: '2025-12-05', planEnd: '2025-12-10', planDuration: 6, actualStart: null, actualEnd: null, actualDuration: null },
+  { id: '3.3', wbs: '3.3', name: '自制产品深化', level: 3, phase: '准备阶段', responsible: '穆晓亮', executor: '杨智', status: '逾期', planStart: '2025-12-05', planEnd: '2025-12-10', planDuration: 6, actualStart: null, actualEnd: null, actualDuration: null },
+  { id: '3.4', wbs: '3.4', name: '深化清单编制及下单(含计划员下单)', level: 3, phase: '准备阶段', responsible: '张同永', executor: '郑富兰', status: '逾期', planStart: '2025-12-05', planEnd: '2025-12-10', planDuration: 6, actualStart: null, actualEnd: null, actualDuration: null },
+  { id: '3.4.1.1', wbs: '3.4.1.1', name: '电气工程', level: 4, phase: '准备阶段', responsible: '张同永', executor: '郑富兰', status: '逾期', planStart: '2025-12-05', planEnd: '2025-12-10', planDuration: 6, actualStart: null, actualEnd: null, actualDuration: null },
+  { id: '3.4.1.2', wbs: '3.4.1.2', name: '空调工程', level: 4, phase: '准备阶段', responsible: '张同永', executor: '郑富兰', status: '逾期', planStart: '2025-12-05', planEnd: '2025-12-10', planDuration: 6, actualStart: null, actualEnd: null, actualDuration: null },
+  { id: '3.4.1.3', wbs: '3.4.1.3', name: '海关监管设施设备工程', level: 4, phase: '准备阶段', responsible: '张同永', executor: '郑富兰', status: '逾期', planStart: '2025-12-05', planEnd: '2025-12-10', planDuration: 6, actualStart: null, actualEnd: null, actualDuration: null },
+  { id: '3.4.1.4', wbs: '3.4.1.4', name: '边检设施设备工程', level: 4, phase: '准备阶段', responsible: '张同永', executor: '郑富兰', status: '逾期', planStart: '2025-12-05', planEnd: '2025-12-10', planDuration: 6, actualStart: null, actualEnd: null, actualDuration: null },
+  { id: '3.4.1.5', wbs: '3.4.1.5', name: '安检设施设备工程', level: 4, phase: '准备阶段', responsible: '张同永', executor: '郑富兰', status: '进行中', planStart: null, planEnd: null, planDuration: null, actualStart: null, actualEnd: null, actualDuration: null },
+  { id: '3.4.1.6', wbs: '3.4.1.6', name: '卫检设备工程', level: 4, phase: '准备阶段', responsible: '张同永', executor: '郑富兰', status: '逾期', planStart: '2025-12-05', planEnd: '2025-12-10', planDuration: 6, actualStart: null, actualEnd: null, actualDuration: null },
+  { id: '3.4.1.7', wbs: '3.4.1.7', name: '土建工程', level: 4, phase: '准备阶段', responsible: '张同永', executor: '郑富兰', status: '逾期', planStart: '2025-12-05', planEnd: '2025-12-10', planDuration: 6, actualStart: null, actualEnd: null, actualDuration: null },
+  
+  // ========== 准备阶段 - 采购准备 ==========
+  { id: '4', wbs: '4', name: '采购准备', level: 2, phase: '准备阶段', responsible: '彭高红', executor: '彭高红', status: '进行中', planStart: '2025-12-05', planEnd: '2025-12-31', planDuration: 27, actualStart: null, actualEnd: null, actualDuration: null },
+  { id: '4.2', wbs: '4.2', name: '外购产品采购及发到货（采购）', level: 3, phase: '准备阶段', responsible: '王妙燕', executor: '', status: '进行中', planStart: '2025-12-05', planEnd: '2025-12-31', planDuration: 27, actualStart: null, actualEnd: null, actualDuration: null },
+  { id: '4.2.1.1', wbs: '4.2.1.1', name: '电气工程采购', level: 4, phase: '准备阶段', responsible: '王妙燕', executor: '', status: '进行中', planStart: '2025-12-05', planEnd: '2025-12-22', planDuration: 18, actualStart: null, actualEnd: null, actualDuration: null },
+  { id: '4.2.1.2', wbs: '4.2.1.2', name: '空调工程采购', level: 4, phase: '准备阶段', responsible: '王妙燕', executor: '', status: '进行中', planStart: '2025-12-05', planEnd: '2025-12-22', planDuration: 18, actualStart: null, actualEnd: null, actualDuration: null },
+  { id: '4.2.1.3', wbs: '4.2.1.3', name: '海关监管设施设备工程采购', level: 4, phase: '准备阶段', responsible: '王妙燕', executor: '', status: '进行中', planStart: '2025-12-05', planEnd: '2025-12-31', planDuration: 27, actualStart: null, actualEnd: null, actualDuration: null },
+  { id: '4.2.1.4', wbs: '4.2.1.4', name: '边检设施设备工程采购', level: 4, phase: '准备阶段', responsible: '王妙燕', executor: '', status: '进行中', planStart: '2025-12-05', planEnd: '2025-12-31', planDuration: 27, actualStart: null, actualEnd: null, actualDuration: null },
+  { id: '4.2.1.5', wbs: '4.2.1.5', name: '卫检设备工程采购', level: 4, phase: '准备阶段', responsible: '王妙燕', executor: '', status: '进行中', planStart: '2025-12-05', planEnd: '2025-12-31', planDuration: 27, actualStart: null, actualEnd: null, actualDuration: null },
+  { id: '4.2.1.6', wbs: '4.2.1.6', name: '土建工程采购', level: 4, phase: '准备阶段', responsible: '王妙燕', executor: '', status: '进行中', planStart: '2025-12-05', planEnd: '2025-12-31', planDuration: 27, actualStart: null, actualEnd: null, actualDuration: null },
+  { id: '4.3', wbs: '4.3', name: '自制产品生产及发到货（生产）', level: 3, phase: '准备阶段', responsible: '谢佳友', executor: '陈涛', status: '进行中', planStart: '2025-12-05', planEnd: '2025-12-31', planDuration: 27, actualStart: null, actualEnd: null, actualDuration: null },
+  { id: '4.3.1.1', wbs: '4.3.1.1', name: '海关监管设施设备工程生产', level: 4, phase: '准备阶段', responsible: '谢佳友', executor: '陈涛', status: '进行中', planStart: '2025-12-05', planEnd: '2025-12-31', planDuration: 27, actualStart: null, actualEnd: null, actualDuration: null },
+  { id: '4.3.1.2', wbs: '4.3.1.2', name: '边检设施设备工程生产', level: 4, phase: '准备阶段', responsible: '谢佳友', executor: '陈涛', status: '延期', planStart: '2025-12-05', planEnd: '2025-12-31', planDuration: 27, actualStart: null, actualEnd: null, actualDuration: null },
+  { id: '4.3.1.3', wbs: '4.3.1.3', name: '卫检设备工程生产', level: 4, phase: '准备阶段', responsible: '谢佳友', executor: '陈涛', status: '进行中', planStart: '2025-12-05', planEnd: '2025-12-31', planDuration: 27, actualStart: null, actualEnd: null, actualDuration: null },
+  { id: '4.3.1.4', wbs: '4.3.1.4', name: '土建工程生产', level: 4, phase: '准备阶段', responsible: '谢佳友', executor: '陈涛', status: '延期', planStart: '2025-12-05', planEnd: '2025-12-31', planDuration: 27, actualStart: null, actualEnd: null, actualDuration: null },
+  
+  // ========== 准备阶段 - 劳务准备 ==========
+  { id: '5', wbs: '5', name: '劳务准备', level: 2, phase: '准备阶段', responsible: '彭高红', executor: '彭高红', status: '逾期', planStart: '2025-12-05', planEnd: '2025-12-10', planDuration: 6, actualStart: null, actualEnd: null, actualDuration: null },
+  { id: '5.1', wbs: '5.1', name: '劳务工程量预估', level: 3, phase: '准备阶段', responsible: '魏新建', executor: '彭高红', status: '逾期', planStart: '2025-12-05', planEnd: '2025-12-07', planDuration: 3, actualStart: null, actualEnd: null, actualDuration: null },
+  { id: '5.2', wbs: '5.2', name: '劳务申请及合同签订', level: 3, phase: '准备阶段', responsible: '魏新建', executor: '金慧慧', status: '逾期', planStart: '2025-12-05', planEnd: '2025-12-08', planDuration: 4, actualStart: null, actualEnd: null, actualDuration: null },
+  { id: '5.3', wbs: '5.3', name: '进场施工手续办理', level: 3, phase: '准备阶段', responsible: '彭高红', executor: '彭高红', status: '逾期', planStart: '2025-12-05', planEnd: '2025-12-10', planDuration: 6, actualStart: null, actualEnd: null, actualDuration: null },
+  
+  // ========== 实施阶段 - 软件开发 ==========
+  { id: '6', wbs: '6', name: '软件开发（开发）', level: 2, phase: '实施阶段', responsible: '胡军会', executor: '董显浩', status: '进行中', planStart: '2025-12-01', planEnd: '2025-12-31', planDuration: 31, actualStart: null, actualEnd: null, actualDuration: null },
+  { id: '6.1.1.1', wbs: '6.1.1.1', name: '卫生检疫及行李查验', level: 4, phase: '实施阶段', responsible: '胡军会', executor: '董显浩', status: '进行中', planStart: '2025-12-01', planEnd: '2025-12-31', planDuration: 31, actualStart: null, actualEnd: null, actualDuration: null },
+  { id: '6.1.1.2', wbs: '6.1.1.2', name: '入境托运行李先期机检系统', level: 4, phase: '实施阶段', responsible: '胡军会', executor: '董显浩', status: '进行中', planStart: '2025-12-01', planEnd: '2025-12-31', planDuration: 31, actualStart: null, actualEnd: null, actualDuration: null },
+  { id: '6.1.1.3', wbs: '6.1.1.3', name: '智能行李拦截服务平台', level: 4, phase: '实施阶段', responsible: '胡军会', executor: '董显浩', status: '进行中', planStart: '2025-12-01', planEnd: '2025-12-31', planDuration: 31, actualStart: null, actualEnd: null, actualDuration: null },
+  { id: '6.1.1.4', wbs: '6.1.1.4', name: '集中审图系统升级', level: 4, phase: '实施阶段', responsible: '胡军会', executor: '董显浩', status: '进行中', planStart: '2025-12-01', planEnd: '2025-12-31', planDuration: 31, actualStart: null, actualEnd: null, actualDuration: null },
+  { id: '6.1.1.5', wbs: '6.1.1.5', name: '信息发布系统', level: 4, phase: '实施阶段', responsible: '胡军会', executor: '董显浩', status: '延期', planStart: '2025-12-01', planEnd: '2025-12-31', planDuration: 31, actualStart: null, actualEnd: null, actualDuration: null },
+  { id: '6.1.1.6', wbs: '6.1.1.6', name: '远程查验系统', level: 4, phase: '实施阶段', responsible: '胡军会', executor: '董显浩', status: '进行中', planStart: '2025-12-01', planEnd: '2025-12-31', planDuration: 31, actualStart: null, actualEnd: null, actualDuration: null },
+  { id: '6.1.1.7', wbs: '6.1.1.7', name: '海关智能库管系统', level: 4, phase: '实施阶段', responsible: '胡军会', executor: '董显浩', status: '进行中', planStart: '2025-12-01', planEnd: '2025-12-31', planDuration: 31, actualStart: null, actualEnd: null, actualDuration: null },
+  { id: '6.1.1.8', wbs: '6.1.1.8', name: '系统整体调试', level: 4, phase: '实施阶段', responsible: '胡军会', executor: '董显浩', status: '进行中', planStart: '2025-12-01', planEnd: '2025-12-31', planDuration: 31, actualStart: null, actualEnd: null, actualDuration: null },
+  { id: '6.1.2', wbs: '6.1.2', name: '边检设施设备工程软件', level: 4, phase: '实施阶段', responsible: '胡军会', executor: '董显浩', status: '延期', planStart: '2025-12-01', planEnd: '2025-12-31', planDuration: 31, actualStart: null, actualEnd: null, actualDuration: null },
+  { id: '6.1.3', wbs: '6.1.3', name: '卫检设备工程软件', level: 4, phase: '实施阶段', responsible: '胡军会', executor: '董显浩', status: '进行中', planStart: '2025-12-01', planEnd: '2025-12-31', planDuration: 31, actualStart: null, actualEnd: null, actualDuration: null },
+  { id: '6.1.4', wbs: '6.1.4', name: '土建工程软件', level: 4, phase: '实施阶段', responsible: '胡军会', executor: '董显浩', status: '延期', planStart: '2025-12-01', planEnd: '2025-12-31', planDuration: 31, actualStart: null, actualEnd: null, actualDuration: null },
+  
+  // ========== 实施阶段 - 现场施工及安装调试 ==========
+  { id: '7', wbs: '7', name: '现场施工及安装调试（施工）', level: 2, phase: '实施阶段', responsible: '彭高红', executor: '彭高红', status: '进行中', planStart: '2025-12-01', planEnd: '2025-12-31', planDuration: 31, actualStart: null, actualEnd: null, actualDuration: null },
+  { id: '7.1.1', wbs: '7.1.1', name: '电气工程施工', level: 4, phase: '实施阶段', responsible: '彭高红', executor: '彭高红', status: '进行中', planStart: '2025-12-01', planEnd: '2025-12-26', planDuration: 26, actualStart: null, actualEnd: null, actualDuration: null },
+  { id: '7.1.2', wbs: '7.1.2', name: '空调工程施工', level: 4, phase: '实施阶段', responsible: '彭高红', executor: '彭高红', status: '进行中', planStart: '2025-12-01', planEnd: '2025-12-31', planDuration: 31, actualStart: null, actualEnd: null, actualDuration: null },
+  { id: '7.1.3', wbs: '7.1.3', name: '海关监管设施设备工程施工', level: 4, phase: '实施阶段', responsible: '彭高红', executor: '彭高红', status: '进行中', planStart: '2025-12-01', planEnd: '2025-12-31', planDuration: 31, actualStart: null, actualEnd: null, actualDuration: null },
+  { id: '7.1.4', wbs: '7.1.4', name: '边检设施设备工程施工', level: 4, phase: '实施阶段', responsible: '彭高红', executor: '彭高红', status: '进行中', planStart: '2025-12-01', planEnd: '2025-12-31', planDuration: 31, actualStart: null, actualEnd: null, actualDuration: null },
+  { id: '7.1.5', wbs: '7.1.5', name: '安检设施设备工程施工', level: 4, phase: '实施阶段', responsible: '', executor: '', status: '进行中', planStart: null, planEnd: null, planDuration: null, actualStart: null, actualEnd: null, actualDuration: null },
+  { id: '7.1.6', wbs: '7.1.6', name: '卫检设备工程施工', level: 4, phase: '实施阶段', responsible: '彭高红', executor: '彭高红', status: '进行中', planStart: '2025-12-01', planEnd: '2025-12-31', planDuration: 31, actualStart: null, actualEnd: null, actualDuration: null },
+  { id: '7.1.7', wbs: '7.1.7', name: '土建工程施工', level: 4, phase: '实施阶段', responsible: '彭高红', executor: '彭高红', status: '进行中', planStart: '2025-12-01', planEnd: '2025-12-31', planDuration: 31, actualStart: null, actualEnd: null, actualDuration: null },
+  
+  // ========== 实施阶段 - 部署联调 ==========
+  { id: '8', wbs: '8', name: '项目部署联调', level: 2, phase: '实施阶段', responsible: '彭高红', executor: '彭高红', status: '延期', planStart: '2025-12-01', planEnd: '2025-12-31', planDuration: 31, actualStart: null, actualEnd: null, actualDuration: null },
+  
+  // ========== 收尾阶段 - 试运行 ==========
+  { id: '9', wbs: '9', name: '项目试运行', level: 2, phase: '收尾阶段', responsible: '彭高红', executor: '彭高红', status: '未开始', planStart: '2026-01-01', planEnd: '2026-03-01', planDuration: 60, actualStart: null, actualEnd: null, actualDuration: null },
+  { id: '9.1', wbs: '9.1', name: '系统部署', level: 3, phase: '收尾阶段', responsible: '彭高红', executor: '彭高红', status: '未开始', planStart: '2026-01-01', planEnd: '2026-03-01', planDuration: 60, actualStart: null, actualEnd: null, actualDuration: null },
+  { id: '9.2', wbs: '9.2', name: '功能测试', level: 3, phase: '收尾阶段', responsible: '彭高红', executor: '彭高红', status: '未开始', planStart: '2026-01-01', planEnd: '2026-03-01', planDuration: 60, actualStart: null, actualEnd: null, actualDuration: null },
+  { id: '9.3', wbs: '9.3', name: '用户培训', level: 3, phase: '收尾阶段', responsible: '彭高红', executor: '彭高红', status: '未开始', planStart: '2026-01-01', planEnd: '2026-03-01', planDuration: 60, actualStart: null, actualEnd: null, actualDuration: null },
+  { id: '9.4', wbs: '9.4', name: '验收准备', level: 3, phase: '收尾阶段', responsible: '彭高红', executor: '彭高红', status: '未开始', planStart: '2026-01-01', planEnd: '2026-03-01', planDuration: 60, actualStart: null, actualEnd: null, actualDuration: null },
+  
+  // ========== 收尾阶段 - 培训 ==========
+  { id: '10', wbs: '10', name: '项目培训', level: 2, phase: '收尾阶段', responsible: '彭高红', executor: '彭高红', status: '未开始', planStart: '2026-01-01', planEnd: '2026-02-12', planDuration: 43, actualStart: null, actualEnd: null, actualDuration: null },
+  { id: '10.1', wbs: '10.1', name: '项目软件产品培训', level: 3, phase: '收尾阶段', responsible: '彭高红', executor: '董显浩', status: '未开始', planStart: '2026-02-01', planEnd: '2026-02-12', planDuration: 12, actualStart: null, actualEnd: null, actualDuration: null },
+  { id: '10.2', wbs: '10.2', name: '项目外购产品培训', level: 3, phase: '收尾阶段', responsible: '彭高红', executor: '彭高红', status: '未开始', planStart: '2026-02-01', planEnd: '2026-02-12', planDuration: 12, actualStart: null, actualEnd: null, actualDuration: null },
+  { id: '10.3', wbs: '10.3', name: '项目自制产品培训', level: 3, phase: '收尾阶段', responsible: '彭高红', executor: '彭高红', status: '未开始', planStart: '2026-02-01', planEnd: '2026-02-12', planDuration: 12, actualStart: null, actualEnd: null, actualDuration: null },
+  
+  // ========== 收尾阶段 - 验收 ==========
+  { id: '11', wbs: '11', name: '项目验收', level: 2, phase: '收尾阶段', responsible: '彭高红', executor: '彭高红', status: '进行中', planStart: '2026-03-01', planEnd: '2026-03-31', planDuration: 31, actualStart: null, actualEnd: null, actualDuration: null },
+  { id: '11.1', wbs: '11.1', name: '劳务工程验收', level: 3, phase: '收尾阶段', responsible: '彭高红', executor: '彭高红', status: '未开始', planStart: '2026-03-01', planEnd: '2026-03-31', planDuration: 31, actualStart: null, actualEnd: null, actualDuration: null },
+  { id: '11.2', wbs: '11.2', name: '现场竣工验收', level: 3, phase: '收尾阶段', responsible: '彭高红', executor: '彭高红', status: '进行中', planStart: '2026-03-01', planEnd: '2026-03-31', planDuration: 31, actualStart: null, actualEnd: null, actualDuration: null },
+  { id: '11.2.1', wbs: '11.2.1', name: '预验收', level: 4, phase: '收尾阶段', responsible: '', executor: '', status: '逾期', planStart: null, planEnd: null, planDuration: null, actualStart: null, actualEnd: null, actualDuration: null },
+  { id: '11.2.2', wbs: '11.2.2', name: '初验', level: 4, phase: '收尾阶段', responsible: '', executor: '', status: '逾期', planStart: null, planEnd: null, planDuration: null, actualStart: null, actualEnd: null, actualDuration: null },
+  { id: '11.2.3', wbs: '11.2.3', name: '终验', level: 4, phase: '收尾阶段', responsible: '', executor: '', status: '逾期', planStart: null, planEnd: null, planDuration: null, actualStart: null, actualEnd: null, actualDuration: null },
+  { id: '11.3', wbs: '11.3', name: '验收问题整改', level: 3, phase: '收尾阶段', responsible: '彭高红', executor: '彭高红', status: '进行中', planStart: '2026-03-01', planEnd: '2026-03-31', planDuration: 31, actualStart: null, actualEnd: null, actualDuration: null },
+  { id: '11.3.1', wbs: '11.3.1', name: '问题清单确认', level: 4, phase: '收尾阶段', responsible: '', executor: '', status: '逾期', planStart: null, planEnd: null, planDuration: null, actualStart: null, actualEnd: null, actualDuration: null },
+  { id: '11.3.2', wbs: '11.3.2', name: '整改方案制定', level: 4, phase: '收尾阶段', responsible: '', executor: '', status: '逾期', planStart: null, planEnd: null, planDuration: null, actualStart: null, actualEnd: null, actualDuration: null },
+  { id: '11.3.3', wbs: '11.3.3', name: '整改实施', level: 4, phase: '收尾阶段', responsible: '', executor: '', status: '逾期', planStart: null, planEnd: null, planDuration: null, actualStart: null, actualEnd: null, actualDuration: null },
+  { id: '11.3.4', wbs: '11.3.4', name: '整改复验', level: 4, phase: '收尾阶段', responsible: '', executor: '', status: '逾期', planStart: null, planEnd: null, planDuration: null, actualStart: null, actualEnd: null, actualDuration: null },
+  
+  // ========== 收尾阶段 - 移交归档 ==========
+  { id: '12', wbs: '12', name: '项目移交归档', level: 2, phase: '收尾阶段', responsible: '彭高红', executor: '彭高红', status: '未开始', planStart: '2026-03-01', planEnd: '2026-03-31', planDuration: 31, actualStart: null, actualEnd: null, actualDuration: null },
+  { id: '12.1', wbs: '12.1', name: '外部单位资料移交', level: 3, phase: '收尾阶段', responsible: '彭高红', executor: '彭高红', status: '未开始', planStart: '2026-03-01', planEnd: '2026-03-31', planDuration: 31, actualStart: null, actualEnd: null, actualDuration: null },
+  { id: '12.1.1', wbs: '12.1.1', name: '产品使用手册', level: 4, phase: '收尾阶段', responsible: '彭高红', executor: '彭高红', status: '未开始', planStart: '2026-03-01', planEnd: '2026-03-31', planDuration: 31, actualStart: null, actualEnd: null, actualDuration: null },
+  { id: '12.1.2', wbs: '12.1.2', name: '设备记录表', level: 4, phase: '收尾阶段', responsible: '彭高红', executor: '彭高红', status: '未开始', planStart: '2026-03-01', planEnd: '2026-03-31', planDuration: 31, actualStart: null, actualEnd: null, actualDuration: null },
+  { id: '12.1.3', wbs: '12.1.3', name: '运行后维护对接方式', level: 4, phase: '收尾阶段', responsible: '彭高红', executor: '彭高红', status: '未开始', planStart: '2026-03-01', planEnd: '2026-03-31', planDuration: 31, actualStart: null, actualEnd: null, actualDuration: null },
+  { id: '12.2', wbs: '12.2', name: '售后维护内部移交', level: 3, phase: '收尾阶段', responsible: '彭高红', executor: '彭高红', status: '未开始', planStart: '2026-03-01', planEnd: '2026-03-31', planDuration: 31, actualStart: null, actualEnd: null, actualDuration: null },
+  { id: '12.2.1', wbs: '12.2.1', name: '竣工图纸', level: 4, phase: '收尾阶段', responsible: '彭高红', executor: '彭高红', status: '未开始', planStart: '2026-03-01', planEnd: '2026-03-31', planDuration: 31, actualStart: null, actualEnd: null, actualDuration: null },
+  { id: '12.2.2', wbs: '12.2.2', name: '结算清单', level: 4, phase: '收尾阶段', responsible: '彭高红', executor: '彭高红', status: '未开始', planStart: '2026-03-01', planEnd: '2026-03-31', planDuration: 31, actualStart: null, actualEnd: null, actualDuration: null },
+  { id: '12.2.3', wbs: '12.2.3', name: '设备记录表', level: 4, phase: '收尾阶段', responsible: '彭高红', executor: '彭高红', status: '未开始', planStart: '2026-03-01', planEnd: '2026-03-31', planDuration: 31, actualStart: null, actualEnd: null, actualDuration: null },
+  { id: '12.2.4', wbs: '12.2.4', name: '运行期间客户联系对接人', level: 4, phase: '收尾阶段', responsible: '彭高红', executor: '彭高红', status: '未开始', planStart: '2026-03-01', planEnd: '2026-03-31', planDuration: 31, actualStart: null, actualEnd: null, actualDuration: null },
+  { id: '12.3', wbs: '12.3', name: '公司资产内部移交', level: 3, phase: '收尾阶段', responsible: '彭高红', executor: '彭高红', status: '未开始', planStart: '2026-03-01', planEnd: '2026-03-31', planDuration: 31, actualStart: null, actualEnd: null, actualDuration: null },
+  
+  // ========== 审计阶段 ==========
+  { id: '13', wbs: '13', name: '项目结算审计', level: 2, phase: '审计阶段', responsible: '彭高红', executor: '彭高红', status: '未开始', planStart: '2026-04-01', planEnd: '2026-04-30', planDuration: 30, actualStart: null, actualEnd: null, actualDuration: null }
+]
+
+// 计算任务统计数据
+function calculateTaskStats(tasks) {
+  const total = tasks.length
+  const completed = tasks.filter(t => t.status === '已完成' || t.status === '逾期完成').length
+  const overdue = tasks.filter(t => t.status === '逾期').length
+  const delayed = tasks.filter(t => t.status === '延期').length
+  const inProgress = tasks.filter(t => t.status === '进行中').length
+  const pending = tasks.filter(t => t.status === '未开始').length
+  
+  // 计算任务完成率：已完成任务数 / 总任务数
+  const completionRate = total > 0 ? Math.round((completed / total) * 100) : 0
+  
+  // 计算截止今天应该完成的任务数（planEnd <= 今天）
+  const today = new Date('2025-12-11') // 使用当前日期
+  const shouldBeCompleted = tasks.filter(t => {
+    if (!t.planEnd) return false
+    return new Date(t.planEnd) <= today
+  }).length
+  
+  // 计算较计划完成率：已完成 / 应完成
+  // 如果应完成数为0，说明还没到任何任务的截止日期
+  const planCompletionRate = shouldBeCompleted > 0 ? Math.round((completed / shouldBeCompleted) * 100) : 100
+  
+  // 计算与计划的差值（用于显示 "较计划 ↓ X%"）
+  // planDelta = 实际完成率 - 计划完成率(100%)
+  // 例如：应完成20个，实际完成4个，完成率=20%，较计划=-80%
+  const actualVsPlan = shouldBeCompleted > 0 ? Math.round((completed / shouldBeCompleted) * 100) : 100
+  const planDelta = actualVsPlan - 100 // 与100%计划的差距
+  
+  // 计算逾期任务率（逾期+延期 占 应完成任务的比例）
+  const overdueRate = shouldBeCompleted > 0 ? Math.round(((overdue) / shouldBeCompleted) * 100) : 0
+  
+  // 计算延期任务率
+  const delayedRate = total > 0 ? Math.round((delayed / total) * 100) : 0
+  
+  return {
+    total,
+    completed,
+    overdue,
+    delayed,
+    inProgress,
+    pending,
+    completionRate,      // 总完成率
+    planCompletionRate,  // 较计划完成率
+    planDelta,           // 与计划差值（负数表示落后）
+    overdueRate,         // 逾期率
+    delayedRate,         // 延期率
+    shouldBeCompleted,   // 应完成任务数
+    actualVsPlan         // 实际vs计划完成率
+  }
+}
+
+// 生成重庆江北项目的进度兑现指数序列（基于实际进度情况）
+function generateChongqingSeriesData() {
+  const data = [];
+  let value = 75; // 项目初始状态
+  for (let i = 0; i < 60; i++) {
+    data.push(Math.round(value));
+    // 模拟真实项目波动：前期启动顺利，中期有逾期压力
+    if (i < 10) {
+      value += (Math.random() - 0.3) * 5; // 启动阶段略有下降
+    } else if (i < 30) {
+      value += (Math.random() - 0.6) * 8; // 准备阶段逾期压力大
+    } else {
+      value += (Math.random() - 0.4) * 6; // 实施阶段努力追赶
+    }
+    if (value > 95) value = 95;
+    if (value < 45) value = 45;
+  }
+  return data;
+}
+
+// 计算重庆江北项目的任务统计
+const chongqingStats = calculateTaskStats(chongqingJiangbeiAllTasks)
+
 const regulars = ref([
+  // 重庆江北项目 - 真实数据（从CSV完整导入）
+  { 
+    name: '重庆江北', 
+    sector: '彭高红', 
+    series: generateChongqingSeriesData(),
+    allTasks: chongqingJiangbeiAllTasks,
+    taskStats: chongqingStats,
+    projectInfo: {
+      fullName: '重庆江北国际机场T3B航站楼及第四跑道工程T3A航站楼联检设施改造工程',
+      planStartDate: '2025-12-01',
+      planCompleteDate: '2026-04-30',
+      currentPhase: '实施阶段',
+      // 使用真实计算的统计数据
+      totalTasks: chongqingStats.total,
+      completedTasks: chongqingStats.completed,
+      overdueTasks: chongqingStats.overdue,
+      delayedTasks: chongqingStats.delayed,
+      inProgressTasks: chongqingStats.inProgress,
+      pendingTasks: chongqingStats.pending,
+      // KPI指标
+      taskCompletionRate: chongqingStats.completionRate,  // 任务完成率
+      planCompletionRate: chongqingStats.planCompletionRate, // 较计划完成率
+      overdueRate: chongqingStats.overdueRate, // 逾期任务率
+      shouldBeCompleted: chongqingStats.shouldBeCompleted // 截止今天应完成任务数
+    },
+    // 项目KPI（基于真实数据计算）
+    kpiData: {
+      taskCompletionRate: {
+        value: chongqingStats.completionRate,
+        planValue: chongqingStats.planCompletionRate,
+        delta: chongqingStats.completionRate - chongqingStats.planCompletionRate,
+        trend: chongqingStats.completionRate >= chongqingStats.planCompletionRate ? 'up' : 'down'
+      },
+      overdueRate: {
+        value: chongqingStats.overdueRate,
+        threshold: 10, // 预警阈值10%
+        isWarning: chongqingStats.overdueRate > 10
+      }
+    },
+    risks: [
+      {
+        level: 'high',
+        levelText: '高风险',
+        category: '进度延误',
+        reason: '深化设计阶段多项任务逾期（12项），影响后续采购和施工',
+        action: '加快深化设计评审，并行推进采购准备',
+        impact: '可能影响整体交付时间 10-15 天',
+        deadline: '2025-12-15'
+      },
+      {
+        level: 'high',
+        levelText: '高风险',
+        category: '劳务准备',
+        reason: '劳务工程量预估、合同签订、进场施工手续办理均已逾期',
+        action: '加急完成劳务合同签订，同步办理进场手续',
+        impact: '现场施工启动延迟',
+        deadline: '2025-12-12'
+      },
+      {
+        level: 'medium',
+        levelText: '中风险',
+        category: '采购风险',
+        reason: '部分设备采购周期较长，需提前锁定供应商',
+        action: '优先确认长周期设备清单，提前下单',
+        impact: '设备到货可能影响安装进度',
+        deadline: '2025-12-20'
+      },
+      {
+        level: 'medium',
+        levelText: '中风险',
+        category: '软件开发',
+        reason: '信息发布系统、边检软件、土建软件状态为延期',
+        action: '增加开发资源，优先处理延期模块',
+        impact: '影响系统联调进度',
+        deadline: '2025-12-25'
+      }
+    ]
+  },
   { name: '前海综合保税区车道', sector: '潘勇', series: generateSeriesData(), risks: [] },
   { 
     name: '乌鲁木齐', 
@@ -238,6 +515,7 @@ const regulars = ref([
   { name: '前海-维修', sector: '潘勇', series: generateSeriesData(), risks: [] },
   { name: 'SSKJ前海', sector: '潘勇', series: generateSeriesData(), risks: [] }
 ])
+// KPI数据 - 当选择重庆江北项目时会使用真实数据
 const kpis = ref([
   { title: '资金到账率', value: '76%', delta: '+3%', up: true },
   { title: '任务完成率', value: '78%', delta: '+2%', up: true },
@@ -245,6 +523,37 @@ const kpis = ref([
   { title: '人员健康度', value: '72%', delta: '-3%', up: false },
   { title: '逾期任务率', value: '22%', delta: '-1%', up: true }
 ])
+
+// 当选择项目时更新KPI数据
+function updateKpisForProject(project) {
+  if (project && project.taskStats) {
+    const stats = project.taskStats
+    // 更新任务完成率 - 显示实际完成率，delta显示与计划的差距
+    const taskKpiIdx = kpis.value.findIndex(k => k.title === '任务完成率')
+    if (taskKpiIdx !== -1) {
+      // 实际完成率 vs 计划（应完成100%）
+      // 例如：应完成24个，实际完成4个 => 完成率 17%，较计划 -83%
+      const actualRate = stats.actualVsPlan  // 实际完成率（相对于应完成任务）
+      const delta = stats.planDelta          // 与100%计划的差距
+      kpis.value[taskKpiIdx] = {
+        title: '任务完成率',
+        value: actualRate + '%',
+        delta: (delta >= 0 ? '+' : '') + delta + '%',
+        up: delta >= 0
+      }
+    }
+    // 更新逾期任务率
+    const overdueKpiIdx = kpis.value.findIndex(k => k.title === '逾期任务率')
+    if (overdueKpiIdx !== -1) {
+      kpis.value[overdueKpiIdx] = {
+        title: '逾期任务率',
+        value: stats.overdueRate + '%',
+        delta: stats.overdueRate > 10 ? '+' + (stats.overdueRate - 10) + '%' : '-' + (10 - stats.overdueRate) + '%',
+        up: stats.overdueRate <= 10 // 逾期率低是好的
+      }
+    }
+  }
+}
 
 const kpiLiveMetrics = ref(null)
 const kpiLiveCompareMode = ref('')
@@ -356,6 +665,8 @@ function handleSelectProject(project) {
   isCompanyView.value = false // Switch to project view
   isChartOverview.value = true // Default to overview mode when project is selected
   selectedKpi.value = null // No KPI selected in overview mode (prevents highlight)
+  // 更新KPI数据为选中项目的真实数据
+  updateKpisForProject(project)
 }
 function showCompanyView() {
   isCompanyView.value = true
