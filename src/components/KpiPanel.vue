@@ -14,7 +14,11 @@ import OverdueTaskView from './kpi/OverdueTaskView.vue'
 const props = defineProps({
   selectedKpi: { type: String, default: null },
   isOverview: { type: Boolean, default: false },
-  projectSeries: { type: Array, default: () => [] }
+  projectSeries: { type: Array, default: () => [] },
+  completionSeries: {
+    type: Object,
+    default: () => ({ dates: [], planCounts: [], actualCounts: [], planRates: [], actualRates: [], totalTasks: 0 })
+  }
 })
 const emit = defineEmits(['stats-changed'])
 
@@ -39,7 +43,11 @@ const compProps = computed(() => {
   if (currentComp.value === ProjectOverviewView) {
     return { projectSeries: props.projectSeries }
   }
-  return { selectedKpi: props.selectedKpi, isOverview: props.isOverview, projectSeries: props.projectSeries }
+  const baseProps = { selectedKpi: props.selectedKpi, isOverview: props.isOverview, projectSeries: props.projectSeries }
+  if (currentComp.value === TaskCompletionView) {
+    return { ...baseProps, completionSeries: props.completionSeries }
+  }
+  return baseProps
 })
 
 function onStatsChanged(e){

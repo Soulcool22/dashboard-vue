@@ -14,7 +14,11 @@ import * as echarts from 'echarts'
 const props = defineProps({
   selectedKpi: { type: String, default: null },
   isOverview: { type: Boolean, default: false },
-  projectSeries: { type: Array, default: () => [] }
+  projectSeries: { type: Array, default: () => [] },
+  completionSeries: {
+    type: Object,
+    default: () => ({ dates: [], planCounts: [], actualCounts: [], planRates: [], actualRates: [], totalTasks: 0 })
+  }
 })
 const emit = defineEmits(['stats-changed'])
 
@@ -25,7 +29,7 @@ let resizeObserver = null
 // 缓存模拟数据
 const mockCache = ref(null)
 
-watch(() => [props.selectedKpi, props.isOverview, props.projectSeries], () => {
+watch(() => [props.selectedKpi, props.isOverview, props.projectSeries, props.completionSeries], () => {
   setTimeout(() => render(), 0)
 }, { deep: true })
 
@@ -75,9 +79,10 @@ function render() {
     resizeObserver.observe(el.value)
   }
   
-  let actualRates = []
-  let planRates = []
+  let actualData = []
+  let planData = []
   let xAxisData = []
+  let totalTasks = 0
   
   function buildDateLabels(len) {
     function fmt(d) {
@@ -96,9 +101,25 @@ function render() {
     return arr
   }
 
-  if (props.isOverview && props.projectSeries && props.projectSeries.length > 0) {
-    actualRates = props.projectSeries.map(v => v / 100)
-    const len = actualRates.length
+  const hasCompletionSeries = !props.isOverview &&
+    props.completionSeries &&
+    Array.isArray(props.completionSeries.dates) &&
+    props.completionSeries.dates.length > 0 &&
+    props.completionSeries.totalTasks > 0
+
+  if (hasCompletionSeries) {
+    // 使用真实任务数量作为纵轴数据
+    actualData = props.completionSeries.actualCounts || []
+    planData = props.completionSeries.planCounts || []
+    totalTasks = props.completionSeries.totalTasks
+    xAxisData = props.completionSeries.dates.map(d => {
+      if (!d) return ''
+      const parts = d.split('-')
+      return parts.length === 3 ? `${parts[1]}-${parts[2]}` : d
+    })
+  } else if (props.isOverview && props.projectSeries && props.projectSeries.length > 0) {
+    actualData = props.projectSeries.map(v => v / 100)
+    const len = actualData.length
     xAxisData = buildDateLabels(len)
   } else {
     const days = 60
@@ -107,8 +128,8 @@ function render() {
     if (!mockCache.value) {
       mockCache.value = generateMockData()
     }
-    actualRates = mockCache.value.actualRates
-    planRates = mockCache.value.planRates
+    actualData = mockCache.value.actualRates
+    planData = mockCache.value.planRates
   }
 
   const markPointData = []
@@ -117,44 +138,95 @@ function render() {
   const axisLabel = '#6b7280'
   const gridLine = '#f3f4f6'
   let isUp = true
-  if (actualRates.length >= 2) {
-    const prev = actualRates[actualRates.length - 2]
-    const last = actualRates[actualRates.length - 1]
+  if (actualData.length >= 2) {
+    const prev = actualData[actualData.length - 2]
+    const last = actualData[actualData.length - 1]
     isUp = (last - prev) >= 0
   }
   const actualLine = isUp ? '#15803d' : '#dc2626'
   const areaStart = isUp ? 'rgba(21,128,61,0.45)' : 'rgba(220,38,38,0.25)'
   const areaEnd = isUp ? 'rgba(187,247,208,0.05)' : 'rgba(255,255,255,0)'
 
-  if (actualRates.length) {
-    const last = actualRates[actualRates.length - 1]
-    const prev = actualRates.length > 1 ? actualRates[actualRates.length - 2] : null
-    const planLast = planRates && planRates.length ? planRates[planRates.length - 1] : null
-    emit('stats-changed', { last, prev, planLast, isUp, isOverview: props.isOverview, kpi: '任务完成率' })
+  // 发送KPI卡片数据（使用百分比）
+  if (actualData.length) {
+    let lastRate = 0, prevRate = 0, planLastRate = 0
+    if (hasCompletionSeries && totalTasks > 0) {
+      // 真实数据：从actualRates获取百分比
+      const rates = props.completionSeries.actualRates || []
+      const planRates = props.completionSeries.planRates || []
+      lastRate = rates.length ? rates[rates.length - 1] : 0
+      prevRate = rates.length > 1 ? rates[rates.length - 2] : 0
+      planLastRate = planRates.length ? planRates[planRates.length - 1] : 0
+    } else if (props.isOverview && props.projectSeries && props.projectSeries.length > 0) {
+      lastRate = actualData[actualData.length - 1]
+      prevRate = actualData.length > 1 ? actualData[actualData.length - 2] : 0
+    } else if (mockCache.value) {
+      lastRate = mockCache.value.actualRates[mockCache.value.actualRates.length - 1]
+      prevRate = mockCache.value.actualRates.length > 1 ? mockCache.value.actualRates[mockCache.value.actualRates.length - 2] : 0
+      planLastRate = mockCache.value.planRates[mockCache.value.planRates.length - 1]
+    }
+    emit('stats-changed', { last: lastRate, prev: prevRate, planLast: planLastRate, isUp, isOverview: props.isOverview, kpi: '任务完成率' })
   }
   const lineWidthActual = 2
   
-  const seriesNameActual = props.isOverview ? '实际进度' : '实际任务完成率'
-  const seriesNamePlan = !props.isOverview ? '计划任务完成率' : null
+  const seriesNameActual = props.isOverview ? '实际进度' : '实际完成任务数'
+  const seriesNamePlan = (!props.isOverview && planData && planData.length) ? '计划完成任务数' : null
 
   const option = {
     legend: { top: 0, right: 16, itemGap: 10, icon: 'rect', itemWidth: 14, itemHeight: 2 },
     grid: { left: 50, right: 24, top: 40, bottom: 28 },
     xAxis: { type: 'category', data: xAxisData, boundaryGap: false, axisLine: { lineStyle: { color: axisLine } }, axisTick: { show: false }, axisLabel: { color: axisLabel } },
-    yAxis: { type: 'value', min: 0, max: 1, axisLine: { show: false }, splitLine: { show: !props.isOverview, lineStyle: { color: gridLine } }, axisLabel: { color: axisLabel, formatter: v => Math.round(v * 100) + '%' } },
+    yAxis: {
+      type: 'value',
+      min: 0,
+      max: hasCompletionSeries ? totalTasks : 1,
+      axisLine: { show: false },
+      splitLine: { show: !props.isOverview, lineStyle: { color: gridLine } },
+      axisLabel: {
+        color: axisLabel,
+        formatter: function (value) {
+          if (hasCompletionSeries) {
+            return value
+          } else {
+            return Math.round(value * 100) + '%'
+          }
+        }
+      }
+    },
     dataZoom: [{ type: 'inside', start: 0, end: 100, filterMode: 'none' }],
     tooltip: {
       trigger: 'axis',
       formatter: function (params) {
-        let a = null, p = null
-        params.forEach(x => {
-          if (x.seriesName === seriesNameActual) a = x.value
-          if (seriesNamePlan && x.seriesName === seriesNamePlan) p = x.value
+        let tooltipStr = params[0].axisValue + '<br/>'
+        params.forEach(param => {
+          const value = param.value
+          let percentage = ''
+          if (hasCompletionSeries && totalTasks > 0) {
+            percentage = ` (${(value / totalTasks * 100).toFixed(1)}%)`
+          } else if (!hasCompletionSeries && !props.isOverview) {
+            percentage = ` (${(value * 100).toFixed(1)}%)`
+          }
+          tooltipStr += `${param.seriesName}: ${value}${percentage}<br/>`
         })
-        const lines = params.map(x => x.seriesName + ': ' + (x.value * 100).toFixed(1) + '%')
-        const diff = (a != null && p != null) ? ((a - p) * 100).toFixed(1) + '%' : ''
-        const s = diff ? (parseFloat(diff) > 0 ? '超前' : parseFloat(diff) < 0 ? '落后' : '持平') : ''
-        return params[0].axisValue + '<br/>' + lines.join('<br/>') + (diff ? ('<br/>差异(实-计): ' + diff + ' ' + s) : '')
+        
+        let actualVal = null, planVal = null
+        params.forEach(param => {
+          if (param.seriesName === seriesNameActual) actualVal = param.value
+          if (param.seriesName === seriesNamePlan) planVal = param.value
+        })
+
+        if (actualVal !== null && planVal !== null && hasCompletionSeries && totalTasks > 0) {
+          const diffCount = actualVal - planVal
+          const diffRate = (diffCount / totalTasks * 100).toFixed(1)
+          const s = diffCount > 0 ? '超前' : diffCount < 0 ? '落后' : '持平'
+          tooltipStr += `差异: ${diffCount}条 (${diffRate}%) ${s}`
+        } else if (actualVal !== null && planVal !== null && !hasCompletionSeries && !props.isOverview) {
+          const diffRate = ((actualVal - planVal) * 100).toFixed(1)
+          const s = parseFloat(diffRate) > 0 ? '超前' : parseFloat(diffRate) < 0 ? '落后' : '持平'
+          tooltipStr += `差异(实-计): ${diffRate}% ${s}`
+        }
+        
+        return tooltipStr
       }
     },
     series: (function () {
@@ -162,7 +234,7 @@ function render() {
         {
           name: seriesNameActual,
           type: 'line',
-          data: actualRates,
+          data: actualData,
           smooth: true,
           showSymbol: false,
           lineStyle: { width: lineWidthActual, color: actualLine },
@@ -171,8 +243,8 @@ function render() {
           markPoint: { symbol: 'circle', symbolSize: 7, data: markPointData }
         }
       ]
-      if (!props.isOverview && planRates && planRates.length) {
-        arr.push({ name: seriesNamePlan, type: 'line', data: planRates, smooth: true, showSymbol: false, lineStyle: { width: lineWidthActual + 0.5, color: '#64748b', type: 'dashed' } })
+      if (!props.isOverview && planData && planData.length) {
+        arr.push({ name: seriesNamePlan, type: 'line', data: planData, smooth: true, showSymbol: false, lineStyle: { width: lineWidthActual + 0.5, color: '#64748b', type: 'dashed' } })
       }
       return arr
     })()
