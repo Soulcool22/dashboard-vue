@@ -101,6 +101,7 @@
                 :is-overview="isChartOverview"
                 :project-series="selectedProject?.series"
                 :completion-series="selectedProject?.completionSeries"
+                :overdue-series="selectedProject?.overdueSeries"
                 @stats-changed="updateKpiFromChart"
               />
             </div>
@@ -411,6 +412,76 @@ function buildCompletionSeries(tasks) {
   return { dates, planCounts, actualCounts, planRates, actualRates, totalTasks }
 }
 
+// 构建逾期任务率时间序列数据
+// 逾期任务率 = 截止某日期，已逾期未完成的任务数 / 应完成的任务数
+function buildOverdueSeries(tasks) {
+  if (!tasks || !tasks.length) {
+    return { dates: [], overdueRates: [], overdueCounts: [], shouldCompleteCounts: [], totalTasks: 0 }
+  }
+
+  const totalTasks = tasks.length
+
+  // 找出所有有 planEnd 的任务
+  const tasksWithPlanEnd = tasks.filter(t => parseDateStrict(t.planEnd))
+  if (!tasksWithPlanEnd.length) {
+    return { dates: [], overdueRates: [], overdueCounts: [], shouldCompleteCounts: [], totalTasks }
+  }
+
+  // 找出日期范围
+  let minDate = null
+  let maxDate = null
+  tasksWithPlanEnd.forEach(task => {
+    const planDate = parseDateStrict(task.planEnd)
+    if (planDate) {
+      if (!minDate || planDate < minDate) minDate = planDate
+      if (!maxDate || planDate > maxDate) maxDate = planDate
+    }
+    const actualDate = parseDateStrict(task.actualEnd)
+    if (actualDate) {
+      if (!maxDate || actualDate > maxDate) maxDate = actualDate
+    }
+  })
+
+  if (!minDate || !maxDate) {
+    return { dates: [], overdueRates: [], overdueCounts: [], shouldCompleteCounts: [], totalTasks }
+  }
+
+  const dates = []
+  const overdueRates = []
+  const overdueCounts = []
+  const shouldCompleteCounts = []
+
+  // 遍历每一天，计算当天的逾期率
+  for (let cursor = new Date(minDate); cursor <= maxDate; cursor.setDate(cursor.getDate() + 1)) {
+    const currentDate = new Date(cursor)
+    const key = formatDateKey(currentDate)
+    dates.push(key)
+
+    // 截止当天应完成的任务数（planEnd <= 当天）
+    let shouldComplete = 0
+    // 截止当天已逾期的任务数（planEnd <= 当天 且 (actualEnd 为空 或 actualEnd > planEnd)）
+    let overdueCount = 0
+
+    tasksWithPlanEnd.forEach(task => {
+      const planDate = parseDateStrict(task.planEnd)
+      if (planDate && planDate <= currentDate) {
+        shouldComplete++
+        const actualDate = parseDateStrict(task.actualEnd)
+        // 逾期条件：没有实际完成日期，或实际完成日期晚于当天（还没完成）
+        if (!actualDate || actualDate > currentDate) {
+          overdueCount++
+        }
+      }
+    })
+
+    shouldCompleteCounts.push(shouldComplete)
+    overdueCounts.push(overdueCount)
+    overdueRates.push(shouldComplete > 0 ? Number((overdueCount / shouldComplete).toFixed(4)) : 0)
+  }
+
+  return { dates, overdueRates, overdueCounts, shouldCompleteCounts, totalTasks }
+}
+
 // 生成重庆江北项目的进度兑现指数序列（直线）
 function generateChongqingSeriesData() {
   const data = [];
@@ -425,6 +496,7 @@ function generateChongqingSeriesData() {
 // 计算重庆江北项目的任务统计
 const chongqingStats = calculateTaskStats(chongqingJiangbeiAllTasks)
 const chongqingCompletionSeries = buildCompletionSeries(chongqingJiangbeiAllTasks)
+const chongqingOverdueSeries = buildOverdueSeries(chongqingJiangbeiAllTasks)
 
 // =====================================================
 // 乌鲁木齐项目完整数据 - 从外部文件导入（真实数据 v2）
@@ -435,6 +507,7 @@ const chongqingCompletionSeries = buildCompletionSeries(chongqingJiangbeiAllTask
 // 计算乌鲁木齐项目的任务统计
 const urumqiStats = calculateTaskStats(urumqiAllTasks)
 const urumqiCompletionSeries = buildCompletionSeries(urumqiAllTasks)
+const urumqiOverdueSeries = buildOverdueSeries(urumqiAllTasks)
 
 // 生成乌鲁木齐项目的进度兑现指数序列（直线）
 function generateUrumqiSeriesData() {
@@ -454,6 +527,7 @@ const regulars = ref([
     sector: '彭高红', 
     series: generateChongqingSeriesData(),
     completionSeries: chongqingCompletionSeries,
+    overdueSeries: chongqingOverdueSeries,
     allTasks: chongqingJiangbeiAllTasks,
     taskStats: chongqingStats,
     projectInfo: {
@@ -532,6 +606,7 @@ const regulars = ref([
     sector: '潘勇', 
     series: generateUrumqiSeriesData(),
     completionSeries: urumqiCompletionSeries,
+    overdueSeries: urumqiOverdueSeries,
     allTasks: urumqiAllTasks,
     taskStats: urumqiStats,
     projectInfo: {

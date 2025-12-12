@@ -18,6 +18,10 @@ const props = defineProps({
   completionSeries: {
     type: Object,
     default: () => ({ dates: [], planCounts: [], actualCounts: [], planRates: [], actualRates: [], totalTasks: 0 })
+  },
+  overdueSeries: {
+    type: Object,
+    default: () => ({ dates: [], overdueRates: [], overdueCounts: [], shouldCompleteCounts: [], totalTasks: 0 })
   }
 })
 const emit = defineEmits(['stats-changed'])
@@ -46,6 +50,9 @@ const compProps = computed(() => {
   const baseProps = { selectedKpi: props.selectedKpi, isOverview: props.isOverview, projectSeries: props.projectSeries }
   if (currentComp.value === TaskCompletionView) {
     return { ...baseProps, completionSeries: props.completionSeries }
+  }
+  if (currentComp.value === OverdueTaskView) {
+    return { ...baseProps, overdueSeries: props.overdueSeries }
   }
   return baseProps
 })
