@@ -153,14 +153,10 @@ const regions = ['全国', '华东', '华南', '华北', '西部', '广东', '�
 const projects = ref([])
 function generateSeriesData() {
   const data = [];
-  let value = 60 + Math.random() * 20; // Initial start between 60-80
+  // 简单直线：从60%到90%
   for (let i = 0; i < 60; i++) {
+    const value = 60 + (30 * i / 59);
     data.push(Math.round(value));
-    // Significantly increased volatility: +/- 7.5 change per step
-    value += (Math.random() - 0.5) * 15; 
-    // Clamping
-    if (value > 98) value = 98;
-    if (value < 30) value = 30;
   }
   return data;
 }
@@ -340,28 +336,183 @@ function calculateTaskStats(tasks) {
   }
 }
 
-// 生成重庆江北项目的进度兑现指数序列（基于实际进度情况）
+// 生成重庆江北项目的进度兑现指数序列（直线）
 function generateChongqingSeriesData() {
   const data = [];
-  let value = 75; // 项目初始状态
+  // 直线：从75%到65%（体现进度压力）
   for (let i = 0; i < 60; i++) {
+    const value = 75 - (10 * i / 59);
     data.push(Math.round(value));
-    // 模拟真实项目波动：前期启动顺利，中期有逾期压力
-    if (i < 10) {
-      value += (Math.random() - 0.3) * 5; // 启动阶段略有下降
-    } else if (i < 30) {
-      value += (Math.random() - 0.6) * 8; // 准备阶段逾期压力大
-    } else {
-      value += (Math.random() - 0.4) * 6; // 实施阶段努力追赶
-    }
-    if (value > 95) value = 95;
-    if (value < 45) value = 45;
   }
   return data;
 }
 
 // 计算重庆江北项目的任务统计
 const chongqingStats = calculateTaskStats(chongqingJiangbeiAllTasks)
+
+// =====================================================
+// 乌鲁木齐项目完整数据 - 从CSV导入（真实数据）
+// =====================================================
+const urumqiAllTasks = [
+  // 里程碑
+  { id: '1.1', name: '设备采购到货安装调试', status: '进行中', planStart: null, planEnd: null },
+  { id: '1.2', name: '航站楼剩余机柜转移到附属楼LED屏用', status: '已完成', planStart: '2025-09-02', planEnd: '2025-09-07', actualEnd: '2025-09-10' },
+  { id: '2.1', name: '预验收整改问题（软件组）', status: '逾期', planStart: '2025-08-31', planEnd: '2025-09-15', actualEnd: null },
+  { id: '2.2', name: '预验收整改问题（设备组）', status: '逾期', planStart: '2025-08-31', planEnd: '2025-09-15', actualEnd: null },
+  { id: '2.3', name: '预验收整改问题（工艺组）', status: '已完成', planStart: null, planEnd: null, actualEnd: null },
+  { id: '2.4', name: '边检交代的其他工作', status: '已完成', planStart: '2025-08-31', planEnd: '2025-09-06', actualEnd: '2025-09-11' },
+  { id: '3.1', name: '001出入境旅客查验系统', status: '逾期', planStart: '2025-09-03', planEnd: '2025-09-12', actualEnd: null },
+  { id: '3.2', name: '002边检勤务指挥中心', status: '逾期', planStart: '2025-09-03', planEnd: '2025-09-12', actualEnd: null },
+  { id: '3.3', name: '003边检专用网络系统', status: '已完成', planStart: '2025-09-05', planEnd: '2025-09-05', actualEnd: '2025-09-09' },
+  { id: '3.4', name: '004边检门禁系统', status: '逾期', planStart: '2025-08-31', planEnd: '2025-09-11', actualEnd: null },
+  // 子任务 - 设备采购到货安装调试
+  { id: '1.1.1', name: 'JITON智能监控管理平台V7.0', status: '已完成', planStart: '2025-09-01', planEnd: '2025-09-05', actualEnd: '2025-09-05' },
+  { id: '1.1.2', name: '网御星云/网络安全设备', status: '已完成', planStart: '2025-08-28', planEnd: '2025-09-05', actualEnd: '2025-09-05' },
+  { id: '1.1.3', name: '自助照相机EMP2931', status: '已完成', planStart: '2025-09-01', planEnd: '2025-09-15', actualEnd: null },
+  { id: '1.1.4', name: 'windows server 2019标准版', status: '逾期', planStart: '2025-08-28', planEnd: '2025-09-13', actualEnd: null },
+  { id: '1.1.5', name: '麒麟/V10', status: '逾期', planStart: '2025-08-28', planEnd: '2025-09-13', actualEnd: null },
+  { id: '1.1.6', name: 'LED全彩屏12.15平方', status: '已完成', planStart: '2025-08-28', planEnd: '2025-09-15', actualEnd: null },
+  { id: '1.1.7', name: '视频会议系统', status: '已完成', planStart: '2025-08-28', planEnd: '2025-09-14', actualEnd: null },
+  { id: '1.1.8', name: '视频会议话筒', status: '已完成', planStart: '2025-08-28', planEnd: '2025-09-15', actualEnd: null },
+  { id: '1.1.9', name: '梅沙执勤专用移动核验笔记本', status: '已完成', planStart: '2025-08-29', planEnd: '2025-10-15', actualEnd: null },
+  { id: '1.1.10', name: '辅助翻译系统', status: '已完成', planStart: '2025-08-28', planEnd: '2025-10-01', actualEnd: null },
+  { id: '1.1.11', name: '查验限定区域人员管理报警系统', status: '逾期完成', planStart: '2025-08-28', planEnd: '2025-09-15', actualEnd: '2025-10-30' },
+  { id: '1.1.12', name: '智能定位手环', status: '已完成', planStart: '2025-08-28', planEnd: '2025-09-15', actualEnd: '2025-09-15' },
+  { id: '1.1.13', name: '电子证照安全服务器', status: '已完成', planStart: '2025-09-13', planEnd: '2025-09-18', actualEnd: '2025-09-05' },
+  { id: '1.1.14', name: '勤务指挥工作站', status: '逾期', planStart: '2025-09-01', planEnd: '2025-09-13', actualEnd: null },
+  { id: '1.1.15', name: '大数据中心家具', status: '逾期', planStart: '2025-09-01', planEnd: '2025-09-13', actualEnd: null },
+  { id: '1.1.16', name: '广播系统', status: '已完成', planStart: '2025-08-28', planEnd: '2025-09-13', actualEnd: null },
+  { id: '1.1.17', name: 'JITON智能监控管理平台V7.0', status: '已完成', planStart: '2025-09-01', planEnd: '2025-09-13', actualEnd: null },
+  { id: '1.1.18', name: '主动安全监管系统', status: '已完成', planStart: '2025-08-28', planEnd: '2025-09-12', actualEnd: '2025-09-10' },
+  { id: '1.1.19', name: '整体软包', status: '已完成', planStart: '2025-09-02', planEnd: '2025-09-03', actualEnd: '2025-09-05' },
+  { id: '1.1.20', name: 'T4货库现场大屏', status: '已完成', planStart: null, planEnd: null, actualEnd: null },
+  { id: '1.1.21', name: '传真功能', status: '已完成', planStart: null, planEnd: null, actualEnd: null },
+  { id: '1.1.22', name: 'TEKING广播系统', status: '已完成', planStart: null, planEnd: null, actualEnd: null },
+  { id: '1.1.23', name: '云桌面瘦客户端', status: '未开始', planStart: null, planEnd: null, actualEnd: null },
+  { id: '1.1.24', name: '云桌面操作系统', status: '未开始', planStart: null, planEnd: null, actualEnd: null },
+  { id: '1.1.25', name: '云桌面后端服务器R4950', status: '已完成', planStart: null, planEnd: null, actualEnd: null },
+  { id: '1.1.26', name: '高倍显微镜', status: '已完成', planStart: null, planEnd: null, actualEnd: null },
+  { id: '1.1.27', name: '考试系统管理软件', status: '未开始', planStart: null, planEnd: null, actualEnd: null },
+  { id: '1.1.28', name: '人体X射线检查设备', status: '已完成', planStart: null, planEnd: null, actualEnd: null },
+  { id: '1.1.29', name: '网络舆情监控模块', status: '已完成', planStart: null, planEnd: null, actualEnd: null },
+  { id: '1.1.30', name: '投影机配件-存储卡', status: '已完成', planStart: '2025-08-28', planEnd: '2025-09-03', actualEnd: '2025-09-02' },
+  { id: '1.1.31', name: '口袋全景防抖相机X4', status: '已完成', planStart: '2025-09-01', planEnd: '2025-09-15', actualEnd: null },
+  { id: '1.1.32', name: '显示器Y32p-30', status: '已完成', planStart: '2025-09-01', planEnd: '2025-09-06', actualEnd: '2025-09-05' },
+  { id: '1.1.33', name: '双目摄像头', status: '已完成', planStart: '2025-09-11', planEnd: '2025-09-15', actualEnd: '2025-09-15' },
+  { id: '1.1.34', name: '彩色喷墨打印机', status: '未开始', planStart: null, planEnd: null, actualEnd: null },
+  { id: '1.1.35', name: '警用电动巡逻车', status: '已完成', planStart: null, planEnd: null, actualEnd: null },
+  { id: '1.1.36', name: '电动平衡车', status: '已完成', planStart: null, planEnd: null, actualEnd: null },
+  { id: '1.1.37', name: '登机牌扫描', status: '已完成', planStart: '2025-08-28', planEnd: '2025-09-12', actualEnd: '2025-09-03' },
+  { id: '1.1.38', name: '视频防尾随系统', status: '已完成', planStart: '2025-08-28', planEnd: '2025-09-12', actualEnd: '2025-09-03' },
+  { id: '1.1.39', name: '辅助查验服务器', status: '未开始', planStart: null, planEnd: null, actualEnd: null },
+  { id: '1.1.40', name: '存储服务器', status: '未开始', planStart: null, planEnd: null, actualEnd: null },
+  { id: '1.1.41', name: '数据中心交换机', status: '未开始', planStart: null, planEnd: null, actualEnd: null },
+  { id: '1.1.42', name: '警用电动巡逻车', status: '未开始', planStart: null, planEnd: null, actualEnd: null },
+  { id: '1.1.43', name: '边检大数据中心相关设备', status: '进行中', planStart: null, planEnd: null, actualEnd: null },
+  { id: '1.1.44', name: '动环设备', status: '已完成', planStart: '2025-09-01', planEnd: '2025-09-15', actualEnd: null },
+  { id: '1.1.45', name: '指纹锁网关', status: '未开始', planStart: null, planEnd: null, actualEnd: null },
+  { id: '1.1.46', name: '门禁电源', status: '逾期', planStart: '2025-09-01', planEnd: '2025-09-15', actualEnd: null },
+  { id: '1.1.47', name: '非标POE转换器', status: '已完成', planStart: null, planEnd: null, actualEnd: '2025-09-11' },
+  { id: '1.1.48', name: '内存条', status: '已完成', planStart: null, planEnd: null, actualEnd: null },
+  { id: '1.1.49', name: '已到货网络设备', status: '已完成', planStart: null, planEnd: null, actualEnd: null },
+  { id: '1.1.50', name: '已到货办公设备', status: '已完成', planStart: '2025-09-01', planEnd: '2025-09-13', actualEnd: null },
+  { id: '1.1.51', name: 'UPS', status: '未开始', planStart: null, planEnd: null, actualEnd: null },
+  { id: '1.1.52', name: '已到货会议系统', status: '逾期', planStart: '2025-09-01', planEnd: '2025-09-15', actualEnd: null },
+  { id: '1.1.53', name: '警用器材及器材柜', status: '未开始', planStart: null, planEnd: null, actualEnd: null },
+  { id: '1.1.54', name: '边检办公设备', status: '未开始', planStart: null, planEnd: null, actualEnd: null },
+  { id: '1.1.55', name: '各类柜子等摆放设施', status: '已完成', planStart: null, planEnd: null, actualEnd: null },
+  { id: '1.1.56', name: '已到货未安装会议系统', status: '已完成', planStart: null, planEnd: null, actualEnd: null },
+  { id: '1.1.57', name: '警用器材及器材柜', status: '已完成', planStart: null, planEnd: null, actualEnd: '2025-09-10' },
+  { id: '1.1.58', name: '已到货证研设备', status: '已完成', planStart: null, planEnd: null, actualEnd: null },
+  { id: '1.1.59', name: '执法取证设备', status: '已完成', planStart: null, planEnd: null, actualEnd: null },
+  { id: '1.1.60', name: '已到货3P空调', status: '已完成', planStart: null, planEnd: null, actualEnd: null },
+  // 预验收整改问题 - 软件组
+  { id: '2.1.1', name: '视频监控系统大屏控制设备', status: '已完成', planStart: '2025-08-31', planEnd: '2025-09-10', actualEnd: '2025-08-31' },
+  { id: '2.1.2', name: '视频会议系统设备终端机', status: '已完成', planStart: '2025-08-28', planEnd: '2025-09-18', actualEnd: '2025-09-15' },
+  { id: '2.1.3', name: '人脸比对算法资源', status: '已完成', planStart: '2025-08-31', planEnd: '2025-09-08', actualEnd: '2025-09-11' },
+  { id: '2.1.4', name: '门禁系统访客机', status: '逾期', planStart: '2025-09-05', planEnd: '2025-09-16', actualEnd: null },
+  // 预验收整改问题 - 设备组（部分）
+  { id: '2.2.2', name: '机房吊顶', status: '已完成', planStart: '2025-08-28', planEnd: '2025-09-09', actualEnd: '2025-09-09' },
+  { id: '2.2.3', name: '密码柜变形', status: '已完成', planStart: '2025-08-31', planEnd: '2025-09-16', actualEnd: null },
+  { id: '2.2.5', name: '自助通道线路标签', status: '已完成', planStart: '2025-08-28', planEnd: '2025-09-08', actualEnd: '2025-09-09' },
+  { id: '2.2.6', name: '验证台钢化玻璃', status: '已完成', planStart: '2025-08-28', planEnd: '2025-09-04', actualEnd: '2025-09-05' },
+  { id: '2.2.7', name: '验证台线缆整理', status: '已完成', planStart: '2025-08-28', planEnd: '2025-09-08', actualEnd: '2025-09-09' },
+  { id: '2.2.8', name: '重点人员核查室设备', status: '逾期完成', planStart: '2025-08-29', planEnd: '2025-09-16', actualEnd: '2025-10-27' },
+  { id: '2.2.9', name: '管理限定区域工作站', status: '已完成', planStart: '2025-08-28', planEnd: '2025-08-29', actualEnd: '2025-08-31' },
+  { id: '2.2.11', name: '处置突发事件及报警装备', status: '已完成', planStart: '2025-08-31', planEnd: '2025-09-13', actualEnd: '2025-09-11' },
+  { id: '2.2.12', name: '打印机安装', status: '已完成', planStart: '2025-08-29', planEnd: '2025-09-10', actualEnd: '2025-09-11' },
+  { id: '2.2.13', name: '信息发布系统工作站', status: '已完成', planStart: '2025-09-08', planEnd: '2025-09-12', actualEnd: '2025-09-10' },
+  { id: '2.2.46', name: '智能防磁管理柜', status: '逾期完成', planStart: '2025-08-28', planEnd: '2025-09-16', actualEnd: '2025-10-30' },
+  { id: '2.2.47', name: '报案自动终端设备', status: '已完成', planStart: '2025-08-28', planEnd: '2025-09-08', actualEnd: '2025-09-08' },
+  { id: '2.2.53', name: '七氟丙烷灭火装置', status: '逾期完成', planStart: '2025-08-29', planEnd: '2025-09-13', actualEnd: '2025-10-27' },
+  // 预验收整改问题 - 工艺组
+  { id: '2.3.1', name: '空调排水处理', status: '逾期完成', planStart: '2025-08-29', planEnd: '2025-09-16', actualEnd: '2025-10-30' },
+  { id: '2.3.2', name: '防撞栏底部横杆', status: '已完成', planStart: '2025-08-28', planEnd: '2025-09-13', actualEnd: '2025-09-15' },
+  // 边检交代的其他工作
+  { id: '2.4.1', name: '4楼指挥中心瓷砖', status: '已完成', planStart: '2025-08-31', planEnd: '2025-09-06', actualEnd: '2025-09-06' },
+  { id: '2.4.2', name: '10楼大厅改造', status: '已完成', planStart: '2025-08-31', planEnd: '2025-09-13', actualEnd: '2025-09-10' },
+  { id: '2.4.3', name: '云桌面安装', status: '已完成', planStart: '2025-08-31', planEnd: '2025-09-13', actualEnd: '2025-09-10' },
+  { id: '2.4.4', name: '买几盆花', status: '已完成', planStart: '2025-08-31', planEnd: '2025-09-06', actualEnd: '2025-08-31' },
+  { id: '2.4.5', name: '二楼玻璃隔断', status: '已完成', planStart: '2025-08-31', planEnd: '2025-09-10', actualEnd: '2025-09-10' },
+  { id: '2.4.6', name: '附属楼机柜', status: '已完成', planStart: '2025-09-03', planEnd: '2025-09-05', actualEnd: '2025-09-08' },
+  // 第三方检测整改 - 001出入境旅客查验系统（部分）
+  { id: '3.1.1', name: '热区指定物品超区计算', status: '已完成', planStart: '2025-08-29', planEnd: '2025-09-10', actualEnd: '2025-09-10' },
+  { id: '3.1.2', name: '警力分布通关流量展示', status: '逾期', planStart: '2025-08-29', planEnd: '2025-09-16', actualEnd: null },
+  { id: '3.1.3', name: '场景回溯功能', status: '已完成', planStart: '2025-08-29', planEnd: '2025-09-16', actualEnd: '2025-09-10' },
+  { id: '3.1.4', name: '待办事项下发功能', status: '已完成', planStart: '2025-08-29', planEnd: '2025-09-10', actualEnd: '2025-09-10' },
+  { id: '3.1.5', name: '智能定位手环', status: '已完成', planStart: '2025-08-29', planEnd: '2025-09-10', actualEnd: '2025-09-10' },
+  { id: '3.1.6', name: '登机口二次核验', status: '逾期', planStart: '2025-08-29', planEnd: '2025-09-16', actualEnd: null },
+  { id: '3.1.7', name: '集成电话', status: '已完成', planStart: '2025-08-29', planEnd: '2025-09-16', actualEnd: '2025-09-10' },
+  { id: '3.1.8', name: '重点人员核查室设备', status: '逾期', planStart: '2025-08-29', planEnd: '2025-09-10', actualEnd: null },
+  { id: '3.1.9', name: '实时活动轨迹监测', status: '逾期', planStart: '2025-08-29', planEnd: '2025-09-16', actualEnd: null },
+  { id: '3.1.10', name: '定位配置轨迹回放', status: '逾期', planStart: '2025-08-29', planEnd: '2025-09-16', actualEnd: null },
+  { id: '3.1.11', name: '指挥一张图智能处突', status: '已完成', planStart: '2025-08-29', planEnd: '2025-09-10', actualEnd: '2025-09-10' },
+  { id: '3.1.12', name: '执勤管理系统', status: '逾期', planStart: '2025-08-29', planEnd: '2025-09-10', actualEnd: null },
+  { id: '3.1.13', name: '人员核查系统', status: '已完成', planStart: '2025-08-29', planEnd: '2025-09-10', actualEnd: '2025-09-10' },
+  { id: '3.1.14', name: '联动报警设备', status: '逾期', planStart: '2025-08-29', planEnd: '2025-09-16', actualEnd: null },
+  { id: '3.1.15', name: '人脸识别管控服务器', status: '已完成', planStart: '2025-08-29', planEnd: '2025-09-10', actualEnd: '2025-09-10' },
+  { id: '3.1.16', name: '翻译辅助应用系统', status: '已完成', planStart: '2025-08-29', planEnd: '2025-09-30', actualEnd: '2025-09-15' },
+  // 第三方检测整改 - 002边检勤务指挥中心（部分）
+  { id: '3.2.1', name: '人工广播功能', status: '未开始', planStart: null, planEnd: null, actualEnd: null },
+  { id: '3.2.2', name: '人工呼叫站启用禁用', status: '逾期', planStart: '2025-08-29', planEnd: '2025-09-17', actualEnd: null },
+  { id: '3.2.3', name: '互动录播云平台', status: '逾期', planStart: '2025-08-29', planEnd: '2025-09-17', actualEnd: null },
+  { id: '3.2.4', name: '坐席管理系统', status: '逾期', planStart: '2025-08-29', planEnd: '2025-09-17', actualEnd: null },
+  { id: '3.2.5', name: '集中控制系统', status: '逾期完成', planStart: '2025-08-29', planEnd: '2025-09-17', actualEnd: '2025-12-09' },
+  { id: '3.2.6', name: '语音系统', status: '已完成', planStart: '2025-08-29', planEnd: '2025-09-17', actualEnd: '2025-09-15' },
+  { id: '3.2.7', name: 'LED条屏预存信息', status: '已完成', planStart: '2025-08-29', planEnd: '2025-09-17', actualEnd: '2025-09-11' },
+  { id: '3.2.8', name: '智能会议中心', status: '逾期完成', planStart: '2025-08-29', planEnd: '2025-09-17', actualEnd: '2025-12-09' },
+  // 第三方检测整改 - 003边检专用网络系统
+  { id: '3.3.1', name: '核心交换机配置', status: '已完成', planStart: '2025-09-05', planEnd: '2025-09-05', actualEnd: '2025-09-05' },
+  // 第三方检测整改 - 004边检门禁系统（部分）
+  { id: '3.4.1', name: '门禁读卡器指纹识别', status: '已完成', planStart: '2025-08-29', planEnd: '2025-09-13', actualEnd: '2025-09-15' },
+  { id: '3.4.2', name: '门锁门禁管理授权', status: '已完成', planStart: '2025-08-29', planEnd: '2025-09-05', actualEnd: '2025-09-05' },
+  { id: '3.4.3', name: '人员分组功能', status: '已完成', planStart: '2025-08-29', planEnd: '2025-09-10', actualEnd: '2025-09-08' },
+  { id: '3.4.4', name: '首卡常开功能', status: '已完成', planStart: '2025-08-29', planEnd: '2025-09-10', actualEnd: '2025-09-08' },
+  { id: '3.4.5', name: '人脸图片质量检测', status: '已完成', planStart: '2025-08-29', planEnd: '2025-09-10', actualEnd: '2025-09-08' },
+  { id: '3.4.6', name: '胁迫卡超级卡功能', status: '已完成', planStart: '2025-08-29', planEnd: '2025-09-10', actualEnd: '2025-09-08' },
+  { id: '3.4.7', name: '设备容量调整', status: '已完成', planStart: '2025-08-29', planEnd: '2025-09-10', actualEnd: '2025-09-08' },
+  { id: '3.4.8', name: '管理机功能', status: '已完成', planStart: '2025-08-29', planEnd: '2025-09-10', actualEnd: '2025-09-08' },
+  { id: '3.4.9', name: '访客管理功能', status: '逾期', planStart: '2025-08-29', planEnd: '2025-09-17', actualEnd: null },
+  { id: '3.4.10', name: '考勤管理功能', status: '已完成', planStart: '2025-08-29', planEnd: '2025-09-10', actualEnd: '2025-09-08' },
+  { id: '3.4.11', name: '访客微信双网摆渡', status: '逾期', planStart: '2025-08-29', planEnd: '2025-09-17', actualEnd: null },
+  { id: '3.4.12', name: '系统外网环境', status: '逾期', planStart: '2025-08-29', planEnd: '2025-09-17', actualEnd: null },
+  { id: '3.4.13', name: '车辆出入口道闸', status: '已完成', planStart: '2025-08-29', planEnd: '2025-09-10', actualEnd: '2025-09-08' },
+  { id: '3.4.14', name: '出入口雷达', status: '已完成', planStart: '2025-08-29', planEnd: '2025-09-10', actualEnd: '2025-09-08' }
+]
+
+// 计算乌鲁木齐项目的任务统计
+const urumqiStats = calculateTaskStats(urumqiAllTasks)
+
+// 生成乌鲁木齐项目的进度兑现指数序列（直线）
+function generateUrumqiSeriesData() {
+  const data = [];
+  // 直线：从85%到70%（体现进度落后）
+  for (let i = 0; i < 60; i++) {
+    const value = 85 - (15 * i / 59);
+    data.push(Math.round(value));
+  }
+  return data;
+}
 
 const regulars = ref([
   // 重庆江北项目 - 真实数据（从CSV完整导入）
@@ -442,85 +593,78 @@ const regulars = ref([
       }
     ]
   },
-  { name: '前海综合保税区车道', sector: '潘勇', series: generateSeriesData(), risks: [] },
   { 
     name: '乌鲁木齐', 
     sector: '潘勇', 
-    series: generateSeriesData(),
+    series: generateUrumqiSeriesData(),
+    allTasks: urumqiAllTasks,
+    taskStats: urumqiStats,
+    projectInfo: {
+      fullName: '乌鲁木齐地窝堡国际机场T4航站楼边检设施改造工程',
+      planStartDate: '2025-08-28',
+      planCompleteDate: '2025-12-31',
+      currentPhase: '实施阶段',
+      totalTasks: urumqiStats.total,
+      completedTasks: urumqiStats.completed,
+      overdueTasks: urumqiStats.overdue,
+      delayedTasks: urumqiStats.delayed,
+      inProgressTasks: urumqiStats.inProgress,
+      pendingTasks: urumqiStats.pending,
+      taskCompletionRate: urumqiStats.completionRate,
+      planCompletionRate: urumqiStats.planCompletionRate,
+      overdueRate: urumqiStats.overdueRate,
+      shouldBeCompleted: urumqiStats.shouldBeCompleted
+    },
+    kpiData: {
+      taskCompletionRate: {
+        value: urumqiStats.completionRate,
+        planValue: urumqiStats.planCompletionRate,
+        delta: urumqiStats.completionRate - urumqiStats.planCompletionRate,
+        trend: urumqiStats.completionRate >= urumqiStats.planCompletionRate ? 'up' : 'down'
+      },
+      overdueRate: {
+        value: urumqiStats.overdueRate,
+        threshold: 10,
+        isWarning: urumqiStats.overdueRate > 10
+      }
+    },
     risks: [
       {
         level: 'high',
         levelText: '高风险',
-        category: '供应商问题',
-        reason: '第三方渠道接口变更，导致联调受阻',
-        action: '协调渠道方技术负责人召开紧急会议',
-        impact: '可能延期 5-7 天',
-        deadline: '2025-11-30'
+        category: '第三方检测整改',
+        reason: '001出入境旅客查验系统、002边检勤务指挥中心多项功能逾期未完成',
+        action: '协调厂家加快调试进度，优先处理核心功能',
+        impact: '影响项目验收进度',
+        deadline: '2025-12-20'
       },
       {
-        level: 'medium',
-        levelText: '中风险',
-        category: '技术难题',
-        reason: '历史代码耦合度高，重构工作量超预期',
-        action: '安排专项重构时间，分阶段解耦',
-        impact: '影响后续迭代速度',
+        level: 'high',
+        levelText: '高风险',
+        category: '设备采购',
+        reason: '部分设备（windows server、麒麟V10、会议系统）采购逾期',
+        action: '加急推进采购流程，协调供应商优先发货',
+        impact: '影响系统部署和联调',
         deadline: '2025-12-15'
-      }
-    ]
-  },
-  { 
-    name: 'SSJS前海', 
-    sector: '潘勇', 
-    series: generateSeriesData(),
-    risks: [
-      {
-        level: 'medium',
-        levelText: '中风险',
-        category: '资源缺口',
-        reason: '核心开发人员请假，进度滞后 3 天',
-        action: '从「报表组」临时抽调 1 名高级开发支援',
-        impact: '部分功能延期交付',
-        deadline: '2025-12-05'
-      }
-    ]
-  },
-  { name: '国铁建-卡口', sector: '潘勇', series: generateSeriesData(), risks: [] },
-  { name: '2前海-车道', sector: '潘勇', series: generateSeriesData(), risks: [] },
-  { 
-    name: '临沂-机场', 
-    sector: '潘勇', 
-    series: generateSeriesData(),
-    risks: [
-      {
-        level: 'medium',
-        levelText: '中风险',
-        category: '质量缺陷返工',
-        reason: 'UI 验收反馈问题较多，修复耗时',
-        action: '组织 UI 与前端坐班集中修复',
-        impact: '测试周期延长 2 天',
-        deadline: '2025-11-28'
       },
       {
-        level: 'low',
-        levelText: '低风险',
-        category: '设计/深化延误',
-        reason: '部分接口文档更新不及时',
-        action: '要求后端同步更新 API 文档',
-        impact: '联调效率降低',
-        deadline: '2025-12-01'
+        level: 'medium',
+        levelText: '中风险',
+        category: '门禁系统',
+        reason: '访客管理、微信双网摆渡、外网环境等功能逾期',
+        action: '请海康厂家进场整改',
+        impact: '影响门禁系统完整性验收',
+        deadline: '2025-12-25'
       }
     ]
-  },
-  { name: '前海-综合', sector: '潘勇', series: generateSeriesData(), risks: [] },
-  { name: '前海-维修', sector: '潘勇', series: generateSeriesData(), risks: [] },
-  { name: 'SSKJ前海', sector: '潘勇', series: generateSeriesData(), risks: [] }
+  }
 ])
 // KPI数据 - 当选择重庆江北项目时会使用真实数据
 const kpis = ref([
-  { title: '资金到账率', value: '76%', delta: '+3%', up: true },
+  { title: '资金到账率', value: '0%', delta: '', up: true },
   { title: '任务完成率', value: '78%', delta: '+2%', up: true },
-  { title: '项目支出金额', value: '81%', delta: '+1%', up: true },
-  { title: '人员健康度', value: '72%', delta: '-3%', up: false },
+  { title: '项目支出金额', value: '¥ 0', delta: '', up: true },
+  { title: '人员健康度', value: '0%', delta: '', up: true },
   { title: '逾期任务率', value: '22%', delta: '-1%', up: true }
 ])
 
@@ -528,13 +672,11 @@ const kpis = ref([
 function updateKpisForProject(project) {
   if (project && project.taskStats) {
     const stats = project.taskStats
-    // 更新任务完成率 - 显示实际完成率，delta显示与计划的差距
+    // 更新任务完成率
     const taskKpiIdx = kpis.value.findIndex(k => k.title === '任务完成率')
     if (taskKpiIdx !== -1) {
-      // 实际完成率 vs 计划（应完成100%）
-      // 例如：应完成24个，实际完成4个 => 完成率 17%，较计划 -83%
-      const actualRate = stats.actualVsPlan  // 实际完成率（相对于应完成任务）
-      const delta = stats.planDelta          // 与100%计划的差距
+      const actualRate = stats.actualVsPlan
+      const delta = stats.planDelta
       kpis.value[taskKpiIdx] = {
         title: '任务完成率',
         value: actualRate + '%',
@@ -549,9 +691,22 @@ function updateKpisForProject(project) {
         title: '逾期任务率',
         value: stats.overdueRate + '%',
         delta: stats.overdueRate > 10 ? '+' + (stats.overdueRate - 10) + '%' : '-' + (10 - stats.overdueRate) + '%',
-        up: stats.overdueRate <= 10 // 逾期率低是好的
+        up: stats.overdueRate <= 10
       }
     }
+    // 强制触发响应式更新
+    kpis.value = [...kpis.value]
+  } else {
+    // 没有真实数据的项目，使用默认值
+    const taskKpiIdx = kpis.value.findIndex(k => k.title === '任务完成率')
+    if (taskKpiIdx !== -1) {
+      kpis.value[taskKpiIdx] = { title: '任务完成率', value: '0%', delta: '', up: true }
+    }
+    const overdueKpiIdx = kpis.value.findIndex(k => k.title === '逾期任务率')
+    if (overdueKpiIdx !== -1) {
+      kpis.value[overdueKpiIdx] = { title: '逾期任务率', value: '0%', delta: '', up: true }
+    }
+    kpis.value = [...kpis.value]
   }
 }
 
@@ -620,7 +775,22 @@ function selectProjectByName(name) {
 }
 
 function updateKpiFromChart(payload){
+  // 在概览模式下，不更新KPI卡片数据
+  if (payload.isOverview) return
   if (!selectedKpi.value) return
+  
+  // 如果当前项目有真实任务数据，不要覆盖任务完成率和逾期任务率
+  if (selectedProject.value?.taskStats) {
+    if (selectedKpi.value === '任务完成率' || selectedKpi.value === '逾期任务率') {
+      const idx = kpis.value.findIndex(k => k.title === selectedKpi.value)
+      if (idx !== -1) {
+        kpiLiveMetrics.value = { value: kpis.value[idx].value, delta: kpis.value[idx].delta, up: kpis.value[idx].up }
+        kpiLiveCompareMode.value = '较计划'
+      }
+      return
+    }
+  }
+  
   const idx = kpis.value.findIndex(k => k.title === selectedKpi.value)
   if (idx === -1) return
   // 项目支出金额：卡片显示实际支出金额，来源于图表数据

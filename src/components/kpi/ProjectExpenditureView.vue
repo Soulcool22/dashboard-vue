@@ -157,11 +157,7 @@ const chartRef = ref(null)
 let chartInstance = null
 
 // Mock Data for Top Expenditures
-const topExpenditures = ref([
-  { name: 'AI算力服务器集群采购 (第2批)', category: '设备采购', amount: 850000, date: '2025-10-15', percent: 12.5, handler: '李采购' },
-  { name: 'Oracle数据库年度授权费', category: '软件授权', amount: 420000, date: '2025-08-02', percent: 6.2, handler: '王运维' },
-  { name: '前端开发外包服务费 (Q3)', category: '劳务外包', amount: 280000, date: '2025-09-20', percent: 4.1, handler: '张研发' }
-])
+const topExpenditures = ref([])
 
 // 为每行计算动态 CSS 变量 --row-weight-opacity
 const weightedTopExpenditures = computed(() => {
@@ -177,12 +173,12 @@ const weightedTopExpenditures = computed(() => {
 // 数据定义
 const totalBudget = ref(12500000)
 const expenditurePeriods = ref([
-  { month: '2025-06', personnel: 780000, labor: 390000, other: 85000 },
-  { month: '2025-07', personnel: 810000, labor: 420000, other: 95000 },
-  { month: '2025-08', personnel: 850000, labor: 450000, other: 120000 },
-  { month: '2025-09', personnel: 780000, labor: 410000, other: 110000 },
-  { month: '2025-10', personnel: 920000, labor: 480000, other: 95000 },
-  { month: '2025-11', personnel: 870000, labor: 460000, other: 105000 }
+  { month: '2025-06', personnel: 0, labor: 0, other: 0 },
+  { month: '2025-07', personnel: 0, labor: 0, other: 0 },
+  { month: '2025-08', personnel: 0, labor: 0, other: 0 },
+  { month: '2025-09', personnel: 0, labor: 0, other: 0 },
+  { month: '2025-10', personnel: 0, labor: 0, other: 0 },
+  { month: '2025-11', personnel: 0, labor: 0, other: 0 }
 ])
 
 // 计算属性

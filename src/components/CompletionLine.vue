@@ -50,40 +50,12 @@ function generateMockData(seedStr) {
   const planRates = []
   const actualRates = []
   
-  // Simple hash-like function to vary trends based on seed
-  let seed = 0;
-  for (let i = 0; i < seedStr.length; i++) {
-    seed = (seed << 5) - seed + seedStr.charCodeAt(i);
-    seed |= 0;
-  }
-  const randomFactor = Math.abs(seed % 10) / 10; // 0 to 0.9
-
-  // Base curve logic customized by randomFactor
-  const planStart = 0.1 + (randomFactor * 0.05)
-  const planEnd = 0.9 + (randomFactor * 0.08)
-
+  // 简单直线：从10%到90%
   for(let i=0;i<days;i++){
     const t = i/(days-1)
-    // Create a sigmoid-like or linear progression
-    let rate = planStart + (planEnd - planStart) * t;
-    
-    // Add some waviness
-    rate += Math.sin(t * Math.PI * (2 + randomFactor)) * 0.05;
-    
-    planRates.push(Math.min(1, Math.max(0, rate)))
-  }
-
-  for(let i=0;i<days;i++){
-    const planRate = planRates[i]
-    // Actual varies around plan
-    let variation = (Math.random() - 0.5) * 0.1 + (randomFactor - 0.5) * 0.05;
-    
-    // Lag or lead trend based on index
-    if (i > 30) variation += 0.05 * (randomFactor > 0.5 ? 1 : -1);
-
-    let actualRate = planRate + variation;
-    actualRate = Math.min(1, Math.max(0, actualRate))
-    actualRates.push(actualRate)
+    const rate = 0.1 + 0.8 * t
+    planRates.push(rate)
+    actualRates.push(rate)
   }
   
   return { planRates, actualRates }
