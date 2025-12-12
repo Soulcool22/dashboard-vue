@@ -1,7 +1,7 @@
 <template>
   <div class="card chart-card">
     <div class="card-header">
-      <h3>{{ isOverview ? '进度兑现指数（折线）' : (selectedKpi ? selectedKpi + '（折线）' : '（折线）') }}</h3>
+      <h3>任务完成率（折线）</h3>
     </div>
     <div ref="el" class="chart-box"></div>
   </div>
@@ -18,41 +18,39 @@ const props = defineProps({
 })
 const emit = defineEmits(['stats-changed'])
 
-// --- Chart Logic ---
-// 缓存 KPI 模式的示例数据，避免每次点击都重新生成
-const mockCache = new Map()
-
 const el = ref(null)
 let chart = null
 let resizeObserver = null
+
+// 缓存模拟数据
+const mockCache = ref(null)
 
 watch(() => [props.selectedKpi, props.isOverview, props.projectSeries], () => {
   setTimeout(() => render(), 0)
 }, { deep: true })
 
-onMounted(()=>{
-  if (props.selectedKpi !== '资金到账率') {
-    render()
-  }
-  // Observe the container, not the chart element directly, or handle nulls
-  // For simplicity, we'll try to observe if el exists, otherwise we might need a wrapper
+onMounted(() => {
+  render()
 })
 
-onBeforeUnmount(()=>{
+onBeforeUnmount(() => {
   if (resizeObserver) {
     resizeObserver.disconnect()
   }
-  if(chart){ chart.dispose(); chart=null }
+  if (chart) {
+    chart.dispose()
+    chart = null
+  }
 })
 
-function generateMockData(seedStr) {
+function generateMockData() {
   const days = 60
   const planRates = []
   const actualRates = []
   
   // 简单直线：从10%到90%
-  for(let i=0;i<days;i++){
-    const t = i/(days-1)
+  for (let i = 0; i < days; i++) {
+    const t = i / (days - 1)
     const rate = 0.1 + 0.8 * t
     planRates.push(rate)
     actualRates.push(rate)
@@ -61,8 +59,8 @@ function generateMockData(seedStr) {
   return { planRates, actualRates }
 }
 
-function render(){
-  if(!el.value) return
+function render() {
+  if (!el.value) return
   if (chart && chart.getDom && chart.getDom() !== el.value) {
     chart.dispose()
     chart = null
@@ -81,11 +79,20 @@ function render(){
   let planRates = []
   let xAxisData = []
   
-  function buildDateLabels(len){
-    function fmt(d){ const m = (d.getMonth()+1).toString().padStart(2,'0'); const day = d.getDate().toString().padStart(2,'0'); return m+'-'+day }
-    const base = new Date(); base.setHours(0,0,0,0)
+  function buildDateLabels(len) {
+    function fmt(d) {
+      const m = (d.getMonth() + 1).toString().padStart(2, '0')
+      const day = d.getDate().toString().padStart(2, '0')
+      return m + '-' + day
+    }
+    const base = new Date()
+    base.setHours(0, 0, 0, 0)
     const arr = []
-    for(let i=len-1;i>=0;i--){ const d = new Date(base); d.setDate(base.getDate()-i); arr.push(fmt(d)) }
+    for (let i = len - 1; i >= 0; i--) {
+      const d = new Date(base)
+      d.setDate(base.getDate() - i)
+      arr.push(fmt(d))
+    }
     return arr
   }
 
@@ -97,17 +104,13 @@ function render(){
     const days = 60
     xAxisData = buildDateLabels(days)
     
-    const key = props.selectedKpi || '任务完成率'
-    let data = mockCache.get(key)
-    if (!data) {
-      data = generateMockData(key)
-      mockCache.set(key, data)
+    if (!mockCache.value) {
+      mockCache.value = generateMockData()
     }
-    actualRates = data.actualRates
-    planRates = data.planRates
+    actualRates = mockCache.value.actualRates
+    planRates = mockCache.value.planRates
   }
 
-  // 移除交点逻辑：不再计算实际与计划交点
   const markPointData = []
 
   const axisLine = '#d1d5db'
@@ -127,44 +130,44 @@ function render(){
     const last = actualRates[actualRates.length - 1]
     const prev = actualRates.length > 1 ? actualRates[actualRates.length - 2] : null
     const planLast = planRates && planRates.length ? planRates[planRates.length - 1] : null
-    emit('stats-changed', { last, prev, planLast, isUp, isOverview: props.isOverview, kpi: props.selectedKpi })
+    emit('stats-changed', { last, prev, planLast, isUp, isOverview: props.isOverview, kpi: '任务完成率' })
   }
   const lineWidthActual = 2
   
-  const seriesNameActual = props.isOverview ? '实际进度' : '实际' + (props.selectedKpi || '')
-  const seriesNamePlan = !props.isOverview ? ('计划' + (props.selectedKpi || '')) : null
+  const seriesNameActual = props.isOverview ? '实际进度' : '实际任务完成率'
+  const seriesNamePlan = !props.isOverview ? '计划任务完成率' : null
 
   const option = {
     legend: { top: 0, right: 16, itemGap: 10, icon: 'rect', itemWidth: 14, itemHeight: 2 },
     grid: { left: 50, right: 24, top: 40, bottom: 28 },
     xAxis: { type: 'category', data: xAxisData, boundaryGap: false, axisLine: { lineStyle: { color: axisLine } }, axisTick: { show: false }, axisLabel: { color: axisLabel } },
-    yAxis: { type: 'value', min: 0, max: 1, axisLine: { show: false }, splitLine: { show: !props.isOverview, lineStyle: { color: gridLine } }, axisLabel: { color: axisLabel, formatter: v => Math.round(v*100)+'%' } },
+    yAxis: { type: 'value', min: 0, max: 1, axisLine: { show: false }, splitLine: { show: !props.isOverview, lineStyle: { color: gridLine } }, axisLabel: { color: axisLabel, formatter: v => Math.round(v * 100) + '%' } },
     dataZoom: [{ type: 'inside', start: 0, end: 100, filterMode: 'none' }],
-    tooltip: { 
-        trigger: 'axis', 
-        formatter: function(params){ 
-            let a=null, p=null; 
-            params.forEach(x=>{ 
-                if(x.seriesName===seriesNameActual) a=x.value; 
-                if(seriesNamePlan && x.seriesName===seriesNamePlan) p=x.value; 
-            }); 
-            const lines = params.map(x=> x.seriesName + ': ' + (x.value*100).toFixed(1) + '%'); 
-            const diff = (a!=null && p!=null) ? ((a-p)*100).toFixed(1) + '%' : '';
-            const s = diff ? (parseFloat(diff)>0 ? '超前' : parseFloat(diff)<0 ? '落后' : '持平') : '';
-            return params[0].axisValue + '<br/>' + lines.join('<br/>') + (diff?('<br/>差异(实-计): ' + diff + ' ' + s):''); 
-        } 
+    tooltip: {
+      trigger: 'axis',
+      formatter: function (params) {
+        let a = null, p = null
+        params.forEach(x => {
+          if (x.seriesName === seriesNameActual) a = x.value
+          if (seriesNamePlan && x.seriesName === seriesNamePlan) p = x.value
+        })
+        const lines = params.map(x => x.seriesName + ': ' + (x.value * 100).toFixed(1) + '%')
+        const diff = (a != null && p != null) ? ((a - p) * 100).toFixed(1) + '%' : ''
+        const s = diff ? (parseFloat(diff) > 0 ? '超前' : parseFloat(diff) < 0 ? '落后' : '持平') : ''
+        return params[0].axisValue + '<br/>' + lines.join('<br/>') + (diff ? ('<br/>差异(实-计): ' + diff + ' ' + s) : '')
+      }
     },
-    series: (function(){
+    series: (function () {
       const arr = [
-        { 
-          name: seriesNameActual, 
-          type: 'line', 
-          data: actualRates, 
-          smooth: true, 
-          showSymbol: false, 
-          lineStyle: { width: lineWidthActual, color: actualLine }, 
-          emphasis: { focus: 'series', lineStyle: { width: lineWidthActual + 1 } }, 
-          areaStyle: { color: new echarts.graphic.LinearGradient(0,0,0,1,[ { offset: 0, color: areaStart }, { offset: 1, color: areaEnd } ]) },
+        {
+          name: seriesNameActual,
+          type: 'line',
+          data: actualRates,
+          smooth: true,
+          showSymbol: false,
+          lineStyle: { width: lineWidthActual, color: actualLine },
+          emphasis: { focus: 'series', lineStyle: { width: lineWidthActual + 1 } },
+          areaStyle: { color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [{ offset: 0, color: areaStart }, { offset: 1, color: areaEnd }]) },
           markPoint: { symbol: 'circle', symbolSize: 7, data: markPointData }
         }
       ]
@@ -190,11 +193,10 @@ function render(){
   color: var(--text);
 }
 
-
-/* Generic Chart Box */
 .chart-box {
   flex: 1;
   min-height: 0;
   width: 100%;
 }
 </style>
+
