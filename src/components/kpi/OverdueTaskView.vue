@@ -138,7 +138,7 @@ function render() {
     legend: { top: 0, right: 16, itemGap: 10, icon: 'rect', itemWidth: 14, itemHeight: 2 },
     grid: { left: 50, right: 24, top: 40, bottom: 28 },
     xAxis: { type: 'category', data: xAxisData, boundaryGap: false, axisLine: { lineStyle: { color: axisLine } }, axisTick: { show: false }, axisLabel: { color: axisLabel } },
-    yAxis: { type: 'value', min: 0, max: 0.5, axisLine: { show: false }, splitLine: { show: true, lineStyle: { color: gridLine } }, axisLabel: { color: axisLabel, formatter: v => Math.round(v * 100) + '%' } },
+    yAxis: { type: 'value', min: 0, max: 1, axisLine: { show: false }, splitLine: { show: true, lineStyle: { color: gridLine } }, axisLabel: { color: axisLabel, formatter: v => Math.round(v * 100) + '%' } },
     dataZoom: [{ type: 'inside', start: 0, end: 100, filterMode: 'none' }],
     tooltip: {
       trigger: 'axis',
@@ -194,8 +194,7 @@ function render() {
 }
 
 .chart-box {
-  flex: 1;
-  min-height: 0;
   width: 100%;
+  height: 250px;
 }
 </style>
