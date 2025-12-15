@@ -99,7 +99,7 @@
               <KpiPanel 
                 :selected-kpi="selectedKpi" 
                 :is-overview="isChartOverview"
-                :project-series="selectedProject?.series"
+                :project-series="selectedProject?.progressIndexSeries || []"
                 :completion-series="selectedProject?.completionSeries"
                 :overdue-series="selectedProject?.overdueSeries"
                 @stats-changed="updateKpiFromChart"
@@ -300,10 +300,12 @@ function calculateTaskStats(tasks) {
   const completionRate = total > 0 ? Math.round((completed / total) * 100) : 0
   
   // 计算截止今天应该完成的任务数（planEnd <= 今天）
-  const today = new Date('2025-12-11') // 使用当前日期
+  const today = parseDateStrict('2025-12-11') || new Date('2025-12-11') // 使用当前日期
+  today.setHours(0, 0, 0, 0)
   const shouldBeCompleted = tasks.filter(t => {
-    if (!t.planEnd) return false
-    return new Date(t.planEnd) <= today
+    const planDate = parseDateStrict(t.planEnd)
+    if (!planDate) return false
+    return planDate <= today
   }).length
   
   // 计算较计划完成率：已完成 / 应完成
@@ -317,7 +319,14 @@ function calculateTaskStats(tasks) {
   const planDelta = actualVsPlan - 100 // 与100%计划的差距
   
   // 计算逾期任务率（逾期+延期 占 应完成任务的比例）
-  const overdueRate = shouldBeCompleted > 0 ? Math.round(((overdue) / shouldBeCompleted) * 100) : 0
+  const overdueBacklog = tasks.filter(t => {
+    const planDate = parseDateStrict(t.planEnd)
+    if (!planDate || planDate > today) return false
+    const actualDate = parseDateStrict(t.actualEnd)
+    return !actualDate || actualDate > today
+  }).length
+
+  const overdueRate = shouldBeCompleted > 0 ? Math.round((overdueBacklog / shouldBeCompleted) * 100) : 0
   
   // 计算延期任务率
   const delayedRate = total > 0 ? Math.round((delayed / total) * 100) : 0
@@ -446,13 +455,18 @@ function buildOverdueSeries(tasks) {
     return { dates: [], overdueRates: [], overdueCounts: [], shouldCompleteCounts: [], totalTasks }
   }
 
+  const today = parseDateStrict('2025-12-11') || new Date('2025-12-11')
+  today.setHours(0, 0, 0, 0)
+  const endDate = maxDate > today ? today : maxDate
+  const startDate = minDate > endDate ? endDate : minDate
+
   const dates = []
   const overdueRates = []
   const overdueCounts = []
   const shouldCompleteCounts = []
 
   // 遍历每一天，计算当天的逾期率
-  for (let cursor = new Date(minDate); cursor <= maxDate; cursor.setDate(cursor.getDate() + 1)) {
+  for (let cursor = new Date(startDate); cursor <= endDate; cursor.setDate(cursor.getDate() + 1)) {
     const currentDate = new Date(cursor)
     const key = formatDateKey(currentDate)
     dates.push(key)

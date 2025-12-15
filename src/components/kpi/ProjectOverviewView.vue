@@ -56,6 +56,7 @@ function render() {
   
   let actualRates = []
   let xAxisData = []
+  const hasSeries = Array.isArray(props.projectSeries) && props.projectSeries.length > 0
   
   function buildDateLabels(len) {
     function fmt(d) {
@@ -74,15 +75,13 @@ function render() {
     return arr
   }
 
-  if (props.projectSeries && props.projectSeries.length > 0) {
+  if (hasSeries) {
     actualRates = props.projectSeries.map(v => v / 100)
     const len = actualRates.length
     xAxisData = buildDateLabels(len)
   } else {
-    // 默认数据
-    const days = 60
-    xAxisData = buildDateLabels(days)
-    actualRates = Array(days).fill(0).map((_, i) => 0.6 + (0.3 * i / (days - 1)))
+    actualRates = []
+    xAxisData = []
   }
 
   const axisLine = '#d1d5db'
@@ -105,24 +104,24 @@ function render() {
   
   const lineWidthActual = 2
 
-  const option = {
+  const option = hasSeries ? {
     legend: { top: 0, right: 16, itemGap: 10, icon: 'rect', itemWidth: 14, itemHeight: 2 },
     grid: { left: 50, right: 24, top: 40, bottom: 28 },
-    xAxis: { 
-      type: 'category', 
-      data: xAxisData, 
-      boundaryGap: false, 
-      axisLine: { lineStyle: { color: axisLine } }, 
-      axisTick: { show: false }, 
-      axisLabel: { color: axisLabel } 
+    xAxis: {
+      type: 'category',
+      data: xAxisData,
+      boundaryGap: false,
+      axisLine: { lineStyle: { color: axisLine } },
+      axisTick: { show: false },
+      axisLabel: { color: axisLabel }
     },
-    yAxis: { 
-      type: 'value', 
-      min: 0, 
-      max: 1, 
-      axisLine: { show: false }, 
-      splitLine: { show: false }, 
-      axisLabel: { color: axisLabel, formatter: v => Math.round(v * 100) + '%' } 
+    yAxis: {
+      type: 'value',
+      min: 0,
+      max: 1,
+      axisLine: { show: false },
+      splitLine: { show: false },
+      axisLabel: { color: axisLabel, formatter: v => Math.round(v * 100) + '%' }
     },
     dataZoom: [{ type: 'inside', start: 0, end: 100, filterMode: 'none' }],
     tooltip: {
@@ -141,14 +140,21 @@ function render() {
         showSymbol: false,
         lineStyle: { width: lineWidthActual, color: actualLine },
         emphasis: { focus: 'series', lineStyle: { width: lineWidthActual + 1 } },
-        areaStyle: { 
+        areaStyle: {
           color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-            { offset: 0, color: areaStart }, 
+            { offset: 0, color: areaStart },
             { offset: 1, color: areaEnd }
-          ]) 
+          ])
         }
       }
     ]
+  } : {
+    legend: { show: false },
+    grid: { left: 0, right: 0, top: 0, bottom: 0 },
+    xAxis: { show: false, type: 'category', data: [] },
+    yAxis: { show: false, type: 'value' },
+    tooltip: { show: false },
+    series: []
   }
   
   chart.setOption(option, true)

@@ -14,6 +14,16 @@ function render(){
   if(!el.value) return
   if(!chart) chart = echarts.init(el.value)
   const a = props.series
+  if (!Array.isArray(a) || a.length < 2) {
+    chart.setOption({
+      tooltip: { show: false },
+      grid: { left: 0, right: 0, top: 0, bottom: 0 },
+      xAxis: { show: false, type: 'category', data: [] },
+      yAxis: { show: false, type: 'value' },
+      series: []
+    })
+    return
+  }
   const prev = a[a.length-2]
   const last = a[a.length-1]
   const isUp = (last - prev) >= 0

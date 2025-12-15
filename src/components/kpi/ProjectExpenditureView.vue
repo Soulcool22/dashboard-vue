@@ -161,17 +161,17 @@ const topExpenditures = ref([])
 
 // 为每行计算动态 CSS 变量 --row-weight-opacity
 const weightedTopExpenditures = computed(() => {
-  const maxAmount = Math.max(...topExpenditures.value.map(item => item.amount));
+  const maxAmount = Math.max(...topExpenditures.value.map(item => item.amount), 0)
   return topExpenditures.value.map(item => ({
     ...item,
-    rowWeightOpacity: (item.amount / maxAmount) * 0.1 // 最大金额对应0.1的透明度，递减
-  }));
-});
+    rowWeightOpacity: maxAmount > 0 ? (item.amount / maxAmount) * 0.1 : 0 // 最大金额对应0.1的透明度，递减
+  }))
+})
 
 // 数据定义
 
 // 数据定义
-const totalBudget = ref(12500000)
+const totalBudget = ref(0)
 const expenditurePeriods = ref([
   { month: '2025-06', personnel: 0, labor: 0, other: 0 },
   { month: '2025-07', personnel: 0, labor: 0, other: 0 },
@@ -184,15 +184,15 @@ const expenditurePeriods = ref([
 // 计算属性
 const totalExpenditure = computed(() => expenditurePeriods.value.reduce((s, p) => s + p.personnel + p.labor + p.other, 0))
 const remainingBudget = computed(() => totalBudget.value - totalExpenditure.value)
-const budgetUtilization = computed(() => Math.round((totalExpenditure.value / totalBudget.value) * 100))
+const budgetUtilization = computed(() => totalBudget.value > 0 ? Math.round((totalExpenditure.value / totalBudget.value) * 100) : 0)
 
 const totalPersonnel = computed(() => expenditurePeriods.value.reduce((s, p) => s + p.personnel, 0))
 const totalLabor = computed(() => expenditurePeriods.value.reduce((s, p) => s + p.labor, 0))
 const totalOther = computed(() => expenditurePeriods.value.reduce((s, p) => s + p.other, 0))
 
-const personnelPercent = computed(() => Math.round((totalPersonnel.value / totalExpenditure.value) * 100))
-const laborPercent = computed(() => Math.round((totalLabor.value / totalExpenditure.value) * 100))
-const otherPercent = computed(() => Math.round((totalOther.value / totalExpenditure.value) * 100))
+const personnelPercent = computed(() => totalExpenditure.value > 0 ? Math.round((totalPersonnel.value / totalExpenditure.value) * 100) : 0)
+const laborPercent = computed(() => totalExpenditure.value > 0 ? Math.round((totalLabor.value / totalExpenditure.value) * 100) : 0)
+const otherPercent = computed(() => totalExpenditure.value > 0 ? Math.round((totalOther.value / totalExpenditure.value) * 100) : 0)
 
 function formatAmount(amount) {
   return (amount / 10000).toFixed(1)
