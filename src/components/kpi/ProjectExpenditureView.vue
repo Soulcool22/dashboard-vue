@@ -109,6 +109,23 @@
           </span>
         </div>
         <div class="ranking-list">
+          <div v-if="weightedTopExpenditures.length === 0" class="expenditure-row">
+            <div class="row-index">--</div>
+            <div class="row-main">
+              <div class="row-title-line">
+                <span class="row-name">暂无数据</span>
+                <span class="row-tag">--</span>
+              </div>
+              <div class="row-meta-line">
+                <span class="row-date">--</span>
+                <span class="row-account">经办人：--</span>
+              </div>
+            </div>
+            <div class="row-value-col">
+              <div class="row-amount"><span class="currency">¥</span>0</div>
+              <div class="row-weight-info"><span>占当期 0%</span></div>
+            </div>
+          </div>
           <div v-for="(item, index) in weightedTopExpenditures" 
                :key="index" 
                class="expenditure-row"
@@ -148,69 +165,111 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, nextTick } from 'vue'
+import { ref, computed, onMounted, nextTick, watch } from 'vue'
 import * as echarts from 'echarts'
 import { People as IconPeople, EngineeringBrand as IconEngineeringBrand, MoreApp as IconMoreApp, Ranking as IconRanking } from '@icon-park/vue-next'
+import * as dataService from '../../services/dataService'
 
 const emit = defineEmits(['stats-changed'])
 const chartRef = ref(null)
 let chartInstance = null
 
+const props = defineProps({
+  project: { type: Object, default: () => null }
+})
+
+const projectId = computed(() => props.project?.id || props.project?.projectId || props.project?.name || null)
+
 // Mock Data for Top Expenditures
 const topExpenditures = ref([
-  { name: 'AI算力服务器集群采购 (第2批)', category: '设备采购', amount: 850000, date: '2025-10-15', percent: 12.5, handler: '李采购' },
-  { name: 'Oracle数据库年度授权费', category: '软件授权', amount: 420000, date: '2025-08-02', percent: 6.2, handler: '王运维' },
-  { name: '前端开发外包服务费 (Q3)', category: '劳务外包', amount: 280000, date: '2025-09-20', percent: 4.1, handler: '张研发' }
+  
 ])
 
 // 为每行计算动态 CSS 变量 --row-weight-opacity
 const weightedTopExpenditures = computed(() => {
-  const maxAmount = Math.max(...topExpenditures.value.map(item => item.amount));
+  if (!topExpenditures.value || topExpenditures.value.length === 0) return []
+  const maxAmount = Math.max(...topExpenditures.value.map(item => item.amount || 0));
   return topExpenditures.value.map(item => ({
     ...item,
-    rowWeightOpacity: (item.amount / maxAmount) * 0.1 // 最大金额对应0.1的透明度，递减
+    rowWeightOpacity: maxAmount ? ((item.amount || 0) / maxAmount) * 0.1 : 0 // 最大金额对应0.1的透明度，递减
   }));
 });
 
 // 数据定义
 
 // 数据定义
-const totalBudget = ref(12500000)
-const expenditurePeriods = ref([
-  { month: '2025-06', personnel: 780000, labor: 390000, other: 85000 },
-  { month: '2025-07', personnel: 810000, labor: 420000, other: 95000 },
-  { month: '2025-08', personnel: 850000, labor: 450000, other: 120000 },
-  { month: '2025-09', personnel: 780000, labor: 410000, other: 110000 },
-  { month: '2025-10', personnel: 920000, labor: 480000, other: 95000 },
-  { month: '2025-11', personnel: 870000, labor: 460000, other: 105000 }
-])
+const totalBudget = ref(0)
+const expenditurePeriods = ref([])
 
 // 计算属性
 const totalExpenditure = computed(() => expenditurePeriods.value.reduce((s, p) => s + p.personnel + p.labor + p.other, 0))
 const remainingBudget = computed(() => totalBudget.value - totalExpenditure.value)
-const budgetUtilization = computed(() => Math.round((totalExpenditure.value / totalBudget.value) * 100))
+const budgetUtilization = computed(() => {
+  const b = Number(totalBudget.value || 0)
+  if (!b) return 0
+  return Math.round((totalExpenditure.value / b) * 100)
+})
 
 const totalPersonnel = computed(() => expenditurePeriods.value.reduce((s, p) => s + p.personnel, 0))
 const totalLabor = computed(() => expenditurePeriods.value.reduce((s, p) => s + p.labor, 0))
 const totalOther = computed(() => expenditurePeriods.value.reduce((s, p) => s + p.other, 0))
 
-const personnelPercent = computed(() => Math.round((totalPersonnel.value / totalExpenditure.value) * 100))
-const laborPercent = computed(() => Math.round((totalLabor.value / totalExpenditure.value) * 100))
-const otherPercent = computed(() => Math.round((totalOther.value / totalExpenditure.value) * 100))
+const personnelPercent = computed(() => {
+  const t = Number(totalExpenditure.value || 0)
+  if (!t) return 0
+  return Math.round((totalPersonnel.value / t) * 100)
+})
+const laborPercent = computed(() => {
+  const t = Number(totalExpenditure.value || 0)
+  if (!t) return 0
+  return Math.round((totalLabor.value / t) * 100)
+})
+const otherPercent = computed(() => {
+  const t = Number(totalExpenditure.value || 0)
+  if (!t) return 0
+  return Math.round((totalOther.value / t) * 100)
+})
 
 function formatAmount(amount) {
   return (amount / 10000).toFixed(1)
 }
 
 function formatFullNumber(num) {
-  return num.toLocaleString('en-US')
+  return Number(num || 0).toLocaleString('en-US')
+}
+
+async function load() {
+  const data = await dataService.getExpenditureData(projectId.value)
+  const totals = data?.totals || {}
+  totalBudget.value = totals.totalBudget || 0
+
+  const trend = data?.monthlyTrend || {}
+  const xAxis = Array.isArray(trend.xAxis) ? trend.xAxis : []
+  const personnel = Array.isArray(trend.personnel) ? trend.personnel : []
+  const labor = Array.isArray(trend.labor) ? trend.labor : []
+  const other = Array.isArray(trend.other) ? trend.other : []
+
+  expenditurePeriods.value = xAxis.map((m, idx) => ({
+    month: m,
+    personnel: Number(personnel[idx] || 0),
+    labor: Number(labor[idx] || 0),
+    other: Number(other[idx] || 0)
+  }))
+
+  topExpenditures.value = Array.isArray(data?.topExpenditures) ? data.topExpenditures : []
 }
 
 function initChart() {
   if (!chartRef.value) return
   chartInstance = echarts.init(chartRef.value)
 
-  const months = expenditurePeriods.value.map(p => parseInt(p.month.substring(5)) + '月')
+  const months = expenditurePeriods.value.map(p => {
+    const m = String(p.month || '')
+    const mm = m.length >= 7 ? m.substring(5, 7) : ''
+    const n = parseInt(mm)
+    if (!Number.isNaN(n) && n > 0) return n + '月'
+    return m
+  })
   const pData = expenditurePeriods.value.map(p => (p.personnel / 10000).toFixed(1))
   const lData = expenditurePeriods.value.map(p => (p.labor / 10000).toFixed(1))
   const oData = expenditurePeriods.value.map(p => (p.other / 10000).toFixed(1))
@@ -254,12 +313,20 @@ function initChart() {
   chartInstance.setOption(option)
 }
 
-onMounted(async () => {
+watch(() => projectId.value, async () => {
+  await load()
   const last = budgetUtilization.value / 100
   const amount = totalExpenditure.value
-  emit('stats-changed', { last, prev: 0.68, isUp: true, isOverview: false, kpi: '项目支出金额', amount })
+  emit('stats-changed', { last, prev: null, isUp: true, isOverview: false, kpi: '项目支出金额', amount })
   await nextTick()
+  if (chartInstance) {
+    chartInstance.dispose()
+    chartInstance = null
+  }
   initChart()
+}, { immediate: true })
+
+onMounted(async () => {
   window.addEventListener('resize', () => chartInstance?.resize())
 })
 </script>

@@ -133,11 +133,12 @@ function toggleSearch() {
 }
 
 const handleClickOutside = (event) => {
+  const toggleEl = searchToggleRef.value && (searchToggleRef.value.$el || searchToggleRef.value)
   if (
     searchCardRef.value &&
     !searchCardRef.value.contains(event.target) &&
-    searchToggleRef.value &&
-    !searchToggleRef.value.$el.contains(event.target)
+    toggleEl &&
+    !(toggleEl.contains && toggleEl.contains(event.target))
   ) {
     isSearchVisible.value = false
   }
@@ -154,9 +155,9 @@ watch(isSearchVisible, (newValue) => {
   })
 })
 
-function lastValue(p){ const a=p.series; return a[a.length-1] }
-function deltaSign(p){ const a=p.series; return a[a.length-1]-a[a.length-2] }
-function deltaText(p){ const a=p.series; const prev=a[a.length-2]; const last=a[a.length-1]; const pct=prev?(((last-prev)/prev)*100).toFixed(2):'0.00'; const s=(last-prev)>=0?'↑ ':'↓ '; return s.replace(' ','') + Math.abs(pct)+'%' }
+function lastValue(p){ const a = Array.isArray(p?.series) ? p.series : []; if (!a.length) return 0; return Number(a[a.length - 1] || 0) }
+function deltaSign(p){ const a = Array.isArray(p?.series) ? p.series : []; if (a.length < 2) return 0; return Number(a[a.length - 1] || 0) - Number(a[a.length - 2] || 0) }
+function deltaText(p){ const a = Array.isArray(p?.series) ? p.series : []; if (a.length < 2) return ''; const prev = Number(a[a.length - 2] || 0); const last = Number(a[a.length - 1] || 0); const pct = prev ? (((last - prev) / prev) * 100).toFixed(2) : '0.00'; const s = (last - prev) >= 0 ? '↑ ' : '↓ '; return s.replace(' ', '') + Math.abs(pct) + '%' }
 function sampleSign(p){ return deltaSign(p) }
 function sampleText(p){ return deltaText(p) }
 function avgValue(p){ const a=p.series||[]; if(!a.length) return 0; return a.reduce((s,v)=>s+v,0)/a.length }

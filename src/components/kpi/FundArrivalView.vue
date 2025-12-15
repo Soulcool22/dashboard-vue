@@ -7,18 +7,18 @@
       <div class="fund-overview">
         <div class="fund-metric-box total">
           <div class="label">总应收金额</div>
-          <div class="value"><span class="currency">¥</span><span class="amount">12,500,000</span></div>
+          <div class="value"><span class="currency">¥</span><span class="amount">{{ formatFullNumber(totalDueAmount) }}</span></div>
         </div>
         <div class="fund-divider"></div>
         <div class="fund-metric-box received">
           <div class="label">实际已收</div>
-          <div class="value highlight"><span class="currency">¥</span><span class="amount">9,500,000</span></div>
-          <div class="sub-text">到账率 76%</div>
+          <div class="value highlight"><span class="currency">¥</span><span class="amount">{{ formatFullNumber(totalReceivedAmount) }}</span></div>
+          <div class="sub-text">到账率 {{ arrivalRatePct }}%</div>
         </div>
         <div class="fund-divider"></div>
         <div class="fund-metric-box pending">
           <div class="label">待收金额</div>
-          <div class="value"><span class="currency">¥</span><span class="amount">3,000,000</span></div>
+          <div class="value"><span class="currency">¥</span><span class="amount">{{ formatFullNumber(totalPendingAmount) }}</span></div>
         </div>
       </div>
 
@@ -29,10 +29,23 @@
           <span>状态</span>
         </div>
         <div class="stage-list">
+          <div v-if="fundStages.length === 0" class="stage-item">
+            <div class="stage-info">
+              <span class="stage-name">暂无数据</span>
+              <span class="stage-amount">应收: {{ formatFullNumber(0) }} / 实收: {{ formatFullNumber(0) }}</span>
+            </div>
+            <div class="stage-progress">
+              <el-progress :percentage="0" :stroke-width="8" :show-text="false" />
+              <span class="progress-val">0%</span>
+            </div>
+            <div class="stage-status">
+              <span class="status-badge pending">--</span>
+            </div>
+          </div>
           <div v-for="(stage, idx) in fundStages" :key="idx" class="stage-item">
             <div class="stage-info">
               <span class="stage-name">{{ stage.name }}</span>
-              <span class="stage-amount">应收: {{ stage.due }} / 实收: {{ stage.actual }}</span>
+              <span class="stage-amount">应收: {{ formatFullNumber(stage.due) }} / 实收: {{ formatFullNumber(stage.actual) }}</span>
             </div>
             <div class="stage-progress">
               <el-progress :percentage="stage.percent" :status="stage.status === 'overdue' ? 'exception' : (stage.percent === 100 ? 'success' : '')" :stroke-width="8" :show-text="false" />
@@ -55,7 +68,7 @@
             <span class="alert-dot"></span>
             <span class="alert-text">
               <span class="alert-stage">{{ item.name }}</span>
-              应收 <span class="alert-money">{{ item.due }}</span>，
+              应收 <span class="alert-money">{{ formatFullNumber(item.due) }}</span>，
               已逾期 <span class="alert-days">{{ item.days }}</span> 天，
               请尽快催收。
             </span>
@@ -67,29 +80,58 @@
  </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, watch } from 'vue'
+import * as dataService from '../../services/dataService'
 const emit = defineEmits(['stats-changed'])
 
-const fundStages = ref([
-  { name: '预付款 (30%)', due: '¥375w', actual: '¥375w', percent: 100, status: 'normal', statusText: '已结清' },
-  { name: '进度款-1期 (20%)', due: '¥250w', actual: '¥250w', percent: 100, status: 'normal', statusText: '已结清' },
-  { name: '进度款-2期 (20%)', due: '¥250w', actual: '¥200w', percent: 80, status: 'overdue', statusText: '未结清' },
-  { name: '进度款-3期 (20%)', due: '¥250w', actual: '¥75w', percent: 30, status: 'overdue', statusText: '未结清' },
-  { name: '质保金 (10%)', due: '¥125w', actual: '¥0', percent: 0, status: 'pending', statusText: '未达节点' }
-])
-
-const overdueItems = computed(() => {
-  return [
-    { name: '进度款-3期', due: '¥175w', days: 15 }
-  ]
+const props = defineProps({
+  project: { type: Object, default: () => null }
 })
 
-onMounted(() => {
-  const last = 0.76
-  const prev = 0.73
-  const isUp = true
-  emit('stats-changed', { last, prev, planLast: null, isUp, isOverview: false, kpi: '资金到账率' })
+const projectId = computed(() => props.project?.id || props.project?.projectId || props.project?.name || null)
+
+const totalDueAmount = ref(0)
+const totalReceivedAmount = ref(0)
+const totalPendingAmount = ref(0)
+
+const fundStages = ref([])
+
+const overdueItems = ref([])
+
+const arrivalRate = computed(() => {
+  const due = Number(totalDueAmount.value || 0)
+  const rec = Number(totalReceivedAmount.value || 0)
+  if (!due) return 0
+  return rec / due
 })
+
+const arrivalRatePct = computed(() => Math.round(arrivalRate.value * 100))
+
+function formatFullNumber(num) {
+  const n = Number(num)
+  if (!Number.isFinite(n)) return '0'
+  return new Intl.NumberFormat('en-US').format(n)
+}
+
+async function load() {
+  const data = await dataService.getFundData(projectId.value)
+  const totals = data?.totals || {}
+  totalDueAmount.value = totals.totalDueAmount || 0
+  totalReceivedAmount.value = totals.totalReceivedAmount || 0
+  totalPendingAmount.value = totals.totalPendingAmount || 0
+  fundStages.value = Array.isArray(data?.fundStages) ? data.fundStages : []
+  overdueItems.value = Array.isArray(data?.overdueItems) ? data.overdueItems : []
+
+  const stats = data?.stats || {}
+  const last = stats.last != null ? stats.last : arrivalRate.value
+  const prev = stats.prev != null ? stats.prev : null
+  const isUp = stats.isUp != null ? stats.isUp : true
+  emit('stats-changed', { last: Number(last || 0), prev, planLast: stats.planLast ?? null, isUp, isOverview: false, kpi: '资金到账率' })
+}
+
+watch(() => projectId.value, () => {
+  load()
+}, { immediate: true })
 </script>
 
 <style scoped>

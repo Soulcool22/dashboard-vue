@@ -13,9 +13,15 @@ let chart = null
 function render(){
   if(!el.value) return
   if(!chart) chart = echarts.init(el.value)
-  const a = props.series
-  const prev = a[a.length-2]
-  const last = a[a.length-1]
+  const raw = Array.isArray(props.series) ? props.series : []
+  const a = raw.map(v => {
+    const n = Number(v)
+    return Number.isFinite(n) ? n : 0
+  })
+  if (a.length === 0) a.push(0)
+  if (a.length === 1) a.push(a[0])
+  const prev = a[a.length-2] ?? 0
+  const last = a[a.length-1] ?? 0
   const isUp = (last - prev) >= 0
   function fmt(d){ const m = (d.getMonth()+1).toString().padStart(2,'0'); const day = d.getDate().toString().padStart(2,'0'); return m+'-'+day }
   const base = new Date(); base.setHours(0,0,0,0)

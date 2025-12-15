@@ -71,9 +71,9 @@
                 <span>项目态势总览</span>
               </div>
               <div class="header-meta">
-                <span class="meta-item">统计周期：2025 Q4</span>
+                <span class="meta-item">统计周期：{{ statsPeriod || '暂无数据' }}</span>
                 <span class="meta-divider">|</span>
-                <span class="meta-item">更新于 14:30</span>
+                <span class="meta-item">更新于 {{ updatedAt || '暂无数据' }}</span>
               </div>
             </div>
 
@@ -100,6 +100,7 @@
                 :selected-kpi="selectedKpi" 
                 :is-overview="isChartOverview"
                 :project-series="selectedProject?.series"
+                :project="selectedProject"
                 @stats-changed="updateKpiFromChart"
               />
             </div>
@@ -142,6 +143,7 @@ import ResearchChat from './components/ResearchChat.vue'
 import ProjectUpdates from './components/ProjectUpdates.vue'
 import AttributionAnalysis from './components/AttributionAnalysis.vue'
 import CompanyDashboard from './components/CompanyDashboard.vue'
+import * as dataService from './services/dataService'
 
 const expandedLeft = ref(false)
 const regularCollapsed = ref(false)
@@ -150,100 +152,19 @@ function toggleLeftExpand(){ expandedLeft.value = !expandedLeft.value }
 // --- Data State ---
 const companyRegion = ref('全国')
 const regions = ['全国', '华东', '华南', '华北', '西部', '广东', '海外']
+const statsPeriod = ref('')
+const updatedAt = ref('')
 const projects = ref([])
 function generateSeriesData() {
-  const data = [];
-  let value = 60 + Math.random() * 20; // Initial start between 60-80
-  for (let i = 0; i < 60; i++) {
-    data.push(Math.round(value));
-    // Significantly increased volatility: +/- 7.5 change per step
-    value += (Math.random() - 0.5) * 15; 
-    // Clamping
-    if (value > 98) value = 98;
-    if (value < 30) value = 30;
-  }
-  return data;
+  return []
 }
-const regulars = ref([
-  { name: '前海综合保税区车道', sector: '潘勇', series: generateSeriesData(), risks: [] },
-  { 
-    name: '乌鲁木齐', 
-    sector: '潘勇', 
-    series: generateSeriesData(),
-    risks: [
-      {
-        level: 'high',
-        levelText: '高风险',
-        category: '供应商问题',
-        reason: '第三方渠道接口变更，导致联调受阻',
-        action: '协调渠道方技术负责人召开紧急会议',
-        impact: '可能延期 5-7 天',
-        deadline: '2025-11-30'
-      },
-      {
-        level: 'medium',
-        levelText: '中风险',
-        category: '技术难题',
-        reason: '历史代码耦合度高，重构工作量超预期',
-        action: '安排专项重构时间，分阶段解耦',
-        impact: '影响后续迭代速度',
-        deadline: '2025-12-15'
-      }
-    ]
-  },
-  { 
-    name: 'SSJS前海', 
-    sector: '潘勇', 
-    series: generateSeriesData(),
-    risks: [
-      {
-        level: 'medium',
-        levelText: '中风险',
-        category: '资源缺口',
-        reason: '核心开发人员请假，进度滞后 3 天',
-        action: '从「报表组」临时抽调 1 名高级开发支援',
-        impact: '部分功能延期交付',
-        deadline: '2025-12-05'
-      }
-    ]
-  },
-  { name: '国铁建-卡口', sector: '潘勇', series: generateSeriesData(), risks: [] },
-  { name: '2前海-车道', sector: '潘勇', series: generateSeriesData(), risks: [] },
-  { 
-    name: '临沂-机场', 
-    sector: '潘勇', 
-    series: generateSeriesData(),
-    risks: [
-      {
-        level: 'medium',
-        levelText: '中风险',
-        category: '质量缺陷返工',
-        reason: 'UI 验收反馈问题较多，修复耗时',
-        action: '组织 UI 与前端坐班集中修复',
-        impact: '测试周期延长 2 天',
-        deadline: '2025-11-28'
-      },
-      {
-        level: 'low',
-        levelText: '低风险',
-        category: '设计/深化延误',
-        reason: '部分接口文档更新不及时',
-        action: '要求后端同步更新 API 文档',
-        impact: '联调效率降低',
-        deadline: '2025-12-01'
-      }
-    ]
-  },
-  { name: '前海-综合', sector: '潘勇', series: generateSeriesData(), risks: [] },
-  { name: '前海-维修', sector: '潘勇', series: generateSeriesData(), risks: [] },
-  { name: 'SSKJ前海', sector: '潘勇', series: generateSeriesData(), risks: [] }
-])
+const regulars = ref([])
 const kpis = ref([
-  { title: '资金到账率', value: '76%', delta: '+3%', up: true },
-  { title: '任务完成率', value: '78%', delta: '+2%', up: true },
-  { title: '项目支出金额', value: '81%', delta: '+1%', up: true },
-  { title: '人员健康度', value: '72%', delta: '-3%', up: false },
-  { title: '逾期任务率', value: '22%', delta: '-1%', up: true }
+  { title: '资金到账率', value: '0%', delta: '0%', up: true },
+  { title: '任务完成率', value: '0%', delta: '0%', up: true },
+  { title: '项目支出金额', value: '¥ 0', delta: '0', up: true },
+  { title: '人员健康度', value: '0%', delta: '0%', up: true },
+  { title: '逾期任务率', value: '0%', delta: '0%', up: true }
 ])
 
 const kpiLiveMetrics = ref(null)
@@ -266,6 +187,28 @@ function handleSelectKpi(kpi) {
   }
 }
 
+async function loadProjects() {
+  const all = await dataService.getProjects()
+  const watched = all.filter(p => p && p.isWatched)
+  const unWatched = all.filter(p => p && !p.isWatched)
+  projects.value = watched
+  regulars.value = unWatched
+}
+
+async function loadKpis(projectId) {
+  const list = await dataService.getKpis(projectId)
+  if (Array.isArray(list)) {
+    kpis.value = list
+  }
+}
+
+async function loadProjectSeries(targetProject) {
+  if (!targetProject) return
+  const projectId = targetProject.id || targetProject.projectId || targetProject.name
+  const series = await dataService.getProjectSeries(projectId)
+  targetProject.series = Array.isArray(series) ? series : []
+}
+
 // --- Search and Filter Logic ---
 const searchQuery = ref('')
 const isSearchActive = ref(false)
@@ -277,7 +220,7 @@ const allProjects = computed(() => {
 const filteredAllProjects = computed(() => {
   if (!searchQuery.value) return allProjects.value
   return allProjects.value.filter(item =>
-    item.name.toLowerCase().includes(searchQuery.value.toLowerCase())
+    String(item?.name || '').toLowerCase().includes(searchQuery.value.toLowerCase())
   )
 })
 function handleSearchActiveChange(isActive) {
@@ -307,6 +250,8 @@ function selectProjectByName(name) {
     isCompanyView.value = false
     isChartOverview.value = true
     selectedKpi.value = null
+    loadProjectSeries(p)
+    loadKpis(p?.id || p?.projectId || p?.name)
   }
 }
 
@@ -349,13 +294,16 @@ function updateKpiFromChart(payload){
 
 // --- Selection and View Logic ---
 onMounted(() => {
-  // No project selected by default, showing company view
+  loadProjects()
+  loadKpis()
 })
-function handleSelectProject(project) {
+async function handleSelectProject(project) {
   selectedProject.value = project
   isCompanyView.value = false // Switch to project view
   isChartOverview.value = true // Default to overview mode when project is selected
   selectedKpi.value = null // No KPI selected in overview mode (prevents highlight)
+  await loadProjectSeries(project)
+  await loadKpis(project?.id || project?.projectId || project?.name)
 }
 function showCompanyView() {
   isCompanyView.value = true
@@ -368,7 +316,7 @@ function clearKpiSelection() {
 }
 
 // Helper functions
-function lastValue(p){ if(!p || !p.series) return 0; const a=p.series; return a[a.length-1] }
+function lastValue(p){ if(!p || !p.series || p.series.length === 0) return 0; const a=p.series; return a[a.length-1] }
 function deltaSign(p){ if(!p || !p.series || p.series.length < 2) return 0; const a=p.series; return a[a.length-1]-a[a.length-2] }
 function deltaText(p){ if(!p || !p.series || p.series.length < 2) return ''; const a=p.series; const prev=a[a.length-2]; const last=a[a.length-1]; const pct=prev?(((last-prev)/prev)*100).toFixed(2):'0.00'; const s=(last-prev)>=0?'↑ ':'↓ '; return s+Math.abs(pct)+'%'
 }

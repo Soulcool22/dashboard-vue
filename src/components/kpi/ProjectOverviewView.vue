@@ -79,10 +79,8 @@ function render() {
     const len = actualRates.length
     xAxisData = buildDateLabels(len)
   } else {
-    // 默认数据
-    const days = 60
-    xAxisData = buildDateLabels(days)
-    actualRates = Array(days).fill(0).map((_, i) => 0.6 + (0.3 * i / (days - 1)))
+    xAxisData = []
+    actualRates = []
   }
 
   const axisLine = '#d1d5db'
@@ -97,11 +95,9 @@ function render() {
   const areaStart = isUp ? 'rgba(21,128,61,0.45)' : 'rgba(220,38,38,0.25)'
   const areaEnd = isUp ? 'rgba(187,247,208,0.05)' : 'rgba(255,255,255,0)'
 
-  if (actualRates.length) {
-    const last = actualRates[actualRates.length - 1]
-    const prev = actualRates.length > 1 ? actualRates[actualRates.length - 2] : null
-    emit('stats-changed', { last, prev, planLast: null, isUp, isOverview: true })
-  }
+  const last = actualRates.length ? actualRates[actualRates.length - 1] : 0
+  const prev = actualRates.length > 1 ? actualRates[actualRates.length - 2] : null
+  emit('stats-changed', { last, prev, planLast: null, isUp, isOverview: true })
 
   const lineWidthActual = 2
 

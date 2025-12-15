@@ -8,13 +8,15 @@
 </template>
 
 <script setup>
-import { onMounted, onBeforeUnmount, ref, watch } from 'vue'
+import { onMounted, onBeforeUnmount, ref, watch, computed } from 'vue'
 import * as echarts from 'echarts'
+import * as dataService from '../../services/dataService'
 
 const props = defineProps({
   selectedKpi: { type: String, default: null },
   isOverview: { type: Boolean, default: false },
-  projectSeries: { type: Array, default: () => [] }
+  projectSeries: { type: Array, default: () => [] },
+  project: { type: Object, default: () => null }
 })
 const emit = defineEmits(['stats-changed'])
 
@@ -22,10 +24,10 @@ const el = ref(null)
 let chart = null
 let resizeObserver = null
 
-// 缓存模拟数据
-const mockCache = ref(null)
+const projectId = computed(() => props.project?.id || props.project?.projectId || props.project?.name || null)
+const taskData = ref({ xAxis: [], actualRates: [], planRates: [] })
 
-watch(() => [props.selectedKpi, props.isOverview, props.projectSeries], () => {
+watch(() => [props.selectedKpi, props.isOverview, props.projectSeries, props.project], () => {
   setTimeout(() => render(), 0)
 }, { deep: true })
 
@@ -43,32 +45,19 @@ onBeforeUnmount(() => {
   }
 })
 
-function generateMockData() {
-  const days = 60
-  const planRates = []
-  const actualRates = []
-  
-  const planStart = 0.15
-  const planEnd = 0.92
-
-  for (let i = 0; i < days; i++) {
-    const t = i / (days - 1)
-    let rate = planStart + (planEnd - planStart) * t
-    rate += Math.sin(t * Math.PI * 2.5) * 0.05
-    planRates.push(Math.min(1, Math.max(0, rate)))
+async function load() {
+  const data = await dataService.getTaskData(projectId.value, '任务完成率')
+  taskData.value = {
+    xAxis: Array.isArray(data?.xAxis) ? data.xAxis : [],
+    actualRates: Array.isArray(data?.actualRates) ? data.actualRates : [],
+    planRates: Array.isArray(data?.planRates) ? data.planRates : []
   }
-
-  for (let i = 0; i < days; i++) {
-    const planRate = planRates[i]
-    let variation = (Math.random() - 0.5) * 0.1
-    if (i > 30) variation += 0.03
-    let actualRate = planRate + variation
-    actualRate = Math.min(1, Math.max(0, actualRate))
-    actualRates.push(actualRate)
-  }
-  
-  return { planRates, actualRates }
+  setTimeout(() => render(), 0)
 }
+
+watch(() => projectId.value, () => {
+  load()
+}, { immediate: true })
 
 function render() {
   if (!el.value) return
@@ -107,14 +96,15 @@ function render() {
     return arr
   }
 
-  const days = 60
-  xAxisData = buildDateLabels(days)
-  
-  if (!mockCache.value) {
-    mockCache.value = generateMockData()
+  actualRates = Array.isArray(taskData.value.actualRates) ? taskData.value.actualRates : []
+  planRates = Array.isArray(taskData.value.planRates) ? taskData.value.planRates : []
+  if (Array.isArray(taskData.value.xAxis) && taskData.value.xAxis.length) {
+    xAxisData = taskData.value.xAxis
+  } else if (actualRates.length) {
+    xAxisData = buildDateLabels(actualRates.length)
+  } else {
+    xAxisData = []
   }
-  actualRates = mockCache.value.actualRates
-  planRates = mockCache.value.planRates
 
   const markPointData = []
 
@@ -131,12 +121,10 @@ function render() {
   const areaStart = isUp ? 'rgba(21,128,61,0.45)' : 'rgba(220,38,38,0.25)'
   const areaEnd = isUp ? 'rgba(187,247,208,0.05)' : 'rgba(255,255,255,0)'
 
-  if (actualRates.length) {
-    const last = actualRates[actualRates.length - 1]
-    const prev = actualRates.length > 1 ? actualRates[actualRates.length - 2] : null
-    const planLast = planRates && planRates.length ? planRates[planRates.length - 1] : null
-    emit('stats-changed', { last, prev, planLast, isUp, isOverview: props.isOverview, kpi: '任务完成率' })
-  }
+  const last = actualRates.length ? actualRates[actualRates.length - 1] : 0
+  const prev = actualRates.length > 1 ? actualRates[actualRates.length - 2] : null
+  const planLast = planRates && planRates.length ? planRates[planRates.length - 1] : null
+  emit('stats-changed', { last, prev, planLast, isUp, isOverview: props.isOverview, kpi: '任务完成率' })
   const lineWidthActual = 2
   
   const seriesNameActual = '实际任务完成率'

@@ -79,7 +79,12 @@
       </div>
       
       <div class="member-list" :class="{ expanded: isExpanded }">
-        <div class="member-item" v-for="member in displayedMembers" :key="member.id" :class="{ 'is-risk': member.projectCount > 3 }">
+        <div v-if="filteredMembers.length === 0" class="empty-state">
+          <div class="empty-icon">0</div>
+          <div class="empty-text">暂无数据</div>
+          <div class="empty-sub">人员数据尚未接入</div>
+        </div>
+        <div v-else class="member-item" v-for="member in displayedMembers" :key="member.id" :class="{ 'is-risk': member.projectCount > 3 }">
           <div class="member-info">
             <span class="member-avatar" :class="{ 'avatar-risk': member.projectCount > 3 }">{{ member.name.charAt(0) }}</span>
             <div class="member-detail">
@@ -123,13 +128,17 @@
 </template>
 
 <script setup>
-import { ref, computed, nextTick } from 'vue'
+import { ref, computed, nextTick, watch } from 'vue'
 import { Search as IconSearch, Down as IconDown, Up as IconUp, Peoples as IconPeoples, ChartLine as IconChartLine, Close as IconClose } from '@icon-park/vue-next'
 import { Search } from '@element-plus/icons-vue'
+import * as dataService from '../../services/dataService'
 
 const props = defineProps({
-  projectContext: { type: Object, default: () => ({}) }
+  projectContext: { type: Object, default: () => ({}) },
+  project: { type: Object, default: () => null }
 })
+
+const projectId = computed(() => props.project?.id || props.project?.projectId || props.project?.name || props.projectContext?.id || props.projectContext?.projectId || props.projectContext?.name || null)
 
 // --- State ---
 const showSearch = ref(false)
@@ -156,25 +165,29 @@ function onSearchBlur() {
 
 // --- Mock Data ---
 const allMembers = ref([
-  { id: 1, name: '张伟', role: '后端', projectCount: 5, projects: ['本项目', '乌鲁木齐', '前海车道', 'SSJS', '数据中心'] },
-  { id: 2, name: '李娜', role: 'UI设计', projectCount: 2, projects: ['本项目', '官网重构'] },
-  { id: 3, name: '王强', role: '前端', projectCount: 4, projects: ['本项目', '临沂机场', '支付网关', '移动端'] },
-  { id: 4, name: '赵敏', role: '产品', projectCount: 1, projects: ['本项目'] },
-  { id: 5, name: '刘洋', role: '测试', projectCount: 3, projects: ['本项目', '运维平台', 'CRM'] },
-  { id: 6, name: '陈杰', role: '后端', projectCount: 6, projects: ['本项目', 'ERP', 'WMS', 'TMS', 'OA', 'HRM'] },
-  { id: 7, name: '杨光', role: '运维', projectCount: 2, projects: ['本项目', '网络升级'] },
-  { id: 8, name: '周云', role: '前端', projectCount: 3, projects: ['本项目', '小程序', 'H5活动'] }
+  
 ])
+
+async function load() {
+  const data = await dataService.getPersonnelData(projectId.value)
+  allMembers.value = Array.isArray(data?.members) ? data.members : []
+}
+
+watch(() => projectId.value, () => {
+  load()
+}, { immediate: true })
 
 // --- Computed ---
 const totalMembers = computed(() => allMembers.value.length)
 const riskMembers = computed(() => allMembers.value.filter(m => m.projectCount > 3).length)
 const normalMembers = computed(() => totalMembers.value - riskMembers.value)
 const avgProjects = computed(() => {
+  if (!totalMembers.value) return '0.0'
   const sum = allMembers.value.reduce((acc, curr) => acc + curr.projectCount, 0)
   return (sum / totalMembers.value).toFixed(1)
 })
 const healthScore = computed(() => {
+  if (!totalMembers.value) return 0
   const ratio = normalMembers.value / totalMembers.value
   return Math.round(ratio * 100)
 })

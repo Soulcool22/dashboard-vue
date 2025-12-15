@@ -8,15 +8,13 @@
       <div class="insight-body">
         <div class="insight-text-row">
           <div class="insight-paragraph">
-            {{ regionName }}整体进度<span class="text-highlight">优于全国平均</span>。
-            重点项目「{{ regionName }}数据中心」已进入验收阶段。
-            需关注<span class="text-highlight warning">人力资源缺口</span>，建议从其他大区调配 2 名后端开发支持。
+            {{ insightText || '暂无数据' }}
           </div>
         </div>
         <div class="insight-metrics-row">
           <div class="mini-metric">
             <div class="mm-icon project">
-              <span class="metric-val">8</span>
+              <span class="metric-val">{{ activeProjects }}</span>
             </div>
             <div class="mm-content">
               <span class="mm-label">在建项目</span>
@@ -26,7 +24,7 @@
           <div class="metric-divider"></div>
           <div class="mini-metric">
             <div class="mm-icon delivery">
-              <span class="metric-val">6</span>
+              <span class="metric-val">{{ plannedDeliveryThisMonth }}</span>
             </div>
             <div class="mm-content">
               <span class="mm-label">本月计划交付</span>
@@ -36,17 +34,17 @@
           <div class="metric-divider"></div>
           <div class="mini-metric">
             <div class="mm-icon success">
-              <span class="metric-val success">3</span>
+              <span class="metric-val success">{{ deliveredThisMonth }}</span>
             </div>
             <div class="mm-content">
               <span class="mm-label">本月已交付</span>
-              <span class="mm-value success">50%</span>
+              <span class="mm-value success">{{ deliveredRatio }}%</span>
             </div>
           </div>
           <div class="metric-divider"></div>
           <div class="mini-metric">
             <div class="mm-icon warning">
-              <span class="metric-val warning">1</span>
+              <span class="metric-val warning">{{ riskProjectCount }}</span>
             </div>
             <div class="mm-content">
               <span class="mm-label">风险项目</span>
@@ -64,6 +62,24 @@
         <span class="section-subtitle">需管理层介入协调的项目</span>
       </div>
       <div class="risk-grid">
+        <div v-if="riskProjects.length === 0" class="risk-card">
+          <div class="risk-header">
+            <span class="risk-name">暂无数据</span>
+            <span class="risk-badge medium">--</span>
+          </div>
+          <div class="risk-reason">
+            <span class="reason-label">风险归因：</span>
+            <span class="reason-text">暂无数据</span>
+          </div>
+          <div class="risk-action">
+            <span class="action-label">建议行动：</span>
+            <span class="action-text">暂无数据</span>
+          </div>
+          <div class="risk-progress">
+            <span class="progress-label">当前进度</span>
+            <el-progress :percentage="0" :stroke-width="6" :show-text="false" />
+          </div>
+        </div>
         <div class="risk-card" v-for="(project, idx) in riskProjects" :key="idx">
           <div class="risk-header">
             <span class="risk-name">{{ project.name }}</span>
@@ -101,6 +117,15 @@
             <span class="col-manager">负责人</span>
           </div>
           <div class="table-body">
+            <div v-if="projects.length === 0" class="table-row">
+              <span class="col-name">暂无数据</span>
+              <span class="col-status">--</span>
+              <span class="col-progress">
+                <el-progress :percentage="0" :stroke-width="6" :show-text="false" />
+                <span class="progress-text">0%</span>
+              </span>
+              <span class="col-manager">--</span>
+            </div>
             <div v-for="(project, idx) in projects" :key="idx" class="table-row">
               <span class="col-name">{{ project.name }}</span>
               <span class="col-status">
@@ -131,6 +156,7 @@
 <script setup>
 import { ref, onMounted, onUnmounted, watch } from 'vue'
 import * as echarts from 'echarts'
+import * as dataService from '../services/dataService'
 
 const props = defineProps({
   regionName: {
@@ -142,49 +168,23 @@ const props = defineProps({
 const chartRef = ref(null)
 let myChart = null
 
-const projects = ref([
-  { name: '某市智慧交通一期', status: 'normal', statusText: '正常', progress: 85, manager: '张伟' },
-  { name: '工业园区安防升级', status: 'delay', statusText: '延期', progress: 42, manager: '李娜' },
-  { name: '政务云平台迁移', status: 'normal', statusText: '正常', progress: 68, manager: '王强' },
-  { name: '轨道交通信号系统', status: 'risk', statusText: '风险', progress: 25, manager: '赵敏' },
-  { name: '城市大脑指挥中心', status: 'normal', statusText: '正常', progress: 92, manager: '刘洋' },
-])
+const projects = ref([])
 
-const riskProjects = ref([
-  {
-    name: '工业园区安防升级',
-    level: 'high',
-    levelText: '高风险',
-    category: '供应商问题',
-    reason: '设备采购延迟，影响现场施工',
-    action: '协调供应商加急发货，启动备用方案',
-    progress: 42,
-    status: 'exception'
-  },
-  {
-    name: '轨道交通信号系统',
-    level: 'medium',
-    levelText: '中风险',
-    category: '资源缺口',
-    reason: '核心开发人员请假，进度滞后',
-    action: '从其他项目组临时调配人员支援',
-    progress: 25,
-    status: 'warning'
-  },
-  {
-    name: '政务云平台迁移',
-    level: 'low',
-    levelText: '低风险',
-    category: '质量缺陷返工',
-    reason: '测试环境不稳定，影响验收',
-    action: '优化测试环境配置',
-    progress: 68,
-    status: ''
-  }
-])
+const riskProjects = ref([])
+
+const insightText = ref('')
+const activeProjects = ref(0)
+const plannedDeliveryThisMonth = ref(0)
+const deliveredThisMonth = ref(0)
+const deliveredRatio = ref(0)
+const riskProjectCount = ref(0)
+
+const chartCategories = ref([])
+const chartLoad = ref([])
+const chartThreshold = ref([])
 
 onMounted(() => {
-  initChart()
+  loadRegionalData()
   window.addEventListener('resize', handleResize)
 })
 
@@ -194,16 +194,36 @@ onUnmounted(() => {
 })
 
 watch(() => props.regionName, () => {
-  // In a real app, fetch new data here
-  // For now, just re-render chart to simulate change
-  if (myChart) {
-    myChart.dispose()
-    initChart()
-  }
+  loadRegionalData()
 })
 
 function handleResize() {
   myChart && myChart.resize()
+}
+
+async function loadRegionalData() {
+  const data = await dataService.getRegionalData(props.regionName)
+  insightText.value = data?.insightText || ''
+  const m = data?.metrics || {}
+  activeProjects.value = m.activeProjects || 0
+  plannedDeliveryThisMonth.value = m.plannedDeliveryThisMonth || 0
+  deliveredThisMonth.value = m.deliveredThisMonth || 0
+  deliveredRatio.value = m.deliveredRatio || 0
+  riskProjectCount.value = m.riskProjects || 0
+
+  projects.value = Array.isArray(data?.projects) ? data.projects : []
+  riskProjects.value = Array.isArray(data?.riskProjects) ? data.riskProjects : []
+
+  const r = data?.resourceLoad || {}
+  chartCategories.value = Array.isArray(r.categories) ? r.categories : []
+  chartLoad.value = Array.isArray(r.load) ? r.load : []
+  chartThreshold.value = Array.isArray(r.threshold) ? r.threshold : []
+
+  if (myChart) {
+    myChart.dispose()
+    myChart = null
+  }
+  initChart()
 }
 
 function initChart() {
@@ -224,7 +244,7 @@ function initChart() {
     },
     xAxis: {
       type: 'category',
-      data: ['前端', '后端', '测试', '产品', '运维'],
+      data: chartCategories.value,
       axisLine: { show: false },
       axisTick: { show: false },
       axisLabel: { color: '#64748b', fontSize: 11 }
@@ -248,14 +268,14 @@ function initChart() {
           ]),
           borderRadius: [4, 4, 0, 0]
         },
-        data: [85, 92, 78, 65, 88]
+        data: chartLoad.value
       },
       {
         name: '警戒线',
         type: 'line',
         symbol: 'none',
         lineStyle: { color: '#f56c6c', type: 'dashed', width: 1 },
-        data: [90, 90, 90, 90, 90],
+        data: chartThreshold.value,
         tooltip: { show: false }
       }
     ]

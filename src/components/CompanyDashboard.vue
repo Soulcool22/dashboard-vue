@@ -12,17 +12,17 @@
           <div class="insight-body">
             <div class="insight-text-row">
               <div class="insight-paragraph">
-                整体项目群运行<span class="text-highlight">平稳有序</span>，核心指标处于健康区间。但需重点关注 <span class="text-highlight warning">Q4 交付高峰</span> 带来的资源挤兑风险。建议立即启动「支付网关」项目的专项攻坚。
+                {{ insightText || '暂无数据' }}
               </div>
             </div>
             <div class="insight-metrics-row">
               <div class="mini-metric">
                 <div class="mm-icon health">
-                  <span class="health-val">82.5</span>
+                  <span class="health-val">{{ healthIndex }}</span>
                 </div>
                 <div class="mm-content">
                   <span class="mm-label">健康指数</span>
-                  <span class="mm-value">稳健</span>
+                  <span class="mm-value">{{ healthLabel || '暂无数据' }}</span>
                 </div>
               </div>
               <div class="metric-divider"></div>
@@ -32,7 +32,7 @@
                 </div>
                 <div class="mm-content">
                   <span class="mm-label">人员健康度</span>
-                  <span class="mm-value warning">92%</span>
+                  <span class="mm-value warning">{{ personnelHealth }}%</span>
                 </div>
               </div>
               <div class="metric-divider"></div>
@@ -42,7 +42,7 @@
                 </div>
                 <div class="mm-content">
                   <span class="mm-label">资金回款比</span>
-                  <span class="mm-value success">75%</span>
+                  <span class="mm-value success">{{ fundReturnRatio }}%</span>
                 </div>
               </div>
               <div class="metric-divider"></div>
@@ -52,7 +52,7 @@
                 </div>
                 <div class="mm-content">
                   <span class="mm-label">交付效率</span>
-                  <span class="mm-value">高</span>
+                  <span class="mm-value">{{ deliveryEfficiencyLabel || '暂无数据' }}</span>
                 </div>
               </div>
             </div>
@@ -67,6 +67,24 @@
           <span class="section-subtitle">需管理层介入协调的项目</span>
         </div>
         <div class="risk-grid">
+          <div v-if="riskProjects.length === 0" class="risk-card">
+            <div class="risk-header">
+              <span class="risk-name">暂无数据</span>
+              <span class="risk-badge medium">--</span>
+            </div>
+            <div class="risk-reason">
+              <span class="reason-label">风险归因：</span>
+              <span class="reason-text">暂无数据</span>
+            </div>
+            <div class="risk-action">
+              <span class="action-label">建议行动：</span>
+              <span class="action-text">暂无数据</span>
+            </div>
+            <div class="risk-progress">
+              <span class="progress-label">当前进度</span>
+              <el-progress :percentage="0" :stroke-width="6" :show-text="false" />
+            </div>
+          </div>
           <div class="risk-card" v-for="(project, idx) in riskProjects" :key="idx">
             <div class="risk-header">
               <span class="risk-name" @click="handleRiskNameClick(project.name)">{{ project.name }}</span>
@@ -114,6 +132,7 @@
 import { ref, onMounted, onUnmounted, watch, nextTick } from 'vue'
 import * as echarts from 'echarts'
 import RegionalDashboard from './RegionalDashboard.vue'
+import * as dataService from '../services/dataService'
 
 const props = defineProps({
   currentRegion: {
@@ -127,38 +146,17 @@ const emits = defineEmits(['select-project-name'])
 const trendChartRef = ref(null)
 let trendChart = null
 
-const riskProjects = ref([
-  {
-    name: '乌鲁木齐',
-    level: 'high',
-    levelText: '高风险',
-    category: '供应商问题',
-    reason: '第三方渠道接口变更，导致联调受阻',
-    action: '协调渠道方技术负责人召开紧急会议',
-    progress: 45,
-    status: 'exception'
-  },
-  {
-    name: 'SSJS前海',
-    level: 'medium',
-    levelText: '中风险',
-    category: '资源缺口',
-    reason: '核心开发人员请假，进度滞后 3 天',
-    action: '从「报表组」临时抽调 1 名高级开发支援',
-    progress: 72,
-    status: 'warning'
-  },
-  {
-    name: '临沂-机场',
-    level: 'medium',
-    levelText: '中风险',
-    category: '质量缺陷返工',
-    reason: 'UI 验收反馈问题较多，修复耗时',
-    action: '组织 UI 与前端坐班集中修复',
-    progress: 88,
-    status: 'warning'
-  }
-])
+const riskProjects = ref([])
+
+const insightText = ref('')
+const healthIndex = ref(0)
+const healthLabel = ref('')
+const personnelHealth = ref(0)
+const fundReturnRatio = ref(0)
+const deliveryEfficiencyLabel = ref('')
+const trendXAxis = ref([])
+const trendPlan = ref([])
+const trendActual = ref([])
 
 function handleRiskNameClick(name){ emits('select-project-name', name) }
 
@@ -166,13 +164,13 @@ function handleRiskNameClick(name){ emits('select-project-name', name) }
 watch(() => props.currentRegion, (newVal) => {
   if (newVal === '全国') {
     nextTick(() => {
-      initTrendChart()
+      loadCompanyData()
     })
   }
 })
 
 onMounted(() => {
-  initTrendChart()
+  loadCompanyData()
   window.addEventListener('resize', handleResize)
 })
 
@@ -185,8 +183,35 @@ function handleResize() {
   trendChart && trendChart.resize()
 }
 
+async function loadCompanyData() {
+  const insights = await dataService.getCompanyInsights()
+  insightText.value = insights?.summaryText || ''
+  const m = insights?.metrics || {}
+  healthIndex.value = m.healthIndex || 0
+  healthLabel.value = m.healthLabel || ''
+  personnelHealth.value = m.personnelHealth || 0
+  fundReturnRatio.value = m.fundReturnRatio || 0
+  deliveryEfficiencyLabel.value = m.deliveryEfficiencyLabel || ''
+
+  const t = insights?.trend || {}
+  trendXAxis.value = Array.isArray(t.xAxis) ? t.xAxis : []
+  trendPlan.value = Array.isArray(t.plan) ? t.plan : []
+  trendActual.value = Array.isArray(t.actual) ? t.actual : []
+
+  const risks = await dataService.getRiskProjects(props.currentRegion)
+  riskProjects.value = Array.isArray(risks) ? risks : []
+
+  nextTick(() => {
+    initTrendChart()
+  })
+}
+
 function initTrendChart() {
   if (!trendChartRef.value) return
+  if (trendChart) {
+    trendChart.dispose()
+    trendChart = null
+  }
   trendChart = echarts.init(trendChartRef.value)
   
   const option = {
@@ -203,7 +228,7 @@ function initTrendChart() {
     },
     xAxis: {
       type: 'category',
-      data: ['6月', '7月', '8月', '9月', '10月', '11月'],
+      data: trendXAxis.value,
       axisLine: { show: false },
       axisTick: { show: false },
       axisLabel: { color: '#64748b' }
@@ -221,7 +246,7 @@ function initTrendChart() {
         type: 'line',
         smooth: true,
         showSymbol: false,
-        data: [12, 15, 18, 22, 25, 28],
+        data: trendPlan.value,
         lineStyle: { color: '#94a3b8', width: 2, type: 'dashed' },
         itemStyle: { color: '#94a3b8' }
       },
@@ -231,7 +256,7 @@ function initTrendChart() {
         smooth: true,
         showSymbol: true,
         symbolSize: 8,
-        data: [11, 16, 17, 24, 23, 29],
+        data: trendActual.value,
         lineStyle: { color: '#3b82f6', width: 3 },
         itemStyle: { color: '#3b82f6', borderWidth: 2, borderColor: '#fff' },
         areaStyle: {
