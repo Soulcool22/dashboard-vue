@@ -131,7 +131,8 @@ function render() {
   const seriesNamePlan = '计划任务完成率'
 
   const option = {
-    legend: { top: 0, right: 16, itemGap: 10, icon: 'rect', itemWidth: 14, itemHeight: 2 },
+    color: [actualLine, '#64748b'],
+    legend: { top: 0, right: 16, itemGap: 10, itemWidth: 24 },
     grid: { left: 50, right: 24, top: 40, bottom: 28 },
     xAxis: { type: 'category', data: xAxisData, boundaryGap: false, axisLine: { lineStyle: { color: axisLine } }, axisTick: { show: false }, axisLabel: { color: axisLabel } },
     yAxis: { type: 'value', min: 0, max: 1, axisLine: { show: false }, splitLine: { show: true, lineStyle: { color: gridLine } }, axisLabel: { color: axisLabel, formatter: v => Math.round(v * 100) + '%' } },
@@ -157,6 +158,7 @@ function render() {
         data: actualRates, 
         smooth: true, 
         showSymbol: false, 
+        itemStyle: { color: actualLine },
         lineStyle: { width: lineWidthActual, color: actualLine }, 
         emphasis: { focus: 'series', lineStyle: { width: lineWidthActual + 1 } }, 
         areaStyle: { color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [{ offset: 0, color: areaStart }, { offset: 1, color: areaEnd }]) },
@@ -168,6 +170,7 @@ function render() {
         data: planRates, 
         smooth: true, 
         showSymbol: false, 
+        itemStyle: { color: '#64748b' },
         lineStyle: { width: lineWidthActual + 0.5, color: '#64748b', type: 'dashed' } 
       }
     ]

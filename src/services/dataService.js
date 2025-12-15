@@ -111,13 +111,10 @@ function addDays(d, days) {
  
  function getUrumqiTasks() {
    if (__urumqiTasksCache) return __urumqiTasksCache
-   console.log('[dataService] urumqiTaskCsv length:', urumqiTaskCsv?.length)
    const rows = parseCsv(urumqiTaskCsv)
-   console.log('[dataService] parsed rows:', rows.length, 'first row keys:', rows[0] ? Object.keys(rows[0]) : [], 'first row:', rows[0])
    const tasks = rows.map(r => {
      const planEnd = parseDateYmd(r['计划完成时间'])
      const actualEnd = parseDateYmd(r['实际完成时间'])
-     if (rows.indexOf(r) === 0) console.log('[dataService] first task planEnd:', planEnd, 'raw:', r['计划完成时间'])
      return {
        projectName: r['项目名称'] || '',
        stage: r['阶段'] || '',
@@ -139,15 +136,12 @@ function addDays(d, days) {
  
  function getTasksByProject(projectId) {
    const pid = String(projectId || '').toLowerCase()
-   console.log('[dataService] getTasksByProject called with:', projectId, '-> pid:', pid)
    if (pid === 'urumqi' || pid === '乌鲁木齐') return getUrumqiTasks()
    return []
  }
  
  function buildCompletionSeries(tasks) {
-   console.log('[dataService] buildCompletionSeries tasks:', tasks.length)
    const valid = tasks.filter(t => t.planEnd)
-   console.log('[dataService] valid tasks with planEnd:', valid.length)
    const total = valid.length || 0
    if (!total) return { xAxis: [], actualRates: [], planRates: [] }
  
@@ -208,7 +202,11 @@ function addDays(d, days) {
      return overdueCount / total
    })
  
-   const planRates = days.map(() => 0)
+   // 计划任务完成率（与任务完成率图表一致）
+   const planRates = days.map(d => {
+     const c = valid.filter(t => t.planEnd && t.planEnd <= d).length
+     return c / total
+   })
    return { xAxis, actualRates, planRates }
  }
 
