@@ -39,12 +39,12 @@
           <div class="wl-delta" :class="sampleSign(p) >= 0 ? 'up' : 'down'">{{ sampleText(p) }}</div>
         </div>
         <div class="wl-sample" v-if="isExpanded">
-          <div class="wl-price">{{ maxValue(p).toFixed(2) }}</div>
-          <div class="wl-delta" :class="sampleSign(p) >= 0 ? 'up' : 'down'">{{ sampleText(p) }}</div>
+          <div class="wl-price">{{ startOnTimeValue(p) }}</div>
+          <div class="wl-delta" :class="startOnTimeDeltaSign(p) >= 0 ? 'up' : 'down'">{{ startOnTimeDeltaText(p) }}</div>
         </div>
         <div class="wl-sample" v-if="isExpanded">
-          <div class="wl-price">{{ minValue(p).toFixed(2) }}</div>
-          <div class="wl-delta" :class="sampleSign(p) >= 0 ? 'up' : 'down'">{{ sampleText(p) }}</div>
+          <div class="wl-price">{{ completeOnTimeValue(p) }}</div>
+          <div class="wl-delta" :class="completeOnTimeDeltaSign(p) >= 0 ? 'up' : 'down'">{{ completeOnTimeDeltaText(p) }}</div>
         </div>
         <div class="wl-sample" v-if="isExpanded">
           <div class="wl-price">{{ rangeValue(p).toFixed(2) }}</div>
@@ -88,6 +88,27 @@ function maxValue(p){ const a=p.series||[]; if(!a.length) return 0; return Math.
 function minValue(p){ const a=p.series||[]; if(!a.length) return 0; return Math.min(...a) }
 function rangeValue(p){ const a=p.series||[]; if(!a.length) return 0; return maxValue(p)-minValue(p) }
 function medianValue(p){ const a=(p.series||[]).slice().sort((x,y)=>x-y); if(!a.length) return 0; const m=Math.floor(a.length/2); return a.length%2? a[m] : (a[m-1]+a[m])/2 }
+
+function fmtRate01(v) {
+  const n = Number(v)
+  if (!Number.isFinite(n)) return '0%'
+  return Math.round(n * 100) + '%'
+}
+
+function fmtDelta01(v) {
+  const n = Number(v)
+  if (!Number.isFinite(n)) return ''
+  const s = n >= 0 ? '↑' : '↓'
+  return s + Math.round(Math.abs(n) * 100) + '%'
+}
+
+function startOnTimeValue(p) { return fmtRate01(p?.expandedMetrics?.startOnTimeRate) }
+function startOnTimeDeltaSign(p) { return Number(p?.expandedMetrics?.startOnTimeRateDelta || 0) }
+function startOnTimeDeltaText(p) { return fmtDelta01(p?.expandedMetrics?.startOnTimeRateDelta) }
+
+function completeOnTimeValue(p) { return fmtRate01(p?.expandedMetrics?.completeOnTimeRate) }
+function completeOnTimeDeltaSign(p) { return Number(p?.expandedMetrics?.completeOnTimeRateDelta || 0) }
+function completeOnTimeDeltaText(p) { return fmtDelta01(p?.expandedMetrics?.completeOnTimeRateDelta) }
 </script>
 
 <style scoped>

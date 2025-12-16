@@ -113,6 +113,8 @@ function addDays(d, days) {
    if (__urumqiTasksCache) return __urumqiTasksCache
    const rows = parseCsv(urumqiTaskCsv)
    const tasks = rows.map(r => {
+     const planStart = parseDateYmd(r['计划开始时间'])
+     const actualStart = parseDateYmd(r['实际开始时间'])
      const planEnd = parseDateYmd(r['计划完成时间'])
      const actualEnd = parseDateYmd(r['实际完成时间'])
      return {
@@ -125,6 +127,8 @@ function addDays(d, days) {
        owner: r['责任人'] || '',
        executor: r['执行人'] || '',
        status: r['工作项状态'] || '',
+       planStart,
+       actualStart,
        planEnd,
        actualEnd,
        raw: r
@@ -210,14 +214,61 @@ function addDays(d, days) {
    return { xAxis, actualRates, planRates }
  }
 
+ function buildOnTimeMetrics(tasks) {
+   function computeStartRateWithTotal(asOf) {
+     const startScope = tasks.filter(t => t.planStart && t.planStart <= asOf)
+     const total = startScope.length || 0
+     const rate = total
+       ? (startScope.filter(t => t.actualStart && t.actualStart <= t.planStart).length / total)
+       : 0
+     return { rate, total }
+   }
+
+   function computeCompleteRateWithTotal(asOf) {
+     const completeScope = tasks.filter(t => t.planEnd && t.planEnd <= asOf)
+     const total = completeScope.length || 0
+     const rate = total
+       ? (completeScope.filter(t => t.actualEnd && t.actualEnd <= t.planEnd).length / total)
+       : 0
+     return { rate, total }
+   }
+
+   const now = new Date()
+   now.setHours(0, 0, 0, 0)
+   const prev = addDays(now, -1)
+
+   const startNow = computeStartRateWithTotal(now)
+   const startPrev = computeStartRateWithTotal(prev)
+   const startOnTimeRate = startNow.rate
+   const startOnTimeRateDelta = (startNow.total > 0 && startPrev.total > 0)
+     ? (startNow.rate - startPrev.rate)
+     : 0
+
+   const completeNow = computeCompleteRateWithTotal(now)
+   const completePrev = computeCompleteRateWithTotal(prev)
+   const completeOnTimeRate = completeNow.rate
+   const completeOnTimeRateDelta = (completeNow.total > 0 && completePrev.total > 0)
+     ? (completeNow.rate - completePrev.rate)
+     : 0
+
+   return {
+     startOnTimeRate,
+     startOnTimeRateDelta,
+     completeOnTimeRate,
+     completeOnTimeRateDelta
+   }
+ }
+
 export async function getProjects() {
+  const urumqiOnTime = buildOnTimeMetrics(getTasksByProject('urumqi'))
   return [
     {
       id: 'urumqi',
       name: '乌鲁木齐',
       sector: '新疆',
       isWatched: true,
-      series: [0, 0]
+      series: [0, 0],
+      expandedMetrics: urumqiOnTime
     }
   ]
 }
