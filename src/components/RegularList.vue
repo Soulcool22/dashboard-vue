@@ -47,8 +47,8 @@
           <div class="wl-delta" :class="completeOnTimeDeltaSign(p) >= 0 ? 'up' : 'down'">{{ completeOnTimeDeltaText(p) }}</div>
         </div>
         <div class="wl-sample" v-if="isExpanded">
-          <div class="wl-price">{{ rangeValue(p).toFixed(2) }}</div>
-          <div class="wl-delta" :class="sampleSign(p) >= 0 ? 'up' : 'down'">{{ sampleText(p) }}</div>
+          <div class="wl-price">{{ avgDurationRatioValue(p) }}</div>
+          <div class="wl-delta" :class="avgDurationRatioDeltaSign(p) >= 0 ? 'up' : 'down'">{{ avgDurationRatioDeltaText(p) }}</div>
         </div>
         <div class="wl-sample" v-if="isExpanded">
           <div class="wl-price">{{ medianValue(p).toFixed(2) }}</div>
@@ -102,6 +102,19 @@ function fmtDelta01(v) {
   return s + Math.round(Math.abs(n) * 100) + '%'
 }
 
+function fmtRatio(v) {
+  const n = Number(v)
+  if (!Number.isFinite(n)) return '0.00'
+  return n.toFixed(2)
+}
+
+function fmtDeltaRatio(v) {
+  const n = Number(v)
+  if (!Number.isFinite(n)) return ''
+  const s = n >= 0 ? '↑' : '↓'
+  return s + Math.abs(n).toFixed(2)
+}
+
 function startOnTimeValue(p) { return fmtRate01(p?.expandedMetrics?.startOnTimeRate) }
 function startOnTimeDeltaSign(p) { return Number(p?.expandedMetrics?.startOnTimeRateDelta || 0) }
 function startOnTimeDeltaText(p) { return fmtDelta01(p?.expandedMetrics?.startOnTimeRateDelta) }
@@ -109,6 +122,10 @@ function startOnTimeDeltaText(p) { return fmtDelta01(p?.expandedMetrics?.startOn
 function completeOnTimeValue(p) { return fmtRate01(p?.expandedMetrics?.completeOnTimeRate) }
 function completeOnTimeDeltaSign(p) { return Number(p?.expandedMetrics?.completeOnTimeRateDelta || 0) }
 function completeOnTimeDeltaText(p) { return fmtDelta01(p?.expandedMetrics?.completeOnTimeRateDelta) }
+
+function avgDurationRatioValue(p) { return fmtRatio(p?.expandedMetrics?.avgDurationRatio) }
+function avgDurationRatioDeltaSign(p) { return Number(p?.expandedMetrics?.avgDurationRatioDelta || 0) }
+function avgDurationRatioDeltaText(p) { return fmtDeltaRatio(p?.expandedMetrics?.avgDurationRatioDelta) }
 </script>
 
 <style scoped>

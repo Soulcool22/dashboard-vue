@@ -117,6 +117,10 @@ function addDays(d, days) {
      const actualStart = parseDateYmd(r['实际开始时间'])
      const planEnd = parseDateYmd(r['计划完成时间'])
      const actualEnd = parseDateYmd(r['实际完成时间'])
+     const planDurationRaw = String(r['计划工期'] || '').trim()
+     const actualDurationRaw = String(r['实际工期'] || '').trim()
+     const planDuration = (planDurationRaw && Number.isFinite(Number(planDurationRaw))) ? Number(planDurationRaw) : null
+     const actualDuration = (actualDurationRaw && Number.isFinite(Number(actualDurationRaw))) ? Number(actualDurationRaw) : null
      return {
        projectName: r['项目名称'] || '',
        stage: r['阶段'] || '',
@@ -131,6 +135,8 @@ function addDays(d, days) {
        actualStart,
        planEnd,
        actualEnd,
+       planDuration,
+       actualDuration,
        raw: r
      }
    })
@@ -233,6 +239,20 @@ function addDays(d, days) {
      return { rate, total }
    }
 
+   function computeAvgDurationRatioWithTotal(asOf) {
+     const scope = tasks.filter(t => {
+       if (!Number.isFinite(t?.planDuration) || t.planDuration <= 0) return false
+       if (!Number.isFinite(t?.actualDuration) || t.actualDuration <= 0) return false
+       if (!t.actualEnd || t.actualEnd > asOf) return false
+       return true
+     })
+     const total = scope.length || 0
+     const avg = total
+       ? (scope.reduce((s, t) => s + (t.actualDuration / t.planDuration), 0) / total)
+       : 0
+     return { avg, total }
+   }
+
    const now = new Date()
    now.setHours(0, 0, 0, 0)
    const prev = addDays(now, -1)
@@ -251,11 +271,20 @@ function addDays(d, days) {
      ? (completeNow.rate - completePrev.rate)
      : 0
 
+   const durationNow = computeAvgDurationRatioWithTotal(now)
+   const durationPrev = computeAvgDurationRatioWithTotal(prev)
+   const avgDurationRatio = durationNow.avg
+   const avgDurationRatioDelta = (durationNow.total > 0 && durationPrev.total > 0)
+     ? (durationNow.avg - durationPrev.avg)
+     : 0
+
    return {
      startOnTimeRate,
      startOnTimeRateDelta,
      completeOnTimeRate,
-     completeOnTimeRateDelta
+     completeOnTimeRateDelta,
+     avgDurationRatio,
+     avgDurationRatioDelta
    }
  }
 
