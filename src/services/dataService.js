@@ -1,72 +1,75 @@
  import urumqiTaskCsv from '../../test_data/template_test.csv?raw'
- 
+import urumqiPeopleCsvUrl from '../../test_data/template_test_people.csv?url'
+
 export const TEST_DATA_PATH = '@test_data'
 
- let __urumqiTasksCache = null
- 
- function parseCsv(text) {
-   if (!text) return []
-   const s = String(text).replace(/^\uFEFF/, '')
- 
-   const rows = []
-   let row = []
-   let field = ''
-   let inQuotes = false
- 
-   for (let i = 0; i < s.length; i++) {
-     const ch = s[i]
-     if (inQuotes) {
-       if (ch === '"') {
-         if (s[i + 1] === '"') {
-           field += '"'
-           i++
-         } else {
-           inQuotes = false
-         }
-       } else {
-         field += ch
-       }
-       continue
-     }
- 
-     if (ch === '"') {
-       inQuotes = true
-       continue
-     }
-     if (ch === ',') {
-       row.push(field)
-       field = ''
-       continue
-     }
-     if (ch === '\r') {
-       continue
-     }
-     if (ch === '\n') {
-       row.push(field)
-       const hasAny = row.some(x => String(x || '').trim() !== '')
-       if (hasAny) rows.push(row)
-       row = []
-       field = ''
-       continue
-     }
-     field += ch
-   }
- 
-   if (field.length || row.length) {
-     row.push(field)
-     const hasAny = row.some(x => String(x || '').trim() !== '')
-     if (hasAny) rows.push(row)
-   }
- 
-   if (rows.length < 2) return []
-   const header = rows[0].map(x => String(x || '').trim())
-   const objects = []
-   for (let r = 1; r < rows.length; r++) {
-     const cols = rows[r]
-     const obj = {}
-     for (let c = 0; c < header.length; c++) {
-       obj[header[c]] = (cols[c] != null ? String(cols[c]) : '').trim()
-     }
+let __urumqiTasksCache = null
+let __urumqiPeopleCache = null
+let __urumqiPeopleCachePromise = null
+
+function parseCsv(text) {
+  if (!text) return []
+  const s = String(text).replace(/^\uFEFF/, '')
+
+  const rows = []
+  let row = []
+  let field = ''
+  let inQuotes = false
+
+  for (let i = 0; i < s.length; i++) {
+    const ch = s[i]
+    if (inQuotes) {
+      if (ch === '"') {
+        if (s[i + 1] === '"') {
+          field += '"'
+          i++
+        } else {
+          inQuotes = false
+        }
+      } else {
+        field += ch
+      }
+      continue
+    }
+
+    if (ch === '"') {
+      inQuotes = true
+      continue
+    }
+    if (ch === ',') {
+      row.push(field)
+      field = ''
+      continue
+    }
+    if (ch === '\r') {
+      continue
+    }
+    if (ch === '\n') {
+      row.push(field)
+      const hasAny = row.some(x => String(x || '').trim() !== '')
+      if (hasAny) rows.push(row)
+      row = []
+      field = ''
+      continue
+    }
+    field += ch
+  }
+
+  if (field.length || row.length) {
+    row.push(field)
+    const hasAny = row.some(x => String(x || '').trim() !== '')
+    if (hasAny) rows.push(row)
+  }
+
+  if (rows.length < 2) return []
+  const header = rows[0].map(x => String(x || '').trim())
+  const objects = []
+  for (let r = 1; r < rows.length; r++) {
+    const cols = rows[r]
+    const obj = {}
+    for (let c = 0; c < header.length; c++) {
+      obj[header[c]] = (cols[c] != null ? String(cols[c]) : '').trim()
+    }
     objects.push(obj)
   }
   return objects
@@ -148,6 +151,65 @@ function addDays(d, days) {
    const pid = String(projectId || '').toLowerCase()
    if (pid === 'urumqi' || pid === '乌鲁木齐') return getUrumqiTasks()
    return []
+ }
+
+ async function getUrumqiPeopleRows() {
+   if (__urumqiPeopleCache) return __urumqiPeopleCache
+   if (__urumqiPeopleCachePromise) return __urumqiPeopleCachePromise
+
+   __urumqiPeopleCachePromise = (async () => {
+     try {
+       const resp = await fetch(urumqiPeopleCsvUrl)
+       if (!resp.ok) throw new Error('Failed to fetch people csv: ' + resp.status)
+       const buf = await resp.arrayBuffer()
+       const bytes = new Uint8Array(buf)
+
+       function tryDecode(encoding) {
+         try {
+           return new TextDecoder(encoding).decode(bytes)
+         } catch (e) {
+           return null
+         }
+       }
+
+       const candidates = [
+         { enc: 'utf-8', text: tryDecode('utf-8') },
+         { enc: 'gb18030', text: tryDecode('gb18030') },
+         { enc: 'gbk', text: tryDecode('gbk') },
+         { enc: 'gb2312', text: tryDecode('gb2312') }
+       ].filter(x => typeof x.text === 'string')
+
+       let text = candidates.length ? candidates[0].text : ''
+       let picked = candidates.length ? candidates[0].enc : ''
+       for (const c of candidates) {
+         if (c.text.includes('项目名称') && c.text.includes('干系人')) {
+           text = c.text
+           picked = c.enc
+           break
+         }
+       }
+
+       if (!(text.includes('项目名称') && text.includes('干系人'))) {
+         console.warn('[getUrumqiPeopleRows] header markers not found after decode; please save template_test_people.csv as UTF-8', { picked })
+       }
+
+       const rows = parseCsv(text)
+       const looksOk = Array.isArray(rows) && rows.length && (Object.prototype.hasOwnProperty.call(rows[0], '项目名称') || Object.prototype.hasOwnProperty.call(rows[0], '干系人'))
+       if (!looksOk) {
+         console.warn('[getUrumqiPeopleRows] parsed rows do not contain expected headers; returning empty', { picked })
+         return []
+       }
+       __urumqiPeopleCache = rows
+       return rows
+     } catch (e) {
+       console.warn('[getUrumqiPeopleRows] failed', e)
+       return []
+     } finally {
+       __urumqiPeopleCachePromise = null
+     }
+   })()
+
+   return __urumqiPeopleCachePromise
  }
  
  function buildCompletionSeries(tasks) {
@@ -421,9 +483,46 @@ export async function getExpenditureData(projectId) {
 }
 
 export async function getPersonnelData(projectId) {
-  return {
-    members: []
+  const pidRaw = String(projectId || '').trim()
+  const pid = pidRaw.toLowerCase()
+  const rows = await getUrumqiPeopleRows()
+
+  function matchProject(row) {
+    if (!pid) return true
+    const rowPid = String(row['项目id'] || '').trim().toLowerCase()
+    const rowName = String(row['项目名称'] || '').trim()
+    if (rowPid && rowPid === pid) return true
+    if (rowName && rowName === pidRaw) return true
+    if ((pid === 'urumqi' || pidRaw === 'urumqi') && rowName === '乌鲁木齐') return true
+    if ((pid === '乌鲁木齐') && rowPid === 'urumqi') return true
+    return false
   }
+
+  const scoped = rows.filter(matchProject)
+  const byName = new Map()
+
+  for (const r of scoped) {
+    const name = String(r['干系人'] || '').trim()
+    if (!name) continue
+    const role = String(r['项目角色'] || '').trim()
+    const projectName = String(r['项目名称'] || '').trim()
+
+    let m = byName.get(name)
+    if (!m) {
+      m = { id: name, name, role: role || '', projectCount: 0, projects: [] }
+      byName.set(name, m)
+    }
+    if (!m.role && role) m.role = role
+    if (projectName && !m.projects.includes(projectName)) {
+      m.projects.push(projectName)
+      m.projectCount = m.projects.length
+    }
+    if (!projectName) {
+      m.projectCount = Math.max(m.projectCount, 1)
+    }
+  }
+
+  return { members: Array.from(byName.values()) }
 }
 
 export async function getTaskData(projectId, kpi) {
