@@ -30,11 +30,26 @@ src/
 ├── assets/
 │   └── dashboard.css
 ├── components/
-│   ├── WatchList.vue
-│   ├── RegularList.vue
+│   ├── kpi/
+│   │   ├── FundArrivalView.vue
+│   │   ├── OverdueTaskView.vue
+│   │   ├── PersonnelHealthView.vue
+│   │   ├── ProjectExpenditureView.vue
+│   │   ├── ProjectOverviewView.vue
+│   │   └── TaskCompletionView.vue
+│   ├── AttributionAnalysis.vue
+│   ├── CompanyDashboard.vue
+│   ├── InfoIcon.vue
 │   ├── KpiGrid.vue
-│   ├── CompletionLine.vue
-│   └── ResearchChat.vue
+│   ├── KpiPanel.vue
+│   ├── ProjectUpdates.vue
+│   ├── RegionalDashboard.vue
+│   ├── RegularList.vue
+│   ├── ResearchChat.vue
+│   ├── SparkLine.vue
+│   └── WatchList.vue
+├── services/
+│   └── dataService.js
 ├── App.vue
 └── main.js
 ```
@@ -68,7 +83,8 @@ src/
 
 ## 数据与状态
 
-- 目前使用本地 mock 数据与生成方法（如 `generateSeriesData()`）
+- 目前数据逻辑集中在 `src/services/dataService.js`
+- 数据源：通过 `import ...?raw` 方式读取 CSV 文件（如 `test_data/template_test.csv`），在前端解析并计算 KPI
 - 需要接入真实 API 时：
   - 新增 `axios`（或 `fetch` 封装）到 `dependencies`
   - 在 `src/api/` 创建模块，统一返回 `{ code, data, message }` 格式
