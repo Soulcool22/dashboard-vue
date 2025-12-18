@@ -380,11 +380,22 @@ export async function getKpis(projectId) {
   const overdueDelta = Math.abs(overdueLast - overduePrev)
   const overdueUp = (overdueLast - overduePrev) <= 0
  
+  // 计算人员健康度
+  const personnelData = await getPersonnelData(projectId)
+  const members = personnelData.members || []
+  const totalMembers = members.length
+  let healthScore = 0
+  if (totalMembers > 0) {
+    const riskCount = members.filter(m => m.projectCount > 3).length
+    const normalCount = totalMembers - riskCount
+    healthScore = Math.round((normalCount / totalMembers) * 100)
+  }
+
   return [
     { title: '资金到账率', value: '0%', delta: '0%', up: true },
     { title: '任务完成率', value: Math.round(completionLast * 100) + '%', delta: Math.round(completionDelta * 100) + '%', up: completionUp },
     { title: '项目支出金额', value: '¥ 0', delta: '0', up: true },
-    { title: '人员健康度', value: '0%', delta: '0%', up: true },
+    { title: '人员健康度', value: healthScore + '%', delta: '0%', up: true },
     { title: '逾期任务率', value: Math.round(overdueLast * 100) + '%', delta: Math.round(overdueDelta * 100) + '%', up: overdueUp }
   ]
 }

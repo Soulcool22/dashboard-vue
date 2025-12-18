@@ -25,7 +25,7 @@ function handleClick(kpi) {
 }
 
 function kDeltaText(k){ const s = k.up ? '↑ ' : '↓ '; const p = (k.title === '关键里程碑达成率' || k.title === '任务完成率') ? '较计划 ' : '环比 '; return p + s + k.delta }
-function showDelta(k){ return k.title !== '资金到账率' && k.title !== '项目支出金额' }
+function showDelta(k){ return k.title !== '资金到账率' && k.title !== '项目支出金额' && k.title !== '人员健康度' }
 </script>
 
 <style scoped>
