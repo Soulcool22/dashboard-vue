@@ -7,9 +7,15 @@ let __urumqiTasksCache = null
 let __urumqiTasksCachePromise = null
 let __urumqiPeopleCache = null
 let __urumqiPeopleCachePromise = null
+let __projectRegionMapCache = null
+let __projectRegionMapCachePromise = null
 
 function getRowProjectLabel(row) {
   return String(row?.['项目简称'] || row?.['项目名称'] || '').trim()
+}
+
+function getRowRegion(row) {
+  return String(row?.['区域'] || row?.['地区'] || '').trim()
 }
 
 function normalizeProjectKey(projectIdOrName) {
@@ -298,6 +304,7 @@ async function getTasksByProject(projectId) {
          console.warn('[getUrumqiPeopleRows] parsed rows do not contain expected headers; returning empty', { picked })
          return []
        }
+
        __urumqiPeopleCache = rows
        return rows
      } catch (e) {
@@ -308,7 +315,33 @@ async function getTasksByProject(projectId) {
      }
    })()
 
-  return __urumqiPeopleCachePromise
+   return __urumqiPeopleCachePromise
+ }
+
+async function getProjectRegionMap() {
+  if (__projectRegionMapCache) return __projectRegionMapCache
+  if (__projectRegionMapCachePromise) return __projectRegionMapCachePromise
+
+  __projectRegionMapCachePromise = (async () => {
+    try {
+      const rows = await getUrumqiPeopleRows()
+      const map = new Map()
+      for (const r of rows) {
+        const project = getRowProjectLabel(r)
+        const region = getRowRegion(r)
+        if (!project || !region) continue
+        const key = normalizeProjectKey(project)
+        if (!key) continue
+        if (!map.has(key)) map.set(key, region)
+      }
+      __projectRegionMapCache = map
+      return map
+    } finally {
+      __projectRegionMapCachePromise = null
+    }
+  })()
+
+  return __projectRegionMapCachePromise
 }
 
 function buildCompletionSeries(tasks) {
@@ -527,7 +560,44 @@ export async function getKpis(projectId) {
 }
 
 export async function getRiskProjects(region) {
-  return []
+  const regionRaw = String(region || '').trim()
+  const wantRegion = (!regionRaw || regionRaw === '全国') ? '' : regionRaw
+
+  const regionMap = await getProjectRegionMap()
+  const projects = await getProjects()
+
+  const scoped = wantRegion
+    ? projects.filter(p => regionMap.get(normalizeProjectKey(p.id || p.name)) === wantRegion)
+    : projects
+
+  const enriched = []
+  for (const p of scoped) {
+    const tasks = await getTasksByProject(p.id || p.name)
+    const overdue = buildOverdueSeries(tasks)
+    const overdueRate = overdue.actualRates.length ? overdue.actualRates[overdue.actualRates.length - 1] : 0
+    const completion = buildCompletionSeries(tasks)
+    const completionRate = completion.actualRates.length ? completion.actualRates[completion.actualRates.length - 1] : 0
+
+    const progress = Math.round(completionRate * 100)
+    const level = overdueRate >= 0.3 ? 'high' : (overdueRate >= 0.15 ? 'medium' : 'low')
+    const levelText = level === 'high' ? '高风险' : (level === 'medium' ? '中风险' : '低风险')
+    const status = level === 'high' ? 'exception' : (level === 'medium' ? 'warning' : 'success')
+
+    enriched.push({
+      name: p.name,
+      level,
+      levelText,
+      category: '进度',
+      reason: '逾期任务率 ' + Math.round(overdueRate * 100) + '%',
+      action: '推进未完成任务并更新实际完成时间',
+      progress,
+      status,
+      __score: overdueRate * 1000 + (100 - progress)
+    })
+  }
+
+  enriched.sort((a, b) => b.__score - a.__score)
+  return enriched.slice(0, 3).map(({ __score, ...x }) => x)
 }
 
 export async function getProjectSeries(projectId) {
@@ -535,39 +605,148 @@ export async function getProjectSeries(projectId) {
 }
 
 export async function getCompanyInsights() {
+  const rows = await getUrumqiPeopleRows()
+  const byName = new Map()
+  for (const r of rows) {
+    const name = String(r['干系人'] || '').trim()
+    if (!name) continue
+    const projectName = getRowProjectLabel(r)
+    let m = byName.get(name)
+    if (!m) {
+      m = { projects: new Set() }
+      byName.set(name, m)
+    }
+    if (projectName) m.projects.add(projectName)
+  }
+
+  const members = Array.from(byName.entries()).map(([name, m]) => ({
+    name,
+    projectCount: m.projects.size || 1
+  }))
+  const totalMembers = members.length
+  const riskCount = members.filter(m => m.projectCount > 3).length
+  const personnelHealth = totalMembers > 0
+    ? Math.round(((totalMembers - riskCount) / totalMembers) * 100)
+    : 0
+
+  const healthIndex = personnelHealth
+  const healthLabel = healthIndex >= 80 ? '健康' : (healthIndex >= 60 ? '一般' : '预警')
+
+  const allTasks = await getAllTasks()
+  const completionAll = buildCompletionSeries(allTasks)
+  const completionRate = completionAll.actualRates.length ? completionAll.actualRates[completionAll.actualRates.length - 1] : 0
+  const deliveryEfficiencyLabel = completionAll.xAxis.length ? (Math.round(completionRate * 100) + '%') : ''
+
+  const xAxis = []
+  const plan = []
+  const actual = []
+
   return {
     summaryText: '',
     metrics: {
-      healthIndex: 0,
-      healthLabel: '',
-      personnelHealth: 0,
+      healthIndex,
+      healthLabel,
+      personnelHealth,
       fundReturnRatio: 0,
-      deliveryEfficiencyLabel: ''
+      deliveryEfficiencyLabel
     },
     trend: {
-      xAxis: [],
-      plan: [],
-      actual: []
+      xAxis,
+      plan,
+      actual
     }
   }
 }
 
 export async function getRegionalData(region) {
+  const regionRaw = String(region || '').trim()
+  const wantRegion = (!regionRaw || regionRaw === '全国') ? '' : regionRaw
+
+  const regionMap = await getProjectRegionMap()
+  const allProjects = await getProjects()
+  const scopedProjects = wantRegion
+    ? allProjects.filter(p => regionMap.get(normalizeProjectKey(p.id || p.name)) === wantRegion)
+    : allProjects
+
+  const projects = []
+  let activeProjects = 0
+  let riskProjectsCount = 0
+
+  const now = new Date()
+  now.setHours(0, 0, 0, 0)
+  const curY = now.getFullYear()
+  const curM = now.getMonth()
+
+  let plannedDeliveryThisMonth = 0
+  let deliveredThisMonth = 0
+
+  for (const p of scopedProjects) {
+    const tasks = await getTasksByProject(p.id || p.name)
+    const completion = buildCompletionSeries(tasks)
+    const completionRate = completion.actualRates.length ? completion.actualRates[completion.actualRates.length - 1] : 0
+    const progress = Math.round(completionRate * 100)
+
+    const overdue = buildOverdueSeries(tasks)
+    const overdueRate = overdue.actualRates.length ? overdue.actualRates[overdue.actualRates.length - 1] : 0
+
+    const isActive = tasks.some(t => {
+      const st = String(t.status || '').trim()
+      if (st === '已完成') return false
+      if (st === '逾期完成') return false
+      if (t.actualEnd && Number.isFinite(t.actualEnd.getTime())) return false
+      return true
+    })
+    if (isActive) activeProjects += 1
+    if (overdueRate > 0) riskProjectsCount += 1
+
+    plannedDeliveryThisMonth += tasks.filter(t => t.planEnd && t.planEnd.getFullYear() === curY && t.planEnd.getMonth() === curM).length
+    deliveredThisMonth += tasks.filter(t => t.actualEnd && t.actualEnd.getFullYear() === curY && t.actualEnd.getMonth() === curM).length
+
+    const manager = (() => {
+      const t = tasks.find(x => String(x.owner || '').trim()) || tasks.find(x => String(x.executor || '').trim())
+      return t ? (String(t.owner || t.executor || '').trim()) : ''
+    })()
+
+    const status = overdueRate > 0 ? 'delay' : 'normal'
+    const statusText = overdueRate > 0 ? '逾期风险' : '正常'
+    projects.push({ name: p.name, status, statusText, progress, manager })
+  }
+
+  const deliveredRatio = plannedDeliveryThisMonth > 0
+    ? Math.round((deliveredThisMonth / plannedDeliveryThisMonth) * 100)
+    : 0
+
+  const topRisks = await getRiskProjects(wantRegion || regionRaw)
+
+  const peopleRows = await getUrumqiPeopleRows()
+  const scopedPeopleRows = wantRegion
+    ? peopleRows.filter(r => getRowRegion(r) === wantRegion)
+    : peopleRows
+  const uniqueNames = new Set(scopedPeopleRows.map(r => String(r['干系人'] || '').trim()).filter(Boolean))
+  const memberCount = uniqueNames.size
+  const categories = ['人员健康风险']
+  const load = [memberCount ? Math.round((Array.from(uniqueNames).filter(name => {
+    const allRows = peopleRows.filter(x => String(x['干系人'] || '').trim() === name)
+    const projectSet = new Set(allRows.map(x => getRowProjectLabel(x)).filter(Boolean))
+    return (projectSet.size || 1) > 3
+  }).length / memberCount) * 100) : 0]
+  const threshold = [30]
+
   return {
     insightText: '',
     metrics: {
-      activeProjects: 0,
-      plannedDeliveryThisMonth: 0,
-      deliveredThisMonth: 0,
-      deliveredRatio: 0,
-      riskProjects: 0
+      activeProjects,
+      plannedDeliveryThisMonth,
+      deliveredThisMonth,
+      deliveredRatio,
+      riskProjects: riskProjectsCount
     },
-    projects: [],
-    riskProjects: [],
+    projects,
+    riskProjects: topRisks,
     resourceLoad: {
-      categories: [],
-      load: [],
-      threshold: []
+      categories,
+      load,
+      threshold
     }
   }
 }
