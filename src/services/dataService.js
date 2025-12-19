@@ -251,7 +251,11 @@ async function getTasksByProject(projectId) {
   const key = normalizeProjectKey(projectId)
   const tasks = await getAllTasks()
   if (!key) return tasks
-  return tasks.filter(t => normalizeProjectKey(t.projectId || t.projectName) === key)
+  return tasks.filter(t => {
+    const keyById = normalizeProjectKey(t.projectId)
+    const keyByName = normalizeProjectKey(t.projectName)
+    return keyById === key || keyByName === key
+  })
 }
 
  async function getUrumqiPeopleRows() {
@@ -635,7 +639,7 @@ export async function getCompanyInsights() {
   const allTasks = await getAllTasks()
   const completionAll = buildCompletionSeries(allTasks)
   const completionRate = completionAll.actualRates.length ? completionAll.actualRates[completionAll.actualRates.length - 1] : 0
-  const deliveryEfficiencyLabel = completionAll.xAxis.length ? (Math.round(completionRate * 100) + '%') : ''
+  const deliveryEfficiencyLabel = ''
 
   const xAxis = []
   const plan = []
