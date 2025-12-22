@@ -144,14 +144,18 @@ import ProjectUpdates from './components/ProjectUpdates.vue'
 import AttributionAnalysis from './components/AttributionAnalysis.vue'
 import CompanyDashboard from './components/CompanyDashboard.vue'
 import * as dataService from './services/dataService'
+import { getRegions } from './config'
 
 const expandedLeft = ref(false)
 const regularCollapsed = ref(false)
 function toggleLeftExpand(){ expandedLeft.value = !expandedLeft.value }
 
 // --- Data State ---
-const companyRegion = ref('全国')
-const regions = ['全国', '华东', '华南', '华北', '西部', '广东', '海外']
+// 从配置获取区域列表
+const configRegions = getRegions()
+const defaultRegion = configRegions.find(r => r.isDefault)?.name || configRegions[0]?.name || '全国'
+const companyRegion = ref(defaultRegion)
+const regions = computed(() => configRegions.map(r => r.name))
 const statsPeriod = ref('')
 const updatedAt = ref('')
 const projects = ref([])

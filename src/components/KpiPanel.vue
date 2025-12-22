@@ -4,6 +4,7 @@
 
 <script setup>
 import { computed } from 'vue'
+import { getKpiConfig } from '../config'
 import FundArrivalView from './kpi/FundArrivalView.vue'
 import ProjectExpenditureView from './kpi/ProjectExpenditureView.vue'
 import PersonnelHealthView from './kpi/PersonnelHealthView.vue'
@@ -19,19 +20,34 @@ const props = defineProps({
 })
 const emit = defineEmits(['stats-changed'])
 
-const viewMap = {
-  '资金到账率': FundArrivalView,
-  '项目支出金额': ProjectExpenditureView,
-  '人员健康度': PersonnelHealthView,
-  '任务完成率': TaskCompletionView,
-  '逾期任务率': OverdueTaskView
+// 组件名称到组件实例的映射（用于动态组件解析）
+const componentRegistry = {
+  FundArrivalView,
+  ProjectExpenditureView,
+  PersonnelHealthView,
+  TaskCompletionView,
+  OverdueTaskView,
+  ProjectOverviewView
+}
+
+/**
+ * 根据KPI标题从配置获取对应的视图组件
+ * @param {string} kpiTitle - KPI标题
+ * @returns {Component} Vue组件
+ */
+function getViewComponent(kpiTitle) {
+  const kpiConfig = getKpiConfig(kpiTitle)
+  if (kpiConfig && kpiConfig.viewComponent) {
+    return componentRegistry[kpiConfig.viewComponent] || ProjectOverviewView
+  }
+  return ProjectOverviewView
 }
 
 const currentComp = computed(() => {
   if (props.isOverview) {
     return ProjectOverviewView
   }
-  return viewMap[props.selectedKpi] || ProjectOverviewView
+  return getViewComponent(props.selectedKpi)
 })
 
 const compProps = computed(() => {

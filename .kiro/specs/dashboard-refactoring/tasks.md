@@ -7,7 +7,7 @@
 ## Tasks
 
 - [ ] 1. 创建配置管理模块
-  - [ ] 1.1 创建 src/config/index.js 配置管理器
+  - [x] 1.1 创建 src/config/index.js 配置管理器
     - 定义 dashboardConfig 对象，包含 regions、kpis、thresholds、display 配置
     - 实现 getKpiConfig、getRegions、getThreshold 辅助函数
     - _Requirements: 1.1, 1.2, 1.3, 1.4_
@@ -16,7 +16,7 @@
     - **Validates: Requirements 1.1, 1.2, 1.3, 1.4**
 
 - [ ] 2. 创建工具模块
-  - [ ] 2.1 创建 src/utils/formatters.js 格式化函数
+  - [x] 2.1 创建 src/utils/formatters.js 格式化函数
     - 实现 formatPercent、formatCurrency、formatDate 函数
     - _Requirements: 4.1, 4.2_
   - [ ] 2.2 创建 src/utils/calculators.js 计算函数
@@ -66,7 +66,7 @@
     - _Requirements: 2.7, 2.8_
 
 - [ ] 6. 重构 App.vue 组件
-  - [ ] 6.1 移除硬编码区域列表
+  - [x] 6.1 移除硬编码区域列表
     - 从配置获取区域列表
     - 使用 getRegions() 函数
     - _Requirements: 3.4_
@@ -79,7 +79,7 @@
     - 移除 kDeltaText 和 showDelta 中的硬编码比较
     - 从配置获取 KPI 显示规则
     - _Requirements: 3.1_
-  - [ ] 7.2 重构 src/components/KpiPanel.vue
+  - [x] 7.2 重构 src/components/KpiPanel.vue
     - 移除硬编码视图映射
     - 从配置获取 viewComponent 映射
     - _Requirements: 3.2_

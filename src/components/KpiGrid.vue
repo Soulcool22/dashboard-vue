@@ -17,6 +17,8 @@
 </template>
 
 <script setup>
+import { getKpiConfig } from '../config'
+
 const props = defineProps({ kpis: { type: Array, default: () => [] }, selectedKpi: { type: String, default: '任务完成率' } })
 const emit = defineEmits(['select-kpi'])
 
@@ -24,8 +26,36 @@ function handleClick(kpi) {
   emit('select-kpi', kpi)
 }
 
-function kDeltaText(k){ const s = k.up ? '↑ ' : '↓ '; const p = (k.title === '关键里程碑达成率' || k.title === '任务完成率') ? '较计划 ' : '环比 '; return p + s + k.delta }
-function showDelta(k){ return k.title !== '资金到账率' && k.title !== '项目支出金额' && k.title !== '人员健康度' }
+/**
+ * 获取KPI变化量文本
+ * 根据配置中的compareMode决定显示"较计划"还是"环比"
+ * @param {Object} k - KPI对象
+ * @returns {string} 变化量文本
+ */
+function kDeltaText(k) {
+  const config = getKpiConfig(k.title)
+  const s = k.up ? '↑ ' : '↓ '
+  
+  // 根据配置的compareMode决定前缀
+  let prefix = '环比 '
+  if (config?.compareMode === 'plan') {
+    prefix = '较计划 '
+  }
+  
+  return prefix + s + k.delta
+}
+
+/**
+ * 判断是否显示变化量
+ * 根据配置中的showDelta属性决定
+ * @param {Object} k - KPI对象
+ * @returns {boolean} 是否显示变化量
+ */
+function showDelta(k) {
+  const config = getKpiConfig(k.title)
+  // 如果找到配置，使用配置的showDelta；否则默认显示
+  return config ? config.showDelta : true
+}
 </script>
 
 <style scoped>
