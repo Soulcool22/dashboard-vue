@@ -137,6 +137,45 @@ setDataAdapter(csvAdapter)
 // setDataAdapter(apiAdapter)
 ```
 
+### 接口实现状态
+
+| 接口 | 状态 | 说明 |
+|------|------|------|
+| `getProjects()` | ✅ 完整 | 项目列表，含扩展指标 |
+| `getKpis(projectId)` | ✅ 完整 | KPI卡片数据 |
+| `getTaskData(projectId, kpi)` | ✅ 完整 | 任务完成率/逾期率图表 |
+| `getPersonnelData(projectId)` | ✅ 完整 | 人员列表及项目挂名统计 |
+| `getProjectSeries(projectId)` | ✅ 完整 | 进度兑现指数时间序列 |
+| `getRiskProjects(region)` | ✅ 完整 | 风险项目列表 |
+| `getCompanyInsights()` | ⚠️ 部分 | 公司级统计，trend为空 |
+| `getRegionalData(region)` | ⚠️ 部分 | 区域数据，resourceLoad为空 |
+| `getFundData(projectId)` | ⏳ 预留 | 资金数据，待接入 |
+| `getExpenditureData(projectId)` | ⏳ 预留 | 支出数据，待接入 |
+| `getProjectUpdates()` | ⏳ 预留 | 项目动态/日报，待接入 |
+| `getWorkOrders()` | ⏳ 预留 | 工单列表，待接入 |
+| `getAttributionData(kpi)` | ⏳ 预留 | AI归因分析，待接入 |
+
+### KPI 数据支持
+
+| KPI | 状态 | 说明 |
+|-----|------|------|
+| 任务完成率 | ✅ | 基于计划/实际完成时间 |
+| 逾期任务率 | ✅ | 基于计划完成时间和状态 |
+| 人员健康度 | ✅ | 基于人员项目挂名数 |
+| 资金到账率 | ⏳ | 待资金数据接入 |
+| 项目支出金额 | ⏳ | 待支出数据接入 |
+| 关键里程碑达成率 | ⏳ | 待里程碑数据接入 |
+
+### 扩展指标支持
+
+| 指标 | 状态 | 说明 |
+|------|------|------|
+| 开工准点率 | ✅ | 基于计划/实际开始时间 |
+| 完工准点率 | ✅ | 基于计划/实际完成时间 |
+| 平均工期比 | ✅ | 基于计划/实际工期 |
+| 逾期趋势比 | ✅ | 当前逾期率/上周逾期率 |
+| 进度兑现指数 | ⚠️ | 关键里程碑(35%权重)暂为0 |
+
 ## 🧪 测试
 
 项目包含单元测试和属性测试：
