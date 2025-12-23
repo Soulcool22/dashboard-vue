@@ -3,13 +3,22 @@
     <div class="card-header">
       <h3>进度兑现指数（折线）</h3>
     </div>
-    <div ref="el" class="chart-box"></div>
+    <!-- 空状态显示 -->
+    <EmptyState 
+      v-if="isEmpty"
+      title="暂无数据"
+      description="进度兑现指数数据尚未接入"
+      icon="chart"
+      variant="chart"
+    />
+    <div v-else ref="el" class="chart-box"></div>
   </div>
 </template>
 
 <script setup>
-import { onMounted, onBeforeUnmount, ref, watch } from 'vue'
+import { onMounted, onBeforeUnmount, ref, watch, computed } from 'vue'
 import * as echarts from 'echarts'
+import EmptyState from '../EmptyState.vue'
 
 const props = defineProps({
   projectSeries: { type: Array, default: () => [] }
@@ -19,6 +28,11 @@ const emit = defineEmits(['stats-changed'])
 const el = ref(null)
 let chart = null
 let resizeObserver = null
+
+// 判断是否为空数据
+const isEmpty = computed(() => {
+  return !props.projectSeries || props.projectSeries.length === 0
+})
 
 watch(() => props.projectSeries, () => {
   setTimeout(() => render(), 0)

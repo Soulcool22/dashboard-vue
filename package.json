@@ -6,7 +6,9 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test": "vitest --run",
+    "test:watch": "vitest"
   },
   "dependencies": {
     "@icon-park/vue-next": "^1.4.2",
@@ -16,7 +18,11 @@
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^6.0.1",
-    "vite": "npm:rolldown-vite@7.2.2"
+    "@vue/test-utils": "^2.4.6",
+    "fast-check": "^4.5.2",
+    "jsdom": "^27.3.0",
+    "vite": "npm:rolldown-vite@7.2.2",
+    "vitest": "^4.0.16"
   },
   "overrides": {
     "vite": "npm:rolldown-vite@7.2.2"

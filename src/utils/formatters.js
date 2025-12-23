@@ -48,3 +48,52 @@ export function formatDate(date, format = 'MM-DD') {
   // 默认返回 MM-DD 格式
   return `${mm}-${dd}`
 }
+
+/**
+ * 格式化比率（0-1之间的小数）为百分比，带方向箭头
+ * @param {number|string} value - 要格式化的值（0-1之间的小数）
+ * @returns {string} 格式化后的百分比字符串，带方向箭头
+ */
+export function formatDeltaPercent(value) {
+  const n = Number(value)
+  if (!Number.isFinite(n)) return ''
+  const s = n >= 0 ? '↑' : '↓'
+  return s + Math.round(Math.abs(n) * 100) + '%'
+}
+
+/**
+ * 格式化比率数值（保留两位小数）
+ * @param {number|string} value - 要格式化的值
+ * @returns {string} 格式化后的数值字符串
+ */
+export function formatRatio(value) {
+  const n = Number(value)
+  if (!Number.isFinite(n)) return '0.00'
+  return n.toFixed(2)
+}
+
+/**
+ * 格式化比率变化量（保留两位小数，带方向箭头）
+ * @param {number|string} value - 要格式化的值
+ * @returns {string} 格式化后的变化量字符串
+ */
+export function formatDeltaRatio(value) {
+  const n = Number(value)
+  if (!Number.isFinite(n)) return ''
+  const s = n >= 0 ? '↑' : '↓'
+  return s + Math.abs(n).toFixed(2)
+}
+
+/**
+ * 格式化序列变化量为百分比文本
+ * @param {number[]} series - 数值序列
+ * @returns {string} 格式化后的变化百分比字符串
+ */
+export function formatSeriesDeltaText(series) {
+  if (!Array.isArray(series) || series.length < 2) return ''
+  const prev = Number(series[series.length - 2] || 0)
+  const last = Number(series[series.length - 1] || 0)
+  const pct = prev ? (((last - prev) / prev) * 100).toFixed(2) : '0.00'
+  const s = (last - prev) >= 0 ? '↑' : '↓'
+  return s + Math.abs(Number(pct)) + '%'
+}

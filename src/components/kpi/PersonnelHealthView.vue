@@ -48,7 +48,7 @@
       
       <div class="definition-note">
         <span class="note-icon">i</span>
-        <span class="note-text">挂名项目 > 3 个判定为风险人员</span>
+        <span class="note-text">{{ riskDefinitionText }}</span>
       </div>
     </div>
 
@@ -84,9 +84,9 @@
           <div class="empty-text">暂无数据</div>
           <div class="empty-sub">人员数据尚未接入</div>
         </div>
-        <div v-else class="member-item" v-for="member in displayedMembers" :key="member.id" :class="{ 'is-risk': member.projectCount > 3 }">
+        <div v-else class="member-item" v-for="member in displayedMembers" :key="member.id" :class="{ 'is-risk': isRiskMember(member) }">
           <div class="member-info">
-            <span class="member-avatar" :class="{ 'avatar-risk': member.projectCount > 3 }">{{ member.name.charAt(0) }}</span>
+            <span class="member-avatar" :class="{ 'avatar-risk': isRiskMember(member) }">{{ member.name.charAt(0) }}</span>
             <div class="member-detail">
               <span class="member-name">{{ member.name }}</span>
               <span class="member-role">{{ member.role }}</span>
@@ -94,12 +94,12 @@
           </div>
           <div class="member-load">
             <div class="load-indicator">
-              <span class="load-count" :class="{ 'count-risk': member.projectCount > 3 }">{{ member.projectCount }}</span>
+              <span class="load-count" :class="{ 'count-risk': isRiskMember(member) }">{{ member.projectCount }}</span>
               <span class="load-label">个项目</span>
             </div>
             <div class="load-bar-wrap">
               <div class="load-bar-bg">
-                <div class="load-bar-fill" :class="{ 'fill-safe': member.projectCount <= 3 }" :style="{ width: Math.min(member.projectCount / 6 * 100, 100) + '%' }"></div>
+                <div class="load-bar-fill" :class="{ 'fill-safe': !isRiskMember(member) }" :style="{ width: Math.min(member.projectCount / 6 * 100, 100) + '%' }"></div>
               </div>
             </div>
           </div>
@@ -132,6 +132,7 @@ import { ref, computed, nextTick, watch } from 'vue'
 import { Search as IconSearch, Down as IconDown, Up as IconUp, Peoples as IconPeoples, ChartLine as IconChartLine, Close as IconClose } from '@icon-park/vue-next'
 import { Search } from '@element-plus/icons-vue'
 import * as dataService from '../../services/dataService'
+import { getThreshold } from '../../config'
 
 const props = defineProps({
   projectContext: { type: Object, default: () => ({}) },
@@ -139,6 +140,16 @@ const props = defineProps({
 })
 
 const projectId = computed(() => props.project?.id || props.project?.projectId || props.project?.name || props.projectContext?.id || props.projectContext?.projectId || props.projectContext?.name || null)
+
+// 从配置获取人员风险阈值
+const projectCountLimit = computed(() => getThreshold('personnelRisk', 'projectCountLimit') || 3)
+const healthyScoreThreshold = computed(() => getThreshold('personnelRisk', 'healthyScore') || 80)
+const warningScoreThreshold = computed(() => getThreshold('personnelRisk', 'warningScore') || 60)
+
+// 判断成员是否为风险人员
+function isRiskMember(member) {
+  return member.projectCount > projectCountLimit.value
+}
 
 // --- State ---
 const showSearch = ref(false)
@@ -179,7 +190,7 @@ watch(() => projectId.value, () => {
 
 // --- Computed ---
 const totalMembers = computed(() => allMembers.value.length)
-const riskMembers = computed(() => allMembers.value.filter(m => m.projectCount > 3).length)
+const riskMembers = computed(() => allMembers.value.filter(m => isRiskMember(m)).length)
 const normalMembers = computed(() => totalMembers.value - riskMembers.value)
 const avgProjects = computed(() => {
   if (!totalMembers.value) return '0.0'
@@ -194,10 +205,13 @@ const healthScore = computed(() => {
 
 const healthStatus = computed(() => {
   const score = healthScore.value
-  if (score >= 80) return { text: '良好', class: 'good' }
-  if (score >= 60) return { text: '预警', class: 'warn' }
+  if (score >= healthyScoreThreshold.value) return { text: '良好', class: 'good' }
+  if (score >= warningScoreThreshold.value) return { text: '预警', class: 'warn' }
   return { text: '危险', class: 'danger' }
 })
+
+// 风险定义说明文本
+const riskDefinitionText = computed(() => `挂名项目 > ${projectCountLimit.value} 个判定为风险人员`)
 
 // 按风险度排序（项目数从高到低）
 const sortedMembers = computed(() => {

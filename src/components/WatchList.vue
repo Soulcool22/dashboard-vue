@@ -35,6 +35,15 @@
       </div>
     </div>
     <div class="wl-list" v-if="!isSearchVisible">
+      <!-- 空状态显示 -->
+      <EmptyState 
+        v-if="!projects || projects.length === 0"
+        title="暂无关注项目"
+        description="点击搜索添加关注项目"
+        icon="folder"
+        variant="list"
+        compact
+      />
       <div 
         v-for="(p, idx) in projects" 
         :key="'wl-'+idx"
@@ -113,7 +122,19 @@
 import { ref, watch, nextTick } from 'vue'
 import SparkLine from './SparkLine.vue'
 import InfoIcon from './InfoIcon.vue'
+import EmptyState from './EmptyState.vue'
 import { Plus, CheckSmall, Search, MenuUnfold, MenuFold } from '@icon-park/vue-next'
+import {
+  getSeriesLastValue,
+  getSeriesDeltaSign,
+  getSeriesAverage,
+  getSeriesMedian,
+  formatPercent,
+  formatDeltaPercent,
+  formatRatio,
+  formatDeltaRatio,
+  formatSeriesDeltaText
+} from '../utils'
 
 const props = defineProps({
   projects: { type: Array, default: () => [] },
@@ -155,54 +176,26 @@ watch(isSearchVisible, (newValue) => {
   })
 })
 
-function lastValue(p){ const a = Array.isArray(p?.series) ? p.series : []; if (!a.length) return 0; return Number(a[a.length - 1] || 0) }
-function deltaSign(p){ const a = Array.isArray(p?.series) ? p.series : []; if (a.length < 2) return 0; return Number(a[a.length - 1] || 0) - Number(a[a.length - 2] || 0) }
-function deltaText(p){ const a = Array.isArray(p?.series) ? p.series : []; if (a.length < 2) return ''; const prev = Number(a[a.length - 2] || 0); const last = Number(a[a.length - 1] || 0); const pct = prev ? (((last - prev) / prev) * 100).toFixed(2) : '0.00'; const s = (last - prev) >= 0 ? '↑ ' : '↓ '; return s.replace(' ', '') + Math.abs(pct) + '%' }
-function sampleSign(p){ return deltaSign(p) }
-function sampleText(p){ return deltaText(p) }
-function avgValue(p){ const a=p.series||[]; if(!a.length) return 0; return a.reduce((s,v)=>s+v,0)/a.length }
-function maxValue(p){ const a=p.series||[]; if(!a.length) return 0; return Math.max(...a) }
-function minValue(p){ const a=p.series||[]; if(!a.length) return 0; return Math.min(...a) }
-function rangeValue(p){ const a=p.series||[]; if(!a.length) return 0; return maxValue(p)-minValue(p) }
-function medianValue(p){ const a=(p.series||[]).slice().sort((x,y)=>x-y); if(!a.length) return 0; const m=Math.floor(a.length/2); return a.length%2? a[m] : (a[m-1]+a[m])/2 }
+// 使用工具函数替代重复的辅助函数
+function lastValue(p) { return getSeriesLastValue(p?.series) }
+function deltaSign(p) { return getSeriesDeltaSign(p?.series) }
+function deltaText(p) { return formatSeriesDeltaText(p?.series) }
+function sampleSign(p) { return deltaSign(p) }
+function sampleText(p) { return deltaText(p) }
+function avgValue(p) { return getSeriesAverage(p?.series) }
+function medianValue(p) { return getSeriesMedian(p?.series) }
 
-function fmtRate01(v) {
-  const n = Number(v)
-  if (!Number.isFinite(n)) return '0%'
-  return Math.round(n * 100) + '%'
-}
-
-function fmtDelta01(v) {
-  const n = Number(v)
-  if (!Number.isFinite(n)) return ''
-  const s = n >= 0 ? '↑' : '↓'
-  return s + Math.round(Math.abs(n) * 100) + '%'
-}
-
-function fmtRatio(v) {
-  const n = Number(v)
-  if (!Number.isFinite(n)) return '0.00'
-  return n.toFixed(2)
-}
-
-function fmtDeltaRatio(v) {
-  const n = Number(v)
-  if (!Number.isFinite(n)) return ''
-  const s = n >= 0 ? '↑' : '↓'
-  return s + Math.abs(n).toFixed(2)
-}
-
-function startOnTimeValue(p) { return fmtRate01(p?.expandedMetrics?.startOnTimeRate) }
+function startOnTimeValue(p) { return formatPercent(p?.expandedMetrics?.startOnTimeRate) }
 function startOnTimeDeltaSign(p) { return Number(p?.expandedMetrics?.startOnTimeRateDelta || 0) }
-function startOnTimeDeltaText(p) { return fmtDelta01(p?.expandedMetrics?.startOnTimeRateDelta) }
+function startOnTimeDeltaText(p) { return formatDeltaPercent(p?.expandedMetrics?.startOnTimeRateDelta) }
 
-function completeOnTimeValue(p) { return fmtRate01(p?.expandedMetrics?.completeOnTimeRate) }
+function completeOnTimeValue(p) { return formatPercent(p?.expandedMetrics?.completeOnTimeRate) }
 function completeOnTimeDeltaSign(p) { return Number(p?.expandedMetrics?.completeOnTimeRateDelta || 0) }
-function completeOnTimeDeltaText(p) { return fmtDelta01(p?.expandedMetrics?.completeOnTimeRateDelta) }
+function completeOnTimeDeltaText(p) { return formatDeltaPercent(p?.expandedMetrics?.completeOnTimeRateDelta) }
 
-function avgDurationRatioValue(p) { return fmtRatio(p?.expandedMetrics?.avgDurationRatio) }
+function avgDurationRatioValue(p) { return formatRatio(p?.expandedMetrics?.avgDurationRatio) }
 function avgDurationRatioDeltaSign(p) { return Number(p?.expandedMetrics?.avgDurationRatioDelta || 0) }
-function avgDurationRatioDeltaText(p) { return fmtDeltaRatio(p?.expandedMetrics?.avgDurationRatioDelta) }
+function avgDurationRatioDeltaText(p) { return formatDeltaRatio(p?.expandedMetrics?.avgDurationRatioDelta) }
 </script>
 
 <style scoped>
