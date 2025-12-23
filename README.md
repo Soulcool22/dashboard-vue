@@ -1,109 +1,181 @@
 # Dashboard-Vue
 
-这是一个基于 Vue 3 + Element Plus 的单页数据看板项目，用于可视化展示工程项目的关键绩效指标（KPI），包括资金到位、任务完成情况、人员健康、项目支出等维度。
+基于 Vue 3 + Element Plus 的工程项目数据看板，用于可视化展示关键绩效指标（KPI），包括任务完成率、逾期任务、人员健康度等维度。
 
 ## 🛠 技术栈
 
-- **核心框架**: [Vue 3](https://vuejs.org/) (使用 `<script setup>` 语法)
-- **构建工具**: [Vite](https://vitejs.dev/) (rolldown-vite)
-- **UI 组件库**: [Element Plus](https://element-plus.org/)
-- **图表库**: [Apache ECharts](https://echarts.apache.org/)
-- **图标库**: [IconPark](https://iconpark.oceanengine.com/)
-- **包管理**: npm
+- **核心框架**: Vue 3 (Composition API + `<script setup>`)
+- **构建工具**: Vite
+- **UI 组件库**: Element Plus
+- **图表库**: Apache ECharts
+- **图标库**: IconPark
+- **测试框架**: Vitest
 
 ## 📂 项目结构
 
 ```
 dashboard-vue/
-├── project_plan_analysis/ # 项目计划与数据分析脚本 (Python)
-├── public/                # 静态资源
+├── .kiro/specs/           # 功能规格文档
+├── conductor/             # 项目规范与指南
+├── test_data/             # 本地测试数据 (CSV)
+│   ├── template_test.csv       # 任务数据
+│   ├── template_test_people.csv # 人员数据
+│   └── template_test_fund.csv   # 资金数据（预留）
+├── tests/                 # 测试文件
+│   ├── components/             # 组件测试
+│   ├── config/                 # 配置测试
+│   └── services/               # 服务测试
 ├── src/
-│   ├── api/               # API 接口定义 (如接入后端)
-│   ├── assets/            # 静态资源 (CSS, 图片)
-│   │   └── dashboard.css  # 全局样式变量与定义
+│   ├── config/            # 配置管理
+│   │   └── index.js       # 集中配置（区域、KPI、阈值）
+│   ├── services/          # 数据服务层
+│   │   ├── dataService.js      # 数据服务接口（适配器模式）
+│   │   ├── dataTypes.js        # 数据类型定义
+│   │   ├── errorHandler.js     # 错误处理
+│   │   └── adapters/
+│   │       └── csvAdapter.js   # CSV数据适配器
+│   ├── utils/             # 工具函数
+│   │   ├── formatters.js       # 格式化函数
+│   │   ├── calculators.js      # 计算函数
+│   │   ├── dateHelpers.js      # 日期辅助函数
+│   │   └── index.js            # 统一导出
 │   ├── components/        # Vue 组件
-│   │   ├── kpi/           # 各类 KPI 指标卡片组件
-│   │   │   ├── FundArrivalView.vue       # 资金到账
-│   │   │   ├── OverdueTaskView.vue       # 逾期任务
-│   │   │   ├── TaskCompletionView.vue    # 任务完成率
-│   │   │   └── ...
-│   │   ├── CompanyDashboard.vue   # 公司级看板
-│   │   ├── RegionalDashboard.vue  # 区域级看板
-│   │   ├── ResearchChat.vue       # AI 助手对话界面
-│   │   └── ...
-│   ├── services/          # 业务逻辑服务
-│   │   └── dataService.js # CSV 数据解析与指标计算核心逻辑
-│   ├── App.vue            # 根组件
-│   └── main.js            # 入口文件
-├── test_data/             # 本地测试数据源 (CSV/Excel)
-├── GEMINI.md              # 项目开发规范与文档
-├── package.json           # 项目依赖配置
-└── vite.config.js         # Vite 配置
+│   │   ├── kpi/                # KPI 详情视图组件
+│   │   │   ├── BaseChartMixin.js
+│   │   │   ├── FundArrivalView.vue
+│   │   │   ├── OverdueTaskView.vue
+│   │   │   ├── PersonnelHealthView.vue
+│   │   │   ├── ProjectExpenditureView.vue
+│   │   │   ├── ProjectOverviewView.vue
+│   │   │   └── TaskCompletionView.vue
+│   │   ├── CompanyDashboard.vue
+│   │   ├── RegionalDashboard.vue
+│   │   ├── KpiGrid.vue
+│   │   ├── KpiPanel.vue
+│   │   ├── WatchList.vue
+│   │   ├── RegularList.vue
+│   │   ├── SparkLine.vue
+│   │   └── EmptyState.vue
+│   ├── assets/
+│   │   └── dashboard.css  # 全局样式变量
+│   ├── App.vue
+│   └── main.js
+├── package.json
+├── vite.config.js
+└── vitest.config.js
 ```
 
 ## ✨ 主要功能
 
-1. **多维度 KPI 监控**:
-   - **任务完成率**: 实时追踪项目任务进度。
-   - **资金管理**: 监控资金到位与项目支出情况。
-   - **风险预警**: 自动识别并展示逾期任务。
-   - **人员健康**: 关注项目人员状态。
-2. **层级化看板**:
-   - 支持 **区域级 (Regional)** 与 **公司级 (Company)** 视图切换。
-3. **数据驱动**:
-   - 前端直接解析 CSV/Excel 数据源（位于 `test_data/`），支持快速原型验证与离线演示。
-   - 内置数据清洗与计算逻辑 (`dataService.js`)。
-4. **交互式图表**:
-   - 集成 ECharts 折线图、柱状图。
-   - 自定义 SparkLine 迷你图用于列表展示。
+### KPI 监控
+- **任务完成率**: 计划完成率 vs 实际完成率对比
+- **逾期任务率**: 逾期任务趋势监控
+- **人员健康度**: 基于项目挂名数量的风险评估
+- **开工/完工准点率**: 任务按时开始和完成的比例
+- **平均工期比**: 实际工期与计划工期的比值
+- **进度兑现指数**: 综合多维度指标的项目健康评分
+
+### 视图层级
+- **项目级**: 单个项目的详细 KPI 和任务数据
+- **区域级**: 按区域聚合的项目概览
+- **公司级**: 全局项目健康度统计
+
+### 架构特性
+- **配置驱动**: 区域、KPI、阈值等通过配置管理
+- **适配器模式**: 数据服务层支持多数据源切换
+- **空状态处理**: 数据缺失时显示友好的空状态组件
+- **类型安全**: 完整的数据类型定义和验证函数
 
 ## 🚀 快速开始
 
-### 1. 环境准备
+### 环境准备
+- Node.js v16+
+- npm
 
-确保您的环境已安装 Node.js (推荐 v16+)。
-
-### 2. 安装依赖
-
+### 安装依赖
 ```bash
 npm install
 ```
 
-### 3. 启动开发服务器
-
+### 启动开发服务器
 ```bash
 npm run dev
 ```
 
-启动后访问终端输出的本地地址（通常为 `http://localhost:5173`）。
+### 运行测试
+```bash
+npm test
+```
 
-### 4. 构建生产版本
-
+### 构建生产版本
 ```bash
 npm run build
 ```
 
-构建产物将输出到 `dist/` 目录。
+## 📊 数据源
 
-### 5. 本地预览构建产物
+当前使用本地 CSV 文件作为数据源（`test_data/` 目录）：
 
-```bash
-npm run preview
+| 文件 | 用途 |
+|------|------|
+| `template_test.csv` | 任务数据（工作项、计划/实际时间、状态等） |
+| `template_test_people.csv` | 人员数据（干系人、项目、区域映射） |
+| `template_test_fund.csv` | 资金数据（预留，暂未启用） |
+
+### 数据适配器
+
+系统采用适配器模式，支持数据源切换：
+
+```javascript
+import { setDataAdapter } from './services/dataService'
+import { csvAdapter } from './services/adapters/csvAdapter'
+
+// 设置 CSV 适配器
+setDataAdapter(csvAdapter)
+
+// 后续可切换为 API 适配器
+// setDataAdapter(apiAdapter)
 ```
 
-## 📊 数据源说明
+## 🧪 测试
 
-目前项目使用本地 CSV 文件作为数据源，位于 `test_data/` 目录。
-主要数据文件包括：
+项目包含单元测试和属性测试：
 
-- `template_test.csv`: 包含任务名称、开始时间、结束时间、完成状态等核心字段。
+```bash
+# 运行所有测试
+npm test
 
-若需更新数据，请直接替换该目录下的相应文件，或修改 `src/services/dataService.js` 中的引用路径。
+# 运行测试并生成覆盖率报告
+npm run test:coverage
+```
 
 ## 📝 开发规范
 
-详细的开发规范、命名约定与 UI 设计指南请参考项目根目录下的 [GEMINI.md](./GEMINI.md) 文件。
+- **样式**: 使用 CSS 变量（定义在 `src/assets/dashboard.css`）
+- **组件**: Composition API + `<script setup>` 风格
+- **配置**: 集中管理在 `src/config/index.js`
+- **数据服务**: 通过适配器模式解耦数据源
 
-- **样式**: 统一使用 CSS 变量（定义在 `src/assets/dashboard.css`）。
-- **图标**: 使用 IconPark，按需引入或全局注册。
-- **组件**: 采用 Composition API `<script setup>` 风格。
+详细规范参考 `conductor/` 目录下的文档。
+
+
+## 🔧 当前待改进项
+
+1. **指标展示一致性**
+   - 左侧项目列表抽屉展开后的指标与右侧进度兑现指数的计算逻辑存在差异，需统一口径
+
+2. **指标计算逻辑校验**
+   - 部分指标的计算逻辑尚未与《指标体系册》严格对齐，需逐项核对
+   - 数据刷新周期（日/周/月）及各指标的更新频次待确认
+   - 需结合更多实际数据观察效果，持续调优指标呈现方式
+
+3. **数据源扩展**
+   - 当前仅接入任务和人员数据，资金数据接口已预留但未启用
+   - 需获取项目日报、周报等更丰富的数据源，完善看板内容
+
+## 🚀 未来方向
+
+- **AI 辅助分析**：基于更完整的项目数据，引入 AI 能力进行风险预警、趋势预测和智能归因分析
+- **数据源对接**：完成与后端 API 的对接，实现数据实时更新
+- **指标体系完善**：补充关键里程碑、资金到账率等核心指标的完整计算逻辑
+- **可视化增强**：优化图表交互体验，支持更多维度的数据下钻分析

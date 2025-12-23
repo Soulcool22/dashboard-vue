@@ -22,9 +22,9 @@ import {
   getExpenditureData,
   getPersonnelData,
   getTaskData
-} from './dataService'
-import { emptyStructures } from './dataTypes'
-import { dashboardConfig } from '../config'
+} from '../../src/services/dataService'
+import { emptyStructures } from '../../src/services/dataTypes'
+import { dashboardConfig } from '../../src/config'
 
 describe('dataService', () => {
   beforeEach(() => {

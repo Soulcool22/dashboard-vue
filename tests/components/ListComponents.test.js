@@ -14,7 +14,7 @@ import {
   formatRatio,
   formatDeltaRatio,
   formatSeriesDeltaText
-} from '../../utils'
+} from '../../src/utils'
 
 describe('List Components Utility Integration', () => {
   describe('Series calculation functions', () => {

@@ -80,8 +80,6 @@ import { Up, Down } from '@icon-park/vue-next'
 import {
   getSeriesLastValue,
   getSeriesDeltaSign,
-  getSeriesAverage,
-  getSeriesMedian,
   formatPercent,
   formatDeltaPercent,
   formatRatio,
@@ -107,10 +105,6 @@ function hasSeriesData(p) {
 function lastValue(p) { return hasSeriesData(p) ? getSeriesLastValue(p?.series) : null }
 function deltaSign(p) { return hasSeriesData(p) ? getSeriesDeltaSign(p?.series) : 0 }
 function deltaText(p) { return hasSeriesData(p) ? formatSeriesDeltaText(p?.series) : '' }
-function sampleSign(p) { return deltaSign(p) }
-function sampleText(p) { return deltaText(p) }
-function avgValue(p) { return hasSeriesData(p) ? getSeriesAverage(p?.series) : null }
-function medianValue(p) { return hasSeriesData(p) ? getSeriesMedian(p?.series) : null }
 
 // 格式化显示值，空数据显示 "--"
 function formatIndexValue(v) { return v === null ? '--' : v.toFixed(2) }

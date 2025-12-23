@@ -7,7 +7,7 @@
  */
 import { describe, it, expect } from 'vitest'
 import fc from 'fast-check'
-import { dashboardConfig, getKpiConfig, getRegions, getThreshold } from './index.js'
+import { dashboardConfig, getKpiConfig, getRegions, getThreshold } from '../../src/config/index.js'
 
 describe('Config Manager Property Tests', () => {
   /**

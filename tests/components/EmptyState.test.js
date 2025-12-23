@@ -5,7 +5,7 @@
  */
 import { describe, it, expect } from 'vitest'
 import { mount } from '@vue/test-utils'
-import EmptyState from '../EmptyState.vue'
+import EmptyState from '../../src/components/EmptyState.vue'
 
 describe('EmptyState Component', () => {
   describe('Basic Rendering (Requirement 7.1, 7.3)', () => {

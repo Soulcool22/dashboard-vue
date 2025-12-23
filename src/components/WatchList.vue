@@ -7,10 +7,10 @@
         *计算规则*：指数 = Σ(管理层指标标准化评分 × 权重占比)
         其中各管理层指标以及权重占比：
         开工准点率：10%
-        完工准点率：20%
+        完工准点率：15%
         关键里程碑达成率：35%
         平均任务工期比：15%
-        逾期恢复时长：5%
+        逾期恢复时长：10%
         逾期积压率：7.5%
         逾期解决率：7.5%" /></div>
       </div>
@@ -127,8 +127,6 @@ import { Plus, CheckSmall, Search, MenuUnfold, MenuFold } from '@icon-park/vue-n
 import {
   getSeriesLastValue,
   getSeriesDeltaSign,
-  getSeriesAverage,
-  getSeriesMedian,
   formatPercent,
   formatDeltaPercent,
   formatRatio,
@@ -184,10 +182,6 @@ function hasSeriesData(p) {
 function lastValue(p) { return hasSeriesData(p) ? getSeriesLastValue(p?.series) : null }
 function deltaSign(p) { return hasSeriesData(p) ? getSeriesDeltaSign(p?.series) : 0 }
 function deltaText(p) { return hasSeriesData(p) ? formatSeriesDeltaText(p?.series) : '' }
-function sampleSign(p) { return deltaSign(p) }
-function sampleText(p) { return deltaText(p) }
-function avgValue(p) { return hasSeriesData(p) ? getSeriesAverage(p?.series) : null }
-function medianValue(p) { return hasSeriesData(p) ? getSeriesMedian(p?.series) : null }
 
 // 格式化显示值，空数据显示 "--"
 function formatIndexValue(v) { return v === null ? '--' : v.toFixed(2) }

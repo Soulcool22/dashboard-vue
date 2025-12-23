@@ -5,7 +5,7 @@
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { mount, shallowMount } from '@vue/test-utils'
-import { getKpiConfig, dashboardConfig } from '../../config'
+import { getKpiConfig, dashboardConfig } from '../../src/config'
 
 // Mock element-plus components
 vi.mock('element-plus', () => ({
@@ -21,7 +21,7 @@ describe('KpiGrid Component (Requirement 3.1)', () => {
 
   beforeEach(async () => {
     // Dynamic import to ensure mocks are applied
-    const module = await import('../KpiGrid.vue')
+    const module = await import('../../src/components/KpiGrid.vue')
     KpiGrid = module.default
   })
 
@@ -109,7 +109,7 @@ describe('KpiPanel Component (Requirement 3.2)', () => {
 
   beforeEach(async () => {
     // Dynamic import
-    const module = await import('../KpiPanel.vue')
+    const module = await import('../../src/components/KpiPanel.vue')
     KpiPanel = module.default
   })
 

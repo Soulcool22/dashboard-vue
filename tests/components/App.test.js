@@ -5,10 +5,10 @@
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { mount, shallowMount } from '@vue/test-utils'
-import { getRegions, dashboardConfig } from '../../config'
+import { getRegions, dashboardConfig } from '../../src/config'
 
 // Mock the dataService to avoid actual data loading
-vi.mock('../../services/dataService', () => ({
+vi.mock('../../src/services/dataService', () => ({
   getProjects: vi.fn(() => Promise.resolve([])),
   getKpis: vi.fn(() => Promise.resolve([])),
   getProjectSeries: vi.fn(() => Promise.resolve([]))

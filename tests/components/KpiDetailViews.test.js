@@ -4,8 +4,8 @@
  * Requirements: 3.3, 5.2
  */
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { getThreshold, dashboardConfig } from '../../config'
-import { chartStyles } from '../kpi/BaseChartMixin'
+import { getThreshold, dashboardConfig } from '../../src/config'
+import { chartStyles } from '../../src/components/kpi/BaseChartMixin'
 
 // Mock echarts with proper constructor
 vi.mock('echarts', () => {
@@ -90,7 +90,7 @@ describe('KPI Detail Views', () => {
     
     beforeEach(async () => {
       // Dynamic import to ensure mock is applied
-      const module = await import('../kpi/BaseChartMixin')
+      const module = await import('../../src/components/kpi/BaseChartMixin')
       createLineChartOption = module.createLineChartOption
     })
 

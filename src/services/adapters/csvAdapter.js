@@ -626,111 +626,272 @@ function buildProgressFulfillmentIndex(tasks) {
   const availableMetrics = []
   if (hasStartData) availableMetrics.push('开工准点率')
   if (hasCompleteData) availableMetrics.push('完工准点率')
+  availableMetrics.push('关键里程碑达成率') // 暂无数据，评分为0
   if (hasDurationData) availableMetrics.push('平均工期比')
-  availableMetrics.push('逾期积压率', '逾期解决率')
+  availableMetrics.push('逾期恢复时长', '逾期积压率', '逾期解决率')
   
   // 如果没有足够的指标数据，返回空
   if (!hasStartData && !hasCompleteData && !hasDurationData) {
     return { xAxis: [], series: [], hasData: false, availableMetrics: [] }
   }
 
+  // 跟踪前一天的各指标分数，用于本期无任务时继承
+  let prevScores = {
+    startOnTimeScore: 1,
+    completeOnTimeScore: 1,
+    durationScore: 1,
+    overdueRecoveryScore: 1
+  }
+  
   // 计算各天的指数
-  const series = days.map(d => {
-    // 1. 开工准点率 (10%) - 实际开工日期 <= 计划开工日期
-    let startOnTimeRate = 0
+  const series = days.map((d, dayIndex) => {
+    const prevDay = dayIndex > 0 ? days[dayIndex - 1] : null
+    
+    // 1. 开工准点率 (10%)
+    // 公式：开工准点率 = 准点开工任务数 / 本期应开工任务数 × 100%
+    // 评分：S = 100 × 开工准点率
+    let startOnTimeScore = 0
     if (hasStartData) {
-      const startScope = valid.filter(t => t.planStart && t.planStart <= d)
+      // 本期应开工任务数：计划开工日期在本期内的任务
+      const startScope = valid.filter(t => {
+        if (!t.planStart) return false
+        if (prevDay) {
+          return t.planStart > prevDay && t.planStart <= d
+        }
+        return t.planStart <= d
+      })
       if (startScope.length > 0) {
+        // 准点开工：实际开工日期 <= 计划开工日期
         const onTimeCount = startScope.filter(t => t.actualStart && t.actualStart <= t.planStart).length
-        startOnTimeRate = onTimeCount / startScope.length
+        startOnTimeScore = onTimeCount / startScope.length // 已经是 0-1 范围
+      } else {
+        // 本期无应开工任务，使用前一天的值
+        startOnTimeScore = prevScores.startOnTimeScore
       }
     }
     
-    // 2. 完工准点率 (20%) - 实际完成日期 <= 计划完成日期
-    let completeOnTimeRate = 0
+    // 2. 完工准点率 (15%)
+    // 公式：完工准点率 = 准点完工任务数 / 本期应完成任务数 × 100%
+    // 评分：S = 100 × 完工准点率
+    let completeOnTimeScore = 0
     if (hasCompleteData) {
-      const completeScope = valid.filter(t => t.planEnd && t.planEnd <= d)
+      // 本期应完成任务数：计划完成日期在本期内的任务
+      const completeScope = valid.filter(t => {
+        if (!t.planEnd) return false
+        if (prevDay) {
+          return t.planEnd > prevDay && t.planEnd <= d
+        }
+        return t.planEnd <= d
+      })
       if (completeScope.length > 0) {
+        // 准点完工：实际完成日期 <= 计划完成日期
         const onTimeCount = completeScope.filter(t => t.actualEnd && t.actualEnd <= t.planEnd).length
-        completeOnTimeRate = onTimeCount / completeScope.length
+        completeOnTimeScore = onTimeCount / completeScope.length // 已经是 0-1 范围
+      } else {
+        // 本期无应完成任务，使用前一天的值
+        completeOnTimeScore = prevScores.completeOnTimeScore
       }
     }
     
-    // 3. 关键里程碑达成率 (35%) - 当前数据不支持，暂不计入
-    // const milestoneRate = 0
+    // 3. 关键里程碑达成率 (35%)
+    // 公式：达成率 = 准点完成关键里程碑数 / 本期应完成关键里程碑数 × 100%
+    // 评分：S = 100 × 关键里程碑达成率
+    // 当前数据不支持，评分为0
+    const milestoneScore = 0
     
-    // 4. 平均任务工期比 (15%) - 实际工期/计划工期，越小越好，转换为评分
+    // 4. 平均任务工期比 (15%)
+    // 公式：平均任务工期比 = avg(实际工期/计划工期)（对本期已完成任务）× 100%
+    // 评分：S = 100 × min(1, 1 / 工期比)
     let durationScore = 0
     if (hasDurationData) {
+      // 本期已完成任务：实际完成日期在本期内的任务
       const durationScope = valid.filter(t => {
         if (!Number.isFinite(t.planDuration) || t.planDuration <= 0) return false
         if (!Number.isFinite(t.actualDuration) || t.actualDuration <= 0) return false
-        if (!t.actualEnd || t.actualEnd > d) return false
+        if (!t.actualEnd) return false
+        // 本期完成
+        if (t.actualEnd > d) return false
+        if (prevDay && t.actualEnd <= prevDay) return false
         return true
       })
       if (durationScope.length > 0) {
         const avgRatio = durationScope.reduce((s, t) => s + (t.actualDuration / t.planDuration), 0) / durationScope.length
-        // 工期比 <= 1 得满分，> 2 得0分，线性插值
-        durationScore = Math.max(0, Math.min(1, 2 - avgRatio))
+        // 评分：S = 100 × min(1, 1 / 工期比)
+        // 工期比 <= 1 得满分，工期比越大得分越低
+        durationScore = Math.min(1, 1 / avgRatio)
+      } else {
+        // 本期无已完成任务，使用前一天的值
+        durationScore = prevScores.durationScore
       }
     }
     
-    // 5. 逾期恢复时长 (5%) - 当前数据不支持，暂不计入
-    // const recoveryScore = 0
-    
-    // 6. 逾期积压率 (7.5%) - 当前逾期未完成任务占比，越低越好
-    const overdueScope = valid.filter(t => t.planEnd && t.planEnd < d)
-    let overdueBacklogRate = 0
-    if (overdueScope.length > 0) {
-      const stillOverdue = overdueScope.filter(t => !t.actualEnd || t.actualEnd > d).length
-      overdueBacklogRate = 1 - (stillOverdue / overdueScope.length) // 转换为正向指标
-    } else {
-      overdueBacklogRate = 1 // 没有应该完成的任务，满分
+    // 5. 逾期恢复时长 (10%)
+    // 公式：逾期恢复时长 = avg(实际完成日期 − 首次逾期日期)（对本期完成且曾逾期任务）
+    // 首次逾期日期 = 计划完成日期（因为从计划完成日期开始就算逾期）
+    // 评分：S = 100 × min(1, [阈值] / 逾期恢复时长)（阈值设为3天）
+    const RECOVERY_THRESHOLD = 3 // 阈值：3天
+    let overdueRecoveryScore = 0
+    {
+      // 找出本期完成且曾逾期的任务
+      const recoveredTasks = valid.filter(t => {
+        // 必须有实际完成日期
+        if (!t.actualEnd) return false
+        // 本期完成（在当前日期之前完成，且在上周期之后完成）
+        if (t.actualEnd > d) return false
+        if (prevDay && t.actualEnd <= prevDay) return false
+        // 曾逾期：实际完成日期 > 计划完成日期
+        if (!t.planEnd) return false
+        return t.actualEnd > t.planEnd
+      })
+      
+      if (recoveredTasks.length > 0) {
+        // 计算平均恢复时长（天数）
+        const totalRecoveryDays = recoveredTasks.reduce((sum, t) => {
+          // 恢复时长 = 实际完成日期 - 计划完成日期（首次逾期日期）
+          const recoveryMs = t.actualEnd.getTime() - t.planEnd.getTime()
+          const recoveryDays = recoveryMs / (1000 * 60 * 60 * 24)
+          return sum + recoveryDays
+        }, 0)
+        const avgRecoveryDays = totalRecoveryDays / recoveredTasks.length
+        
+        // 评分：S = 100 × min(1, 阈值 / 逾期恢复时长)
+        // 恢复时长越短，得分越高
+        if (avgRecoveryDays > 0) {
+          overdueRecoveryScore = Math.min(1, RECOVERY_THRESHOLD / avgRecoveryDays)
+        } else {
+          overdueRecoveryScore = 1 // 恢复时长为0，满分
+        }
+      } else {
+        // 本期无恢复的逾期任务，使用前一天的值
+        overdueRecoveryScore = prevScores.overdueRecoveryScore
+      }
     }
     
-    // 7. 逾期解决率 (7.5%) - 逾期后完成的任务占逾期任务的比例
-    let overdueResolveRate = 0
-    const overdueTasksTotal = valid.filter(t => {
-      if (!t.planEnd || t.planEnd >= d) return false
-      // 曾经逾期的任务（计划完成日期已过）
-      return true
-    })
-    if (overdueTasksTotal.length > 0) {
-      const resolved = overdueTasksTotal.filter(t => t.actualEnd && t.actualEnd <= d).length
-      overdueResolveRate = resolved / overdueTasksTotal.length
-    } else {
-      overdueResolveRate = 1 // 没有逾期任务，满分
+    // 6. 逾期积压率 (7.5%)
+    // 公式：逾期积压率 = (本周期末逾期数 - 上周期末逾期数) / 本期应完成任务数 × 100%
+    // 评分规则：
+    // - 若 积压率 > 0，得0分
+    // - 若 积压率 ≤ 0：
+    //   ① (本周期逾期任务数/累积应完工任务数) > 10%：S = MIN(75, 40 + |积压率| × 70)
+    //   ② (本周期逾期任务数/累积应完工任务数) ≤ 10%：S = 80 + (1 - (本周期逾期任务数/累积应完工任务数) / 10%) × 15
+    let overdueBacklogScore = 0
+    {
+      // 本周期末逾期数：计划完成日期已过但未完成的任务数
+      const currentOverdueCount = valid.filter(t => {
+        if (!t.planEnd || t.planEnd >= d) return false
+        // 未完成或逾期完成
+        if (!t.actualEnd) return true
+        return t.actualEnd > t.planEnd
+      }).length
+      
+      // 上周期末逾期数（前一天）
+      const prevDay = dayIndex > 0 ? days[dayIndex - 1] : null
+      let prevOverdueCount = 0
+      if (prevDay) {
+        prevOverdueCount = valid.filter(t => {
+          if (!t.planEnd || t.planEnd >= prevDay) return false
+          if (!t.actualEnd) return true
+          return t.actualEnd > t.planEnd
+        }).length
+      }
+      
+      // 本期应完成任务数：本周期内计划完成的任务数
+      const currentPeriodTasks = valid.filter(t => {
+        if (!t.planEnd) return false
+        if (prevDay) {
+          return t.planEnd > prevDay && t.planEnd <= d
+        }
+        return t.planEnd <= d
+      }).length
+      
+      // 累积应完工任务数
+      const cumulativeShouldComplete = valid.filter(t => t.planEnd && t.planEnd <= d).length
+      
+      if (currentPeriodTasks > 0) {
+        const backlogRate = (currentOverdueCount - prevOverdueCount) / currentPeriodTasks
+        
+        if (backlogRate > 0) {
+          overdueBacklogScore = 0
+        } else {
+          const overdueRatio = cumulativeShouldComplete > 0 
+            ? currentOverdueCount / cumulativeShouldComplete 
+            : 0
+          
+          if (overdueRatio > 0.1) {
+            // ① 逾期占比 > 10%
+            overdueBacklogScore = Math.min(75, 40 + Math.abs(backlogRate) * 70)
+          } else {
+            // ② 逾期占比 ≤ 10%
+            overdueBacklogScore = 80 + (1 - overdueRatio / 0.1) * 15
+          }
+        }
+      } else {
+        // 本期无应完成任务，根据累积逾期情况评分
+        const overdueRatio = cumulativeShouldComplete > 0 
+          ? currentOverdueCount / cumulativeShouldComplete 
+          : 0
+        if (overdueRatio === 0) {
+          overdueBacklogScore = 95 // 无逾期，高分
+        } else if (overdueRatio <= 0.1) {
+          overdueBacklogScore = 80 + (1 - overdueRatio / 0.1) * 15
+        } else {
+          overdueBacklogScore = 40
+        }
+      }
+      
+      // 归一化到 0-1 范围
+      overdueBacklogScore = overdueBacklogScore / 100
     }
     
-    // 计算加权指数（调整权重，因为部分指标不可用）
-    // 原始权重：开工10% + 完工20% + 里程碑35% + 工期15% + 恢复5% + 积压7.5% + 解决7.5% = 100%
-    // 可用权重：开工10% + 完工20% + 工期15% + 积压7.5% + 解决7.5% = 60%
-    // 归一化后：开工16.7% + 完工33.3% + 工期25% + 积压12.5% + 解决12.5% = 100%
-    
-    const weights = {
-      startOnTime: hasStartData ? 0.167 : 0,
-      completeOnTime: hasCompleteData ? 0.333 : 0,
-      duration: hasDurationData ? 0.25 : 0,
-      overdueBacklog: 0.125,
-      overdueResolve: 0.125
+    // 7. 逾期解决率 (7.5%)
+    // 公式：逾期解决率 = 本期解决逾期数 / 上周末逾期总数 × 100%
+    // 评分：S = 逾期解决率 × 100
+    let overdueResolveScore = 0
+    {
+      // 上周末逾期总数：上周期末仍未完成的逾期任务
+      let prevOverdueTasks = []
+      if (prevDay) {
+        prevOverdueTasks = valid.filter(t => {
+          if (!t.planEnd || t.planEnd >= prevDay) return false
+          // 在上周期末仍未完成
+          if (!t.actualEnd) return true
+          return t.actualEnd > prevDay
+        })
+      }
+      
+      if (prevOverdueTasks.length > 0) {
+        // 本期解决逾期数：上周期末逾期的任务中，本周期内完成的数量
+        const resolvedCount = prevOverdueTasks.filter(t => {
+          return t.actualEnd && t.actualEnd <= d
+        }).length
+        
+        const resolveRate = resolvedCount / prevOverdueTasks.length
+        overdueResolveScore = resolveRate // 已经是 0-1 范围
+      } else {
+        // 上周期无逾期任务，满分
+        overdueResolveScore = 1
+      }
     }
     
-    // 归一化权重
-    const totalWeight = Object.values(weights).reduce((s, w) => s + w, 0)
-    if (totalWeight === 0) return null
-    
-    const normalizedWeights = {}
-    for (const key in weights) {
-      normalizedWeights[key] = weights[key] / totalWeight
-    }
-    
+    // 计算加权指数（使用原始权重，无数据的指标评分为0）
+    // 原始权重：开工10% + 完工15% + 里程碑35% + 工期15% + 恢复10% + 积压7.5% + 解决7.5% = 100%
     const index = (
-      startOnTimeRate * normalizedWeights.startOnTime +
-      completeOnTimeRate * normalizedWeights.completeOnTime +
-      durationScore * normalizedWeights.duration +
-      overdueBacklogRate * normalizedWeights.overdueBacklog +
-      overdueResolveRate * normalizedWeights.overdueResolve
+      startOnTimeScore * 0.10 +
+      completeOnTimeScore * 0.15 +
+      milestoneScore * 0.35 +
+      durationScore * 0.15 +
+      overdueRecoveryScore * 0.10 +
+      overdueBacklogScore * 0.075 +
+      overdueResolveScore * 0.075
     ) * 100
+    
+    // 更新前一天的分数，供下一天使用（当本期无任务时继承）
+    prevScores = {
+      startOnTimeScore,
+      completeOnTimeScore,
+      durationScore,
+      overdueRecoveryScore
+    }
     
     return Math.round(index * 100) / 100 // 保留两位小数
   })
