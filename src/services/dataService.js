@@ -71,7 +71,8 @@ async function safeAdapterCall(methodName, fallback, ...args) {
   }
   
   try {
-    return await dataAdapter[methodName](...args)
+    // 使用 .call() 确保 this 上下文正确绑定到 dataAdapter
+    return await dataAdapter[methodName].call(dataAdapter, ...args)
   } catch (e) {
     console.error(`[dataService] ${methodName} failed:`, e)
     return fallback()

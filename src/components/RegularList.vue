@@ -44,8 +44,8 @@
         </div>
         <SparkLine :series="p.series" />
         <div class="wl-sample" v-if="isExpanded">
-          <div class="wl-price">{{ avgValue(p).toFixed(2) }}</div>
-          <div class="wl-delta" :class="sampleSign(p) >= 0 ? 'up' : 'down'">{{ sampleText(p) }}</div>
+          <div class="wl-price unavailable">--</div>
+          <div class="wl-delta unavailable">暂无数据</div>
         </div>
         <div class="wl-sample" v-if="isExpanded">
           <div class="wl-price">{{ startOnTimeValue(p) }}</div>
@@ -60,11 +60,11 @@
           <div class="wl-delta" :class="avgDurationRatioDeltaSign(p) >= 0 ? 'up' : 'down'">{{ avgDurationRatioDeltaText(p) }}</div>
         </div>
         <div class="wl-sample" v-if="isExpanded">
-          <div class="wl-price">{{ medianValue(p).toFixed(2) }}</div>
-          <div class="wl-delta" :class="sampleSign(p) >= 0 ? 'up' : 'down'">{{ sampleText(p) }}</div>
+          <div class="wl-price">{{ overdueTrendRatioValue(p) }}</div>
+          <div class="wl-delta" :class="overdueTrendRatioDeltaSign(p) >= 0 ? 'up' : 'down'">{{ overdueTrendRatioDeltaText(p) }}</div>
         </div>
         <div class="wl-right">
-          <div class="wl-price">{{ lastValue(p).toFixed(2) }}</div>
+          <div class="wl-price">{{ formatIndexValue(lastValue(p)) }}</div>
           <div class="wl-delta" :class="deltaSign(p) >= 0 ? 'up' : 'down'">{{ deltaText(p) }}</div>
         </div>
       </div>
@@ -100,13 +100,20 @@ function toggle(){ emits('update:modelValue', !props.modelValue) }
 const collapsed = computed(()=> props.modelValue)
 
 // 使用工具函数替代重复的辅助函数
-function lastValue(p) { return getSeriesLastValue(p?.series) }
-function deltaSign(p) { return getSeriesDeltaSign(p?.series) }
-function deltaText(p) { return formatSeriesDeltaText(p?.series) }
+function hasSeriesData(p) { 
+  const series = p?.series
+  return Array.isArray(series) && series.length > 0 
+}
+function lastValue(p) { return hasSeriesData(p) ? getSeriesLastValue(p?.series) : null }
+function deltaSign(p) { return hasSeriesData(p) ? getSeriesDeltaSign(p?.series) : 0 }
+function deltaText(p) { return hasSeriesData(p) ? formatSeriesDeltaText(p?.series) : '' }
 function sampleSign(p) { return deltaSign(p) }
 function sampleText(p) { return deltaText(p) }
-function avgValue(p) { return getSeriesAverage(p?.series) }
-function medianValue(p) { return getSeriesMedian(p?.series) }
+function avgValue(p) { return hasSeriesData(p) ? getSeriesAverage(p?.series) : null }
+function medianValue(p) { return hasSeriesData(p) ? getSeriesMedian(p?.series) : null }
+
+// 格式化显示值，空数据显示 "--"
+function formatIndexValue(v) { return v === null ? '--' : v.toFixed(2) }
 
 function startOnTimeValue(p) { return formatPercent(p?.expandedMetrics?.startOnTimeRate) }
 function startOnTimeDeltaSign(p) { return Number(p?.expandedMetrics?.startOnTimeRateDelta || 0) }
@@ -119,6 +126,12 @@ function completeOnTimeDeltaText(p) { return formatDeltaPercent(p?.expandedMetri
 function avgDurationRatioValue(p) { return formatRatio(p?.expandedMetrics?.avgDurationRatio) }
 function avgDurationRatioDeltaSign(p) { return Number(p?.expandedMetrics?.avgDurationRatioDelta || 0) }
 function avgDurationRatioDeltaText(p) { return formatDeltaRatio(p?.expandedMetrics?.avgDurationRatioDelta) }
+
+// 逾期趋势比：比值 < 1 表示改善（向好），> 1 表示恶化（向差）
+function overdueTrendRatioValue(p) { return formatRatio(p?.expandedMetrics?.overdueTrendRatio) }
+// 对于趋势比，delta < 0 表示改善（显示绿色向上），delta > 0 表示恶化（显示红色向下）
+function overdueTrendRatioDeltaSign(p) { return -Number(p?.expandedMetrics?.overdueTrendRatioDelta || 0) }
+function overdueTrendRatioDeltaText(p) { return formatDeltaPercent(p?.expandedMetrics?.overdueTrendRatioDelta) }
 </script>
 
 <style scoped>
@@ -178,5 +191,10 @@ function avgDurationRatioDeltaText(p) { return formatDeltaRatio(p?.expandedMetri
   justify-self: center;
   align-items: center;
   text-align: center;
+}
+
+.unavailable {
+  color: var(--muted);
+  opacity: 0.6;
 }
 </style>

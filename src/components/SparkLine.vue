@@ -12,13 +12,19 @@ let chart = null
 
 function render(){
   if(!el.value) return
-  if(!chart) chart = echarts.init(el.value)
+  
   const raw = Array.isArray(props.series) ? props.series : []
+  
+  // 如果数据为空，不渲染图表但也不销毁
+  if (raw.length === 0) {
+    return
+  }
+  
+  if(!chart) chart = echarts.init(el.value)
   const a = raw.map(v => {
     const n = Number(v)
     return Number.isFinite(n) ? n : 0
   })
-  if (a.length === 0) a.push(0)
   if (a.length === 1) a.push(a[0])
   const prev = a[a.length-2] ?? 0
   const last = a[a.length-1] ?? 0

@@ -57,7 +57,7 @@
             <div class="project-info">
               <div class="project-main-title">{{ selectedProject.name }}</div>
               <div class="project-index-row">
-                <div class="project-index-value">{{ lastValue(selectedProject).toFixed(2) }}</div>
+                <div class="project-index-value">{{ formatIndexValue(lastValue(selectedProject)) }}</div>
                 <div class="project-index-label">进度兑现指数</div>
                 <div class="project-index-change" :class="deltaSign(selectedProject) >= 0 ? 'up' : 'down'">{{ deltaText(selectedProject) }}</div>
               </div>
@@ -200,17 +200,29 @@ async function loadProjects() {
 }
 
 async function loadKpis(projectId) {
-  const list = await dataService.getKpis(projectId)
-  if (Array.isArray(list)) {
-    kpis.value = list
+  try {
+    const list = await dataService.getKpis(projectId)
+    if (Array.isArray(list)) {
+      kpis.value = list
+    }
+  } catch (e) {
+    console.error('[App] loadKpis failed:', e)
   }
 }
 
 async function loadProjectSeries(targetProject) {
   if (!targetProject) return
-  const projectId = targetProject.id || targetProject.projectId || targetProject.name
-  const series = await dataService.getProjectSeries(projectId)
-  targetProject.series = Array.isArray(series) ? series : []
+  try {
+    const projectId = targetProject.id || targetProject.projectId || targetProject.name
+    const series = await dataService.getProjectSeries(projectId)
+    // 只更新 selectedProject 的 series，不修改原始项目对象
+    // 这样不会影响列表中的 SparkLine 显示
+    if (selectedProject.value && selectedProject.value.name === targetProject.name) {
+      selectedProject.value = { ...selectedProject.value, series: Array.isArray(series) ? series : [] }
+    }
+  } catch (e) {
+    console.error('[App] loadProjectSeries failed:', e)
+  }
 }
 
 // --- Search and Filter Logic ---
@@ -302,12 +314,16 @@ onMounted(() => {
   loadKpis()
 })
 async function handleSelectProject(project) {
+  console.log('[App] handleSelectProject called:', project?.name)
   selectedProject.value = project
   isCompanyView.value = false // Switch to project view
   isChartOverview.value = true // Default to overview mode when project is selected
   selectedKpi.value = null // No KPI selected in overview mode (prevents highlight)
-  await loadProjectSeries(project)
-  await loadKpis(project?.id || project?.projectId || project?.name)
+  
+  // 不等待数据加载完成，让UI立即响应
+  loadProjectSeries(project)
+  loadKpis(project?.id || project?.projectId || project?.name)
+  console.log('[App] handleSelectProject finished')
 }
 function showCompanyView() {
   isCompanyView.value = true
@@ -320,10 +336,12 @@ function clearKpiSelection() {
 }
 
 // Helper functions
-function lastValue(p){ if(!p || !p.series || p.series.length === 0) return 0; const a=p.series; return a[a.length-1] }
+function hasSeriesData(p) { return p && Array.isArray(p.series) && p.series.length > 0 }
+function lastValue(p){ if(!hasSeriesData(p)) return null; const a=p.series; return a[a.length-1] }
 function deltaSign(p){ if(!p || !p.series || p.series.length < 2) return 0; const a=p.series; return a[a.length-1]-a[a.length-2] }
 function deltaText(p){ if(!p || !p.series || p.series.length < 2) return ''; const a=p.series; const prev=a[a.length-2]; const last=a[a.length-1]; const pct=prev?(((last-prev)/prev)*100).toFixed(2):'0.00'; const s=(last-prev)>=0?'↑ ':'↓ '; return s+Math.abs(pct)+'%'
 }
+function formatIndexValue(v) { return v === null ? '--' : v.toFixed(2) }
 </script>
 
 <style scoped>

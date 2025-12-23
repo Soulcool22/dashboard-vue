@@ -456,9 +456,61 @@ function buildOnTimeMetrics(tasks) {
     return { avg, total }
   }
 
+  /**
+   * 计算逾期趋势比
+   * 逾期趋势比 = 当前逾期率 / 上期逾期率
+   * - 比值 < 1 表示逾期情况改善（趋势向好）
+   * - 比值 > 1 表示逾期情况恶化（趋势向差）
+   * - 比值 = 1 表示逾期情况持平
+   * 
+   * 逾期率 = 逾期未完成任务数 / 应完成任务总数
+   */
+  function computeOverdueTrendWithTotal(asOf, prevAsOf) {
+    // 计算某日的逾期率：逾期未完成任务数 / 应完成任务总数
+    function getOverdueRate(date) {
+      const shouldComplete = tasks.filter(t => t.planEnd && t.planEnd < date)
+      const total = shouldComplete.length || 0
+      if (total === 0) return { rate: 0, total: 0 }
+      
+      // 逾期未完成：计划完成日期已过，但实际未完成或完成日期晚于计划
+      const overdueCount = shouldComplete.filter(t => {
+        if (!t.actualEnd) return true // 未完成
+        return t.actualEnd > t.planEnd // 逾期完成
+      }).length
+      
+      return { rate: overdueCount / total, total }
+    }
+    
+    const current = getOverdueRate(asOf)
+    const previous = getOverdueRate(prevAsOf)
+    
+    // 计算趋势比
+    let trendRatio = 1
+    if (previous.total > 0 && previous.rate > 0) {
+      trendRatio = current.rate / previous.rate
+    } else if (current.rate > 0) {
+      trendRatio = 2 // 从无逾期到有逾期，设为2表示恶化
+    } else {
+      trendRatio = 1 // 都无逾期，保持1
+    }
+    
+    // 计算变化量（当前逾期率 - 上期逾期率）
+    const delta = (current.total > 0 && previous.total > 0)
+      ? (current.rate - previous.rate) : 0
+    
+    return { 
+      trendRatio, 
+      delta,
+      currentRate: current.rate,
+      previousRate: previous.rate,
+      total: current.total 
+    }
+  }
+
   const now = new Date()
   now.setHours(0, 0, 0, 0)
   const prev = addDays(now, -1)
+  const prevWeek = addDays(now, -7) // 用一周前的数据计算趋势比更有意义
 
   const startNow = computeStartRateWithTotal(now)
   const startPrev = computeStartRateWithTotal(prev)
@@ -478,13 +530,226 @@ function buildOnTimeMetrics(tasks) {
   const avgDurationRatioDelta = (durationNow.total > 0 && durationPrev.total > 0)
     ? (durationNow.avg - durationPrev.avg) : 0
 
+  // 计算逾期趋势比
+  const overdueTrend = computeOverdueTrendWithTotal(now, prevWeek)
+  const overdueTrendRatio = overdueTrend.trendRatio
+  const overdueTrendRatioDelta = overdueTrend.delta
+
   return {
     startOnTimeRate,
     startOnTimeRateDelta,
     completeOnTimeRate,
     completeOnTimeRateDelta,
     avgDurationRatio,
-    avgDurationRatioDelta
+    avgDurationRatioDelta,
+    overdueTrendRatio,
+    overdueTrendRatioDelta
+  }
+}
+
+/**
+ * 计算进度兑现指数时间序列
+ * 
+ * 计算规则：指数 = Σ(管理层指标标准化评分 × 权重占比)
+ * - 开工准点率：10%
+ * - 完工准点率：20%
+ * - 关键里程碑达成率：35% (当前数据不支持，暂不计入)
+ * - 平均任务工期比：15%
+ * - 逾期恢复时长：5% (当前数据不支持，暂不计入)
+ * - 逾期积压率：7.5%
+ * - 逾期解决率：7.5%
+ * 
+ * 当数据不足时返回空数组
+ * 
+ * @param {Array} tasks - 任务列表
+ * @returns {{ xAxis: string[], series: number[], hasData: boolean, availableMetrics: string[] }}
+ */
+function buildProgressFulfillmentIndex(tasks) {
+  try {
+    const valid = tasks.filter(t => t.planEnd && Number.isFinite(t.planEnd.getTime()))
+    const total = valid.length || 0
+    
+    // 数据不足时返回空结构
+    if (total < 3) {
+      return { xAxis: [], series: [], hasData: false, availableMetrics: [] }
+    }
+
+    // 确定时间范围
+    const allPlanEnds = valid.map(t => t.planEnd).filter(d => d && Number.isFinite(d.getTime()))
+    const allActualEnds = valid.map(t => t.actualEnd).filter(d => d && Number.isFinite(d.getTime()))
+    const allPlanStarts = valid.map(t => t.planStart).filter(d => d && Number.isFinite(d.getTime()))
+
+    // 如果没有有效的计划结束日期，返回空
+    if (allPlanEnds.length === 0) {
+      return { xAxis: [], series: [], hasData: false, availableMetrics: [] }
+    }
+
+    // 计算最小日期（优先使用计划开始日期，否则使用计划结束日期）
+    const minDateCandidates = [
+      ...allPlanEnds.map(d => d.getTime()),
+      ...allPlanStarts.map(d => d.getTime())
+    ].filter(t => Number.isFinite(t))
+    
+    if (minDateCandidates.length === 0) {
+      return { xAxis: [], series: [], hasData: false, availableMetrics: [] }
+    }
+    
+    const minDate = new Date(Math.min(...minDateCandidates))
+    
+    const maxCandidates = [
+      Math.max(...allPlanEnds.map(d => d.getTime())),
+      allActualEnds.length ? Math.max(...allActualEnds.map(d => d.getTime())) : null,
+      new Date().setHours(0, 0, 0, 0)
+    ].filter(x => x != null && Number.isFinite(x))
+    
+    if (maxCandidates.length === 0) {
+      return { xAxis: [], series: [], hasData: false, availableMetrics: [] }
+    }
+    
+    const maxDate = new Date(Math.max(...maxCandidates))
+
+  const days = dateRangeInclusive(minDate, maxDate)
+  if (days.length === 0) {
+    return { xAxis: [], series: [], hasData: false, availableMetrics: [] }
+  }
+
+  const xAxis = days.map(d => formatMMDD(d))
+  
+  // 检查各指标数据可用性
+  const hasStartData = valid.some(t => t.planStart && t.actualStart)
+  const hasCompleteData = valid.some(t => t.planEnd && t.actualEnd)
+  const hasDurationData = valid.some(t => 
+    Number.isFinite(t.planDuration) && t.planDuration > 0 &&
+    Number.isFinite(t.actualDuration) && t.actualDuration > 0
+  )
+  
+  const availableMetrics = []
+  if (hasStartData) availableMetrics.push('开工准点率')
+  if (hasCompleteData) availableMetrics.push('完工准点率')
+  if (hasDurationData) availableMetrics.push('平均工期比')
+  availableMetrics.push('逾期积压率', '逾期解决率')
+  
+  // 如果没有足够的指标数据，返回空
+  if (!hasStartData && !hasCompleteData && !hasDurationData) {
+    return { xAxis: [], series: [], hasData: false, availableMetrics: [] }
+  }
+
+  // 计算各天的指数
+  const series = days.map(d => {
+    // 1. 开工准点率 (10%) - 实际开工日期 <= 计划开工日期
+    let startOnTimeRate = 0
+    if (hasStartData) {
+      const startScope = valid.filter(t => t.planStart && t.planStart <= d)
+      if (startScope.length > 0) {
+        const onTimeCount = startScope.filter(t => t.actualStart && t.actualStart <= t.planStart).length
+        startOnTimeRate = onTimeCount / startScope.length
+      }
+    }
+    
+    // 2. 完工准点率 (20%) - 实际完成日期 <= 计划完成日期
+    let completeOnTimeRate = 0
+    if (hasCompleteData) {
+      const completeScope = valid.filter(t => t.planEnd && t.planEnd <= d)
+      if (completeScope.length > 0) {
+        const onTimeCount = completeScope.filter(t => t.actualEnd && t.actualEnd <= t.planEnd).length
+        completeOnTimeRate = onTimeCount / completeScope.length
+      }
+    }
+    
+    // 3. 关键里程碑达成率 (35%) - 当前数据不支持，暂不计入
+    // const milestoneRate = 0
+    
+    // 4. 平均任务工期比 (15%) - 实际工期/计划工期，越小越好，转换为评分
+    let durationScore = 0
+    if (hasDurationData) {
+      const durationScope = valid.filter(t => {
+        if (!Number.isFinite(t.planDuration) || t.planDuration <= 0) return false
+        if (!Number.isFinite(t.actualDuration) || t.actualDuration <= 0) return false
+        if (!t.actualEnd || t.actualEnd > d) return false
+        return true
+      })
+      if (durationScope.length > 0) {
+        const avgRatio = durationScope.reduce((s, t) => s + (t.actualDuration / t.planDuration), 0) / durationScope.length
+        // 工期比 <= 1 得满分，> 2 得0分，线性插值
+        durationScore = Math.max(0, Math.min(1, 2 - avgRatio))
+      }
+    }
+    
+    // 5. 逾期恢复时长 (5%) - 当前数据不支持，暂不计入
+    // const recoveryScore = 0
+    
+    // 6. 逾期积压率 (7.5%) - 当前逾期未完成任务占比，越低越好
+    const overdueScope = valid.filter(t => t.planEnd && t.planEnd < d)
+    let overdueBacklogRate = 0
+    if (overdueScope.length > 0) {
+      const stillOverdue = overdueScope.filter(t => !t.actualEnd || t.actualEnd > d).length
+      overdueBacklogRate = 1 - (stillOverdue / overdueScope.length) // 转换为正向指标
+    } else {
+      overdueBacklogRate = 1 // 没有应该完成的任务，满分
+    }
+    
+    // 7. 逾期解决率 (7.5%) - 逾期后完成的任务占逾期任务的比例
+    let overdueResolveRate = 0
+    const overdueTasksTotal = valid.filter(t => {
+      if (!t.planEnd || t.planEnd >= d) return false
+      // 曾经逾期的任务（计划完成日期已过）
+      return true
+    })
+    if (overdueTasksTotal.length > 0) {
+      const resolved = overdueTasksTotal.filter(t => t.actualEnd && t.actualEnd <= d).length
+      overdueResolveRate = resolved / overdueTasksTotal.length
+    } else {
+      overdueResolveRate = 1 // 没有逾期任务，满分
+    }
+    
+    // 计算加权指数（调整权重，因为部分指标不可用）
+    // 原始权重：开工10% + 完工20% + 里程碑35% + 工期15% + 恢复5% + 积压7.5% + 解决7.5% = 100%
+    // 可用权重：开工10% + 完工20% + 工期15% + 积压7.5% + 解决7.5% = 60%
+    // 归一化后：开工16.7% + 完工33.3% + 工期25% + 积压12.5% + 解决12.5% = 100%
+    
+    const weights = {
+      startOnTime: hasStartData ? 0.167 : 0,
+      completeOnTime: hasCompleteData ? 0.333 : 0,
+      duration: hasDurationData ? 0.25 : 0,
+      overdueBacklog: 0.125,
+      overdueResolve: 0.125
+    }
+    
+    // 归一化权重
+    const totalWeight = Object.values(weights).reduce((s, w) => s + w, 0)
+    if (totalWeight === 0) return null
+    
+    const normalizedWeights = {}
+    for (const key in weights) {
+      normalizedWeights[key] = weights[key] / totalWeight
+    }
+    
+    const index = (
+      startOnTimeRate * normalizedWeights.startOnTime +
+      completeOnTimeRate * normalizedWeights.completeOnTime +
+      durationScore * normalizedWeights.duration +
+      overdueBacklogRate * normalizedWeights.overdueBacklog +
+      overdueResolveRate * normalizedWeights.overdueResolve
+    ) * 100
+    
+    return Math.round(index * 100) / 100 // 保留两位小数
+  })
+  
+  // 过滤掉null值
+  const validSeries = series.filter(v => v !== null)
+  if (validSeries.length === 0) {
+    return { xAxis: [], series: [], hasData: false, availableMetrics: [] }
+  }
+  
+  return { 
+    xAxis, 
+    series: series.map(v => v === null ? 0 : v), 
+    hasData: true, 
+    availableMetrics 
+  }
+  } catch (e) {
+    console.error('[csvAdapter] buildProgressFulfillmentIndex failed:', e)
+    return { xAxis: [], series: [], hasData: false, availableMetrics: [] }
   }
 }
 
@@ -520,12 +785,17 @@ export const csvAdapter = {
       const name = keyToName.get(key) || key
       const tasks = await getTasksByProject(key)
       const expandedMetrics = buildOnTimeMetrics(tasks)
+      
+      // 计算进度兑现指数序列
+      const progressIndex = buildProgressFulfillmentIndex(tasks)
+      const series = progressIndex.hasData ? progressIndex.series : []
+      
       out.push({
         id: key,
         name,
         sector: '',
         isWatched: idx === 0,
-        series: [0, 0],
+        series,
         expandedMetrics
       })
     }
@@ -533,45 +803,57 @@ export const csvAdapter = {
   },
 
   async getKpis(projectId) {
-    const tasks = await getTasksByProject(projectId)
-    const completion = buildCompletionSeries(tasks)
-    const overdue = buildOverdueSeries(tasks)
-   
-    const completionLast = completion.actualRates.length 
-      ? completion.actualRates[completion.actualRates.length - 1] : 0
-    const completionPlanLast = completion.planRates.length 
-      ? completion.planRates[completion.planRates.length - 1] : null
-    const completionDelta = (completionPlanLast != null) 
-      ? Math.abs(completionLast - completionPlanLast) : 0
-    const completionUp = (completionPlanLast != null) 
-      ? (completionLast - completionPlanLast) >= 0 : true
-   
-    const overdueLast = overdue.actualRates.length 
-      ? overdue.actualRates[overdue.actualRates.length - 1] : 0
-    const overduePrev = overdue.actualRates.length > 1 
-      ? overdue.actualRates[overdue.actualRates.length - 2] : overdueLast
-    const overdueDelta = Math.abs(overdueLast - overduePrev)
-    const overdueUp = (overdueLast - overduePrev) <= 0
-   
-    const personnelData = await this.getPersonnelData(projectId)
-    const members = personnelData.members || []
-    const totalMembers = members.length
-    let healthScore = 0
-    if (totalMembers > 0) {
-      const riskCount = members.filter(m => m.projectCount > 3).length
-      const normalCount = totalMembers - riskCount
-      healthScore = Math.round((normalCount / totalMembers) * 100)
-    }
+    try {
+      const tasks = await getTasksByProject(projectId)
+      const completion = buildCompletionSeries(tasks)
+      const overdue = buildOverdueSeries(tasks)
+     
+      const completionLast = completion.actualRates.length 
+        ? completion.actualRates[completion.actualRates.length - 1] : 0
+      const completionPlanLast = completion.planRates.length 
+        ? completion.planRates[completion.planRates.length - 1] : null
+      const completionDelta = (completionPlanLast != null) 
+        ? Math.abs(completionLast - completionPlanLast) : 0
+      const completionUp = (completionPlanLast != null) 
+        ? (completionLast - completionPlanLast) >= 0 : true
+     
+      const overdueLast = overdue.actualRates.length 
+        ? overdue.actualRates[overdue.actualRates.length - 1] : 0
+      const overduePrev = overdue.actualRates.length > 1 
+        ? overdue.actualRates[overdue.actualRates.length - 2] : overdueLast
+      const overdueDelta = Math.abs(overdueLast - overduePrev)
+      const overdueUp = (overdueLast - overduePrev) <= 0
+     
+      const personnelData = await this.getPersonnelData(projectId)
+      const members = personnelData.members || []
+      const totalMembers = members.length
+      let healthScore = 0
+      if (totalMembers > 0) {
+        const riskCount = members.filter(m => m.projectCount > 3).length
+        const normalCount = totalMembers - riskCount
+        healthScore = Math.round((normalCount / totalMembers) * 100)
+      }
 
-    return [
-      { title: '资金到账率', value: '0%', delta: '0%', up: true },
-      { title: '任务完成率', value: Math.round(completionLast * 100) + '%', 
-        delta: Math.round(completionDelta * 100) + '%', up: completionUp },
-      { title: '项目支出金额', value: '¥ 0', delta: '0', up: true },
-      { title: '人员健康度', value: healthScore + '%', delta: '0%', up: true },
-      { title: '逾期任务率', value: Math.round(overdueLast * 100) + '%', 
-        delta: Math.round(overdueDelta * 100) + '%', up: overdueUp }
-    ]
+      return [
+        { title: '资金到账率', value: '0%', delta: '0%', up: true },
+        { title: '任务完成率', value: Math.round(completionLast * 100) + '%', 
+          delta: Math.round(completionDelta * 100) + '%', up: completionUp },
+        { title: '项目支出金额', value: '¥ 0', delta: '0', up: true },
+        { title: '人员健康度', value: healthScore + '%', delta: '0%', up: true },
+        { title: '逾期任务率', value: Math.round(overdueLast * 100) + '%', 
+          delta: Math.round(overdueDelta * 100) + '%', up: overdueUp }
+      ]
+    } catch (e) {
+      console.error('[csvAdapter] getKpis failed:', e)
+      // 返回默认的空KPI数据
+      return [
+        { title: '资金到账率', value: '0%', delta: '0%', up: true },
+        { title: '任务完成率', value: '0%', delta: '0%', up: true },
+        { title: '项目支出金额', value: '¥ 0', delta: '0', up: true },
+        { title: '人员健康度', value: '0%', delta: '0%', up: true },
+        { title: '逾期任务率', value: '0%', delta: '0%', up: true }
+      ]
+    }
   },
 
   async getFundData(projectId) {
@@ -674,10 +956,20 @@ export const csvAdapter = {
   },
 
   async getProjectSeries(projectId) {
-    const tasks = await getTasksByProject(projectId)
-    const completion = buildCompletionSeries(tasks)
-    // 返回实际完成率序列作为项目进度指数
-    return completion.actualRates.map(r => Math.round(r * 100))
+    try {
+      const tasks = await getTasksByProject(projectId)
+      const result = buildProgressFulfillmentIndex(tasks)
+      
+      // 如果数据不足，返回空数组（UI会显示空状态）
+      if (!result.hasData) {
+        return []
+      }
+      
+      return result.series
+    } catch (e) {
+      console.error('[csvAdapter] getProjectSeries failed:', e)
+      return []
+    }
   },
 
   async getCompanyInsights() {
