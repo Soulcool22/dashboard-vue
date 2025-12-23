@@ -8,7 +8,9 @@ export const dashboardConfig = {
     { id: 'east', name: '华东' },
     { id: 'south', name: '华南' },
     { id: 'north', name: '华北' },
-    { id: 'west', name: '西部' }
+    { id: 'west', name: '西部' },
+    { id: 'guangdong', name: '广东' },
+    { id: 'southwest', name: '西南' }
   ],
   
   // KPI配置

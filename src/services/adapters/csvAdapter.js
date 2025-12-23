@@ -776,6 +776,9 @@ export const csvAdapter = {
       if (!keyToName.has(key)) keyToName.set(key, label)
     }
 
+    // 获取项目区域映射
+    const regionMap = await getProjectRegionMap()
+
     const keys = Array.from(keyToName.keys())
     if (!keys.length) return []
 
@@ -790,10 +793,13 @@ export const csvAdapter = {
       const progressIndex = buildProgressFulfillmentIndex(tasks)
       const series = progressIndex.hasData ? progressIndex.series : []
       
+      // 获取项目区域
+      const sector = regionMap.get(key) || ''
+      
       out.push({
         id: key,
         name,
-        sector: '',
+        sector,
         isWatched: idx === 0,
         series,
         expandedMetrics
@@ -933,10 +939,16 @@ export const csvAdapter = {
 
   async getRiskProjects(region) {
     const projects = await this.getProjects()
+    
+    // 根据区域筛选项目
+    const filteredProjects = region === '全国' 
+      ? projects 
+      : projects.filter(p => p.sector === region)
+    
     // 简单风险判断：逾期率超过阈值的项目
     const riskProjects = []
     
-    for (const p of projects) {
+    for (const p of filteredProjects) {
       const tasks = await getTasksByProject(p.id)
       const overdue = buildOverdueSeries(tasks)
       const overdueRate = overdue.actualRates.length 
@@ -1005,7 +1017,13 @@ export const csvAdapter = {
   },
 
   async getRegionalData(region) {
-    const projects = await this.getProjects()
+    const allProjects = await this.getProjects()
+    
+    // 根据区域筛选项目
+    const projects = region === '全国' 
+      ? allProjects 
+      : allProjects.filter(p => p.sector === region)
+    
     const riskProjects = await this.getRiskProjects(region)
     
     return {
